@@ -1,3 +1,5 @@
+@file:Suppress("UNUSED_VARIABLE")
+
 plugins {
     kotlin("multiplatform") version "1.4.10"
 }
@@ -21,12 +23,10 @@ kotlin {
     js(IR) {
         nodejs {
             testTask {
-                useKarma {
-                    useMocha()
-                    webpackConfig.cssSupport.enabled = true
-                }
+                useMocha()
             }
         }
+        binaries.executable()
     }
 
     
@@ -44,6 +44,7 @@ kotlin {
                 implementation(kotlin("test-junit5"))
                 implementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
                 runtimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.0")
+                implementation("io.mockk:mockk:1.10.2")
             }
         }
         val jsMain by getting
