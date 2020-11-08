@@ -1,4 +1,5 @@
-import com.github.scottbot95.stationeers.ic.mutableLazy
+package com.github.scottbot95.stationeers.ic
+
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.asserter
