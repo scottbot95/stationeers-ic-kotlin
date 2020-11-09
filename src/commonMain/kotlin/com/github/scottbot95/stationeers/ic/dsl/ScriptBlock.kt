@@ -4,11 +4,17 @@ package com.github.scottbot95.stationeers.ic.dsl
 annotation class ScriptBlockMarker
 
 @ScriptBlockMarker
-abstract class ScriptBlock : Compilable {
-    abstract operator fun Compilable.unaryPlus()
+interface ScriptBlock : Compilable {
+    operator fun Compilable.unaryPlus()
+
+    val registers: RegisterContainer
 }
 
-open class SimpleScriptBlock : ScriptBlock() {
+abstract class AbstractScriptBlock(val scope: ScriptBlock? = null) : ScriptBlock {
+    override val registers = RegisterContainer()
+}
+
+open class SimpleScriptBlock(scope: ScriptBlock? = null) : AbstractScriptBlock(scope) {
     private val operations = mutableListOf<Compilable>()
 
     override fun Compilable.unaryPlus() {
@@ -21,8 +27,13 @@ open class SimpleScriptBlock : ScriptBlock() {
 }
 
 fun ScriptBlock.block(init: ScriptBlock.() -> Unit): ScriptBlock {
-    val block = SimpleScriptBlock()
+    val block = SimpleScriptBlock(this)
     block.init()
     +block
     return block
+}
+
+fun ScriptBlock.registers(init: RegisterContainer.() -> Unit): RegisterContainer {
+    registers.init()
+    return registers
 }

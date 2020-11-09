@@ -29,16 +29,22 @@ kotlin {
         binaries.executable()
     }
 
-    
+
     sourceSets {
-        val commonMain by getting
+        val commonMain by getting {
+            dependencies {
+            }
+        }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test-common"))
                 implementation(kotlin("test-annotations-common"))
             }
         }
-        val jvmMain by getting
+        val jvmMain by getting {
+            dependencies {
+            }
+        }
         val jvmTest by getting {
             dependencies {
                 implementation(kotlin("test-junit5"))
@@ -47,7 +53,10 @@ kotlin {
                 implementation("io.mockk:mockk:1.10.2")
             }
         }
-        val jsMain by getting
+        val jsMain by getting {
+            dependencies {
+            }
+        }
         val jsTest by getting {
             dependencies {
                 implementation(kotlin("test-js"))

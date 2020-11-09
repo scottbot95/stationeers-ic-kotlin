@@ -1,5 +1,7 @@
 package com.github.scottbot95.stationeers.ic
 
+import com.github.scottbot95.stationeers.ic.util.once
+
 data class LockedItem<T>(val value: T, val unlock: () -> Unit)
 
 abstract class LockingSequence<T> {
