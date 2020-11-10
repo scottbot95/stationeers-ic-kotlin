@@ -1,18 +1,23 @@
 package com.github.scottbot95.stationeers.ic.dsl
 
+import com.github.scottbot95.stationeers.ic.Register
+import com.github.scottbot95.stationeers.ic.RegisterValue
+import kotlin.properties.ReadOnlyProperty
+
 @DslMarker
 annotation class ScriptBlockMarker
 
 @ScriptBlockMarker
-interface ScriptBlock : Compilable {
+interface ScriptBlock : Compilable, RegisterContainer {
     operator fun Compilable.unaryPlus()
 
     val registers: RegisterContainer
 }
 
-abstract class AbstractScriptBlock(val scope: ScriptBlock? = null) : ScriptBlock {
-    override val registers = RegisterContainer()
-}
+abstract class AbstractScriptBlock(
+    val scope: ScriptBlock? = null,
+    override val registers: RegisterContainer = RegisterContainerImpl()
+) : ScriptBlock, RegisterContainer by registers
 
 open class SimpleScriptBlock(scope: ScriptBlock? = null) : AbstractScriptBlock(scope) {
     private val operations = mutableListOf<Compilable>()
