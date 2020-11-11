@@ -33,6 +33,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                implementation("io.ktor:ktor-io:1.4.1")
             }
         }
         val commonTest by getting {
@@ -43,6 +44,7 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
+                implementation("io.ktor:ktor-io-jvm:1.4.1")
             }
         }
         val jvmTest by getting {
@@ -55,6 +57,7 @@ kotlin {
         }
         val jsMain by getting {
             dependencies {
+                implementation("io.ktor:ktor-io-js:1.4.1")
             }
         }
         val jsTest by getting {
