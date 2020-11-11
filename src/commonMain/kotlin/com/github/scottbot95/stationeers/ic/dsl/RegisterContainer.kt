@@ -1,29 +1,16 @@
 package com.github.scottbot95.stationeers.ic.dsl
 
-import com.github.scottbot95.stationeers.ic.NamedRegisterValue
 import com.github.scottbot95.stationeers.ic.Register
 import com.github.scottbot95.stationeers.ic.RegisterValue
-import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.KProperty
 
-class RegisterValueProvider(
-    private val container: RegisterContainer,
-    private val register: Register? = null,
-    private val name: String? = null
-) {
-    operator fun provideDelegate(
-        thisRef: Any?,
-        prop: KProperty<*>
-    ) = ReadOnlyProperty<Any?, RegisterValue> { _, _ ->
-        container.newRegister(register, name ?: prop.name)
-    }
-}
 
-inline val RegisterContainer.register: RegisterValueProvider
+inline val RegisterContainer.register
     get() = this.register()
 
-fun RegisterContainer.register(register: Register? = null, name: String? = null): RegisterValueProvider =
-    RegisterValueProvider(this, register, name)
+fun RegisterContainer.register(register: Register? = null, name: String? = null) =
+    AliasedScriptValueDelegateProvider(name) {
+        this.newRegister(register, it)
+    }
 
 @ScriptBlockMarker
 interface RegisterContainer {
@@ -34,24 +21,30 @@ interface RegisterContainer {
      * You may have multiple [RegisterValue]s pointing the the same [Register], however [RegisterContainer.newRegister] will
      * throw if there are no unused registers and [register] is not provided
      */
-    fun newRegister(register: Register? = null, name: String? = null): RegisterValue
+    fun newRegister(register: Register? = null, name: String? = null): AliasedScriptValue<RegisterValue>
 
 }
 
 class RegisterContainerImpl : RegisterContainer {
-    private val registersInUse: Map<Register, MutableSet<RegisterValue>> = Register.values()
-        .map { it to mutableSetOf<RegisterValue>() }
+    private val registersInUse: Map<Register, MutableSet<AliasedScriptValue<RegisterValue>>> = Register.values()
+        .map { it to mutableSetOf<AliasedScriptValue<RegisterValue>>() }
         .toMap()
 
-    override fun newRegister(register: Register?, name: String?): RegisterValue {
+    override fun newRegister(register: Register?, name: String?): AliasedScriptValue<RegisterValue> {
         val registerToUse = register ?: nextFreeRegister()
         if (registerToUse === null) {
             throw IllegalArgumentException("All registers in use and no register was explicitly provided")
         }
 
-        return NamedRegisterValue(registerToUse, name) {
-            registersInUse[registerToUse]?.remove(this)
-        }
+
+        val aliasSet = registersInUse[registerToUse]!!
+        val registerValue = AliasedScriptValue(name, RegisterValue(registerToUse) {
+            aliasSet.remove<ScriptValue>(this)
+        })
+
+        aliasSet.add(registerValue)
+
+        return registerValue
     }
 
     private fun nextFreeRegister(): Register? {

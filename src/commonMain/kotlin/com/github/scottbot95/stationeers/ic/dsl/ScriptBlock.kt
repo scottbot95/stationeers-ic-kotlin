@@ -1,9 +1,5 @@
 package com.github.scottbot95.stationeers.ic.dsl
 
-import com.github.scottbot95.stationeers.ic.Register
-import com.github.scottbot95.stationeers.ic.RegisterValue
-import kotlin.properties.ReadOnlyProperty
-
 @DslMarker
 annotation class ScriptBlockMarker
 

@@ -11,27 +11,13 @@ enum class Register {
     override fun toString(): String = name.toLowerCase()
 }
 
-sealed class RegisterValue(
-    open val register: Register,
+class RegisterValue(
+    val register: Register,
+    release: RegisterValue.() -> Unit
 ) : ScriptValue, Closeable {
-
-    override fun toString(options: CompileOptions): String = register.toString()
-}
-
-class NamedRegisterValue(
-    override val register: Register,
-    val alias: String? = null,
-    release: RegisterValue.() -> Unit = {}
-) : RegisterValue(register) {
     private val releaseOnce = once { this.release() }
 
-    override fun toString(options: CompileOptions): String {
-        return if (options.minify || alias === null) {
-            register.toString()
-        } else {
-            alias
-        }
-    }
+    override fun toString(options: CompileOptions): String = register.toString()
 
     override fun close() = releaseOnce()
 }
