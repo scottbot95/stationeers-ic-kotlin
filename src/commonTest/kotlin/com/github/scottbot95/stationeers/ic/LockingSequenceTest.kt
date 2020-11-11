@@ -2,7 +2,9 @@ package com.github.scottbot95.stationeers.ic
 
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.asserter
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 private const val MAX_NUMBERS = 10
 
@@ -32,14 +34,14 @@ class LockingSequenceTest {
     @Test
     fun testCanLockItems() {
         val lock = lockingSequence.tryLock(0)
-        asserter.assertEquals("Expected to lock requested item", 0, lock?.value)
+        assertEquals(0, lock?.value, "Expected to lock requested item")
     }
 
     @Test
     fun testCannotLockAnItemTwice() {
         lockingSequence.tryLock(0)
         val lock = lockingSequence.tryLock(0)
-        asserter.assertNull("Expected second lock to fail", lock)
+        assertNull(lock, "Expected second lock to fail")
     }
 
     @Test
@@ -47,12 +49,12 @@ class LockingSequenceTest {
         // lock all the items, should succeed
         repeat(MAX_NUMBERS) {
             val lock = lockingSequence.lockNext()
-            asserter.assertEquals(null, it, lock?.value)
+            assertEquals(it, lock?.value)
         }
 
         // try to lock one more
         val lock = lockingSequence.lockNext()
-        asserter.assertNull(null, lock)
+        assertNull(lock)
     }
 
     @Test
@@ -61,7 +63,7 @@ class LockingSequenceTest {
         lock1.unlock()
         val lock2 = lockingSequence.tryLock(0)
 
-        asserter.assertNotNull("Expected to lock unlocked item", lock2)
+        assertNotNull(lock2, "Expected to lock unlocked item")
     }
 
     @Test
@@ -71,8 +73,8 @@ class LockingSequenceTest {
         val lock2 = lockingSequence.tryLock(0)
         lock1.unlock()
 
-        asserter.assertNotNull(null, lock2)
-        asserter.assertEquals(null, false, lockingSequence.canLock(0))
+        assertNotNull(lock2)
+        assertEquals(false, lockingSequence.canLock(0))
 
     }
 }

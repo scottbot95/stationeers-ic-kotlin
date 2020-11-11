@@ -2,7 +2,7 @@ package com.github.scottbot95.stationeers.ic.util
 
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.asserter
+import kotlin.test.assertEquals
 
 class FuntionUtilsTest {
     var timesCalled = 0
@@ -17,7 +17,7 @@ class FuntionUtilsTest {
     @Test
     fun testCanCallThrough() {
         val result = wrappedFunc()
-        asserter.assertEquals(null, 1, result)
+        assertEquals(1, result)
     }
 
     @Test
@@ -25,6 +25,6 @@ class FuntionUtilsTest {
         wrappedFunc()
         wrappedFunc()
         wrappedFunc()
-        asserter.assertEquals(null, 1, timesCalled)
+        assertEquals(1, timesCalled)
     }
 }
