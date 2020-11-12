@@ -7,8 +7,8 @@ import com.github.scottbot95.stationeers.ic.RegisterValue
  */
 sealed class Operation(val opCode: String, vararg val args: ScriptValue) : Compilable {
 
-    data class Add(val output: RegisterValue, val a: ScriptValue, val b: ScriptValue): Operation("add", output, a, b)
-    data class Comment(val message: String): Operation("#", StringScriptValue(message))
+    data class Add(val output: RegisterValue, val a: ScriptValue, val b: ScriptValue) : Operation("add", output, a, b)
+    data class Comment(val message: String) : Operation("#", StringScriptValue(message))
 
     override fun compile(options: CompileOptions): CompileResults {
         val combinedArgs = args.joinToString(" ") { it.toString(options) }

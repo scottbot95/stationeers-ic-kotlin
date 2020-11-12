@@ -3,7 +3,7 @@ package com.github.scottbot95.stationeers.ic.dsl
 import com.github.scottbot95.stationeers.ic.MAX_SCRIPT_LINES
 import com.github.scottbot95.stationeers.ic.MAX_SCRIPT_LINE_LEN
 
-class ValidationException(message: String? = null) : Exception(message) {}
+class ValidationException(message: String? = null) : Exception(message)
 
 // TODO Not sure if this class is really worth it....
 open class ValidatingCompilable(private val delegate: Compilable) : Compilable {
@@ -24,5 +24,4 @@ open class ValidatingCompilable(private val delegate: Compilable) : Compilable {
 
         return result
     }
-
 }

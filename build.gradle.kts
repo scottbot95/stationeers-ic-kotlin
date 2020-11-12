@@ -2,6 +2,7 @@
 
 plugins {
     kotlin("multiplatform") version "1.4.10"
+    id("org.jlleitschuh.gradle.ktlint") version "9.4.1"
 }
 
 group = "com.github.scottbot95"
@@ -28,7 +29,6 @@ kotlin {
         }
         binaries.executable()
     }
-
 
     sourceSets {
         val commonMain by getting {

@@ -22,5 +22,4 @@ fun <T> mutableLazy(initializer: () -> T?): ReadWriteProperty<Any?, T> =
             @Suppress("UNCHECKED_CAST")
             return value as T
         }
-
     }

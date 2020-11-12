@@ -3,7 +3,6 @@ package com.github.scottbot95.stationeers.ic.dsl
 import com.github.scottbot95.stationeers.ic.Register
 import com.github.scottbot95.stationeers.ic.RegisterValue
 
-
 inline val RegisterContainer.register
     get() = this.register()
 
@@ -22,7 +21,6 @@ interface RegisterContainer {
      * throw if there are no unused registers and [register] is not provided
      */
     fun newRegister(register: Register? = null, name: String? = null): AliasedScriptValue<RegisterValue>
-
 }
 
 class RegisterContainerImpl : RegisterContainer {
@@ -36,11 +34,13 @@ class RegisterContainerImpl : RegisterContainer {
             throw IllegalArgumentException("All registers in use and no register was explicitly provided")
         }
 
-
         val aliasSet = registersInUse[registerToUse]!!
-        val registerValue = AliasedScriptValue(name, RegisterValue(registerToUse) {
-            aliasSet.remove<ScriptValue>(this)
-        })
+        val registerValue = AliasedScriptValue(
+            name,
+            RegisterValue(registerToUse) {
+                aliasSet.remove<ScriptValue>(this)
+            }
+        )
 
         aliasSet.add(registerValue)
 

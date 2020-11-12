@@ -12,4 +12,3 @@ operator fun CompileResults.plus(other: CompileResults): CompileResults = this.c
 interface Compilable {
     fun compile(options: CompileOptions): CompileResults
 }
-

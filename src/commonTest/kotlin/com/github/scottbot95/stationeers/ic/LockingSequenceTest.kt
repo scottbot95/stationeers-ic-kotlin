@@ -11,12 +11,12 @@ private const val MAX_NUMBERS = 10
 private class TestLockingSequence : LockingSequence<Int>() {
     override fun nextItem(currItem: Int?): Int? = when (currItem) {
         null -> 0
-        MAX_NUMBERS-1 -> null
+        MAX_NUMBERS - 1 -> null
         else -> currItem + 1
     }
 
     override fun prevItem(currItem: Int?): Int? = when (currItem) {
-        null -> MAX_NUMBERS-1
+        null -> MAX_NUMBERS - 1
         0 -> null
         else -> currItem - 1
     }
@@ -75,6 +75,5 @@ class LockingSequenceTest {
 
         assertNotNull(lock2)
         assertEquals(false, lockingSequence.canLock(0))
-
     }
 }

@@ -19,7 +19,6 @@ data class NumberScriptValue(val value: Number) : ScriptValue {
 data class AliasedScriptValue<T : ScriptValue>(val alias: String?, val value: T) : ScriptValue {
     override fun toString(options: CompileOptions): String =
         if (options.minify || alias == null) value.toString(options) else alias
-
 }
 
 class AliasedScriptValueDelegateProvider<T : ScriptValue>(
