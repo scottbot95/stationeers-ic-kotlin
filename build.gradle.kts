@@ -1,8 +1,12 @@
 @file:Suppress("UNUSED_VARIABLE")
 
+import org.jetbrains.dokka.gradle.DokkaTask
+
+
 plugins {
     kotlin("multiplatform") version "1.4.10"
     id("org.jlleitschuh.gradle.ktlint") version "9.4.1"
+    id("org.jetbrains.dokka") version "1.4.10.2"
 }
 
 group = "com.github.scottbot95"
@@ -10,6 +14,7 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 kotlin {
@@ -64,6 +69,14 @@ kotlin {
             dependencies {
                 implementation(kotlin("test-js"))
             }
+        }
+    }
+}
+
+tasks {
+    withType<DokkaTask>().configureEach {
+        dokkaSourceSets {
+            // configure tasks here
         }
     }
 }
