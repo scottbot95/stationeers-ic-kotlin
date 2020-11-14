@@ -2,7 +2,6 @@
 
 import org.jetbrains.dokka.gradle.DokkaTask
 
-
 plugins {
     kotlin("multiplatform") version "1.4.10"
     id("org.jlleitschuh.gradle.ktlint") version "9.4.1"
@@ -26,7 +25,8 @@ kotlin {
             useJUnitPlatform()
         }
     }
-    js(IR) {
+    // FIXME Figure out why the IR compiler isn't working
+    js(LEGACY) {
         nodejs {
             testTask {
                 useMocha()
