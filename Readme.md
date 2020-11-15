@@ -19,7 +19,7 @@ val myScript = script {
         // Will implicitly create a temp register to store the value
         val switchSetting = readDevice(lightSwitch, "Setting")
         writeDevice(light, "Setting", switchSetting)
-        inc(loopCount)
+        inc(loopCount) // TODO use inc operator?
     }
     
     +"# You can add text directly as well"
@@ -52,6 +52,7 @@ j loop
 ```
 
 With `minify:true` option:
+
 **script.min.out**
 ```
 l r15 d0 Setting
@@ -59,3 +60,7 @@ s d1 Setting r15
 add r0 r0 1
 jr -3
 ```
+
+## Planned Features
+
+- Framework for unit testing your scripts

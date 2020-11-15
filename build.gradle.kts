@@ -76,7 +76,9 @@ kotlin {
 tasks {
     withType<DokkaTask>().configureEach {
         dokkaSourceSets {
-            // configure tasks here
+            configureEach {
+                reportUndocumented.set(true)
+            }
         }
     }
 }

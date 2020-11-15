@@ -7,6 +7,10 @@ annotation class ScriptBlockMarker
 interface ScriptBlock : Compilable {
     operator fun Compilable.unaryPlus()
 
+    operator fun String.unaryPlus() {
+        +Compilable { _, _ -> CompileResults(this) }
+    }
+
     val registers: RegisterContainer
     val devices: DeviceContainer
 }
@@ -23,7 +27,10 @@ open class SimpleScriptBlock(scope: ScriptBlock? = null) : AbstractScriptBlock(s
         operations.add(this)
     }
 
-    override fun compile(options: CompileOptions): CompileResults = operations.asSequence()
-        .map { it.compile(options) }
-        .reduce { combined: CompileResults, it: CompileResults -> combined + it }
+    override fun compile(options: CompileOptions, context: CompileContext): CompileResults =
+        operations.fold(CompileResults() to context) { (acc, currContext), it ->
+            it.compile(options, currContext).let {
+                (acc + it) to currContext + it.lines.size
+            }
+        }.first
 }

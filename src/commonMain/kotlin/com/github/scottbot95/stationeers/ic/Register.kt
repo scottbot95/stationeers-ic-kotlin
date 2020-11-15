@@ -1,6 +1,5 @@
 package com.github.scottbot95.stationeers.ic
 
-import com.github.scottbot95.stationeers.ic.dsl.AliasedScriptValue
 import com.github.scottbot95.stationeers.ic.dsl.CompileOptions
 import com.github.scottbot95.stationeers.ic.dsl.SimpleScriptValue
 import io.ktor.utils.io.core.Closeable
@@ -16,5 +15,3 @@ class RegisterValue(
 ) : SimpleScriptValue<Register>(register), Closeable {
     override fun toString(options: CompileOptions): String = value.toString()
 }
-
-typealias AliasedRegisterValue = AliasedScriptValue<RegisterValue>

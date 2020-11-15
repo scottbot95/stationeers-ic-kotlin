@@ -7,8 +7,8 @@ class ValidationException(message: String? = null) : Exception(message)
 
 // TODO Not sure if this class is really worth it....
 open class ValidatingCompilable(private val delegate: Compilable) : Compilable {
-    override fun compile(options: CompileOptions): CompileResults {
-        val result = delegate.compile(options)
+    override fun compile(options: CompileOptions, context: CompileContext): CompileResults {
+        val result = delegate.compile(options, context)
 
         if (result.lines.size > MAX_SCRIPT_LINES) {
             throw ValidationException(

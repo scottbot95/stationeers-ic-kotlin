@@ -1,7 +1,6 @@
-package com.github.scottbot95.stationeers.ic.dsl
+package com.github.scottbot95.stationeers.ic.util
 
-import com.github.scottbot95.stationeers.ic.util.AliasedScriptValueContainer
-import com.github.scottbot95.stationeers.ic.util.ConstantReadOnlyProperty
+import com.github.scottbot95.stationeers.ic.dsl.AliasedScriptValue
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
