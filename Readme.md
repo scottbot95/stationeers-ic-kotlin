@@ -18,7 +18,7 @@ val myScript = script {
     forever("loop") {
         // Will implicitly create a temp register to store the value
         val switchSetting = readDevice(lightSwitch, "Setting")
-        writeDevice(light, "Setting", switchSetting)
+        writeDevice(light, "On", switchSetting)
         inc(loopCount) // TODO use inc operator?
     }
     
@@ -44,8 +44,8 @@ alias loopCount r0
 # Loop forever
 loop:
 yield
-l r15 lightSwitch Setting
-s Light Setting r15
+l r11 lightSwitch Setting
+s Light On r11
 add loopCount loopCount 1
 j loop
 # You can add text directly as well
@@ -56,11 +56,14 @@ With `minify:true` option:
 **script.min.out**
 ```
 l r15 d0 Setting
-s d1 Setting r15
+s d1 On r15
 add r0 r0 1
-jr -3
+j 0
+# You can add text directly as well
 ```
 
 ## Planned Features
 
 - Framework for unit testing your scripts
+- Typesafe device vars (ie can't set "Setting" on something that doesn't have a Setting)
+   - This can be easily achieved in TS

@@ -19,6 +19,7 @@ class LoopingScriptBlockTest {
         val expected =
             """
             loop:
+            yield
             # Something inside the block
             # Should probably have something more complex here
             j loop
@@ -39,6 +40,7 @@ class LoopingScriptBlockTest {
 
         val expected =
             """
+            yield
             # Something inside the block
             # Should probably have something more complex here
             j 5
@@ -63,6 +65,7 @@ class LoopingScriptBlockTest {
         val expected =
             """
             loop:
+            yield
             # Something inside the block
             # Should probably have something more complex here
             bgt 2 1 loop
@@ -86,6 +89,7 @@ class LoopingScriptBlockTest {
 
         val expected =
             """
+            yield
             # Something inside the block
             # Should probably have something more complex here
             bgt 2 1 5
@@ -111,7 +115,8 @@ class LoopingScriptBlockTest {
         val expected =
             """
             loop:
-            bgt 2 1 10
+            bgt 2 1 11
+            yield
             # Something inside the block
             # Should probably have something more complex here
             j loop
@@ -138,7 +143,8 @@ class LoopingScriptBlockTest {
 
         val expected =
             """
-            bgt 2 1 9
+            bgt 2 1 10
+            yield
             # Something inside the block
             # Should probably have something more complex here
             j 5

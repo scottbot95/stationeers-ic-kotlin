@@ -28,7 +28,7 @@ class AliasedScriptValue<T : Any>(
     private val releaseAlias: () -> Unit = {},
 ) : ScriptValue<T> by delegate {
     override fun toString(options: CompileOptions): String =
-        if (options.minify || alias == null) delegate.toString(options) else alias
+        if (options.minify || alias === null) delegate.toString(options) else alias
 
     override fun close() = releaseAlias()
 }

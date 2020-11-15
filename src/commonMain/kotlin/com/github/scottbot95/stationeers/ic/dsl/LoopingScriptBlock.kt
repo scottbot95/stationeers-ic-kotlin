@@ -13,8 +13,10 @@ import com.github.scottbot95.stationeers.ic.util.Conditional
 class LoopingScriptBlock(
     private val label: String? = null,
     private val conditional: Conditional? = null,
-    private val atLeastOnce: Boolean = true
-) : SimpleScriptBlock() {
+    private val atLeastOnce: Boolean = true,
+    private val shouldYield: Boolean = true,
+    scope: ScriptBlock? = null
+) : SimpleScriptBlock(scope) {
     override fun compile(options: CompileOptions, context: CompileContext): CompileResults {
         val (labelLine: String?, loopStart: JumpTarget<*>) = if (label !== null && !options.minify) {
             "$label:" to JumpTarget.Label(label)
@@ -22,12 +24,14 @@ class LoopingScriptBlock(
             null to JumpTarget.Line(context.startLine)
         }
 
+        val yieldLine = if (shouldYield) listOf("yield") else listOf()
+
         return if (conditional !== null && !atLeastOnce) {
             val labelLines = listOfNotNull(labelLine)
             val innerResults = super.compile(options, context + labelLines.size)
-            val loopLines = labelLines.size + innerResults.lines.size + 2
+            val loopLines = labelLines.size + yieldLine.size + innerResults.lines.size + 2
             val branchOp = Operation.Branch(conditional, JumpTarget.Line(context.startLine + loopLines)).compile(options, context)
-            val prefix = labelLines + branchOp.lines
+            val prefix = labelLines + branchOp.lines + yieldLine
             val suffix = Operation.Jump(loopStart).compile(options, context + prefix.size + innerResults.lines.size)
 
             innerResults.withLines(prefix + innerResults.lines + suffix.lines)
@@ -37,7 +41,7 @@ class LoopingScriptBlock(
             } else {
                 Operation.Jump(loopStart)
             }
-            val prefix = listOfNotNull(labelLine)
+            val prefix = listOfNotNull(labelLine) + yieldLine
             val innerResults = super.compile(options, context + prefix.size)
             val suffix = operation.compile(options, context + prefix.size + innerResults.lines.size)
 
