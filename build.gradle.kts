@@ -6,10 +6,25 @@ plugins {
     kotlin("multiplatform") version "1.4.10"
     id("org.jlleitschuh.gradle.ktlint") version "9.4.1"
     id("org.jetbrains.dokka") version "1.4.10.2"
+    id("maven-publish")
 }
 
 group = "com.github.scottbot95"
-version = "1.0-SNAPSHOT"
+version = "0.1.0-SNAPSHOT"
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/scottbot95/stationeers-ic-kotlin")
+
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+}
 
 repositories {
     mavenCentral()
