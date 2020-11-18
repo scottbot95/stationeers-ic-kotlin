@@ -40,8 +40,7 @@ kotlin {
             useJUnitPlatform()
         }
     }
-    // FIXME Figure out why the IR compiler isn't working
-    js(LEGACY) {
+    js(IR) {
         nodejs {
             testTask {
                 useMocha()

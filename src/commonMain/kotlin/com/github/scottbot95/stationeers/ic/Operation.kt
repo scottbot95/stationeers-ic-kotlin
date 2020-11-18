@@ -5,7 +5,6 @@ import com.github.scottbot95.stationeers.ic.dsl.CompileContext
 import com.github.scottbot95.stationeers.ic.dsl.CompileOptions
 import com.github.scottbot95.stationeers.ic.dsl.CompileResults
 import com.github.scottbot95.stationeers.ic.dsl.ScriptValue
-import com.github.scottbot95.stationeers.ic.dsl.StringScriptValue
 import com.github.scottbot95.stationeers.ic.dsl.of
 import com.github.scottbot95.stationeers.ic.util.Conditional
 import com.github.scottbot95.stationeers.ic.util.FlagEnum
@@ -105,7 +104,7 @@ sealed class Operation : Compilable {
         }
     }
 
-    class Comment(val message: String) : SimpleOperation("#", StringScriptValue(message)) {
+    class Comment(val message: String) : SimpleOperation("#", ScriptValue.of(message)) {
         override fun compile(options: CompileOptions, context: CompileContext): CompileResults {
             return if (options.minify) {
                 CompileResults()
