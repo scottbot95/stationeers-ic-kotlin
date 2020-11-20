@@ -5,3 +5,7 @@ pluginManagement {
         jcenter()
     }
 }
+include("lib")
+include("samples")
+
+project(":lib").name = "stationeers-ic"

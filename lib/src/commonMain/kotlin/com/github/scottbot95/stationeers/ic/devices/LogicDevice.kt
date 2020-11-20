@@ -18,7 +18,6 @@ val SETTABLE_LOGIC_VARS: LogicVarMap = mapOf("Setting" to true)
 val LOCKABLE_LOGIC_VARS: LogicVarMap = mapOf("Lock" to true)
 val GAS_READER_LOGIC_VARS: LogicVarMap = (Gases.values().map { it.name } + listOf("")).map { it to false }.toMap()
 
-
 /**
  * Generic interface representing available device variables for a LogicDevice
  * TODO May be used to facilitate simulation in the future
@@ -42,12 +41,9 @@ object Light : StructureLogicDevice(POWERED_LOGIC_VARS, LOCKABLE_LOGIC_VARS)
 object LogicMemory : StructureLogicDevice(SETTABLE_LOGIC_VARS)
 object GasSensor : StructureLogicDevice(GAS_READER_LOGIC_VARS)
 
-
-
 // THIS GOES INTO ANOTHER FILE!!!
 
-
-class LogicDeviceScriptValue<T: LogicDevice>(val logicDevice: T, override val value: Device): ScriptValue<Device>
+class LogicDeviceScriptValue<T : LogicDevice>(val logicDevice: T, override val value: Device) : ScriptValue<Device>
 
 private fun <T : LogicDevice> writeDevice(device: LogicDeviceScriptValue<T>, deviceVar: String) {
     if (!device.logicDevice.canWrite(deviceVar)) {

@@ -1,9 +1,8 @@
-
 @JsExport
 abstract class Foo
 
 @JsExport
-object FooObj: Foo()
+object FooObj : Foo()
 
 @JsExport
 fun doAThing() {
