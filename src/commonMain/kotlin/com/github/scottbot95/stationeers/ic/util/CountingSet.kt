@@ -4,11 +4,11 @@ class CountingSet<T> {
 
     private val usageCount: MutableMap<T, Int> = mutableMapOf()
 
-    fun add(value: T) {
+    fun addOne(value: T) {
         usageCount[value] = usageCount.getOrPut(value) { 0 } + 1
     }
 
-    fun remove(value: T) {
+    fun removeOne(value: T) {
         (usageCount[value]!! - 1).let {
             if (it < 0) throw IllegalStateException("Attempted to remove $value when none are in use")
             usageCount[value] = it

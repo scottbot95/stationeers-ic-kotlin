@@ -2,6 +2,7 @@ package com.github.scottbot95.stationeers.ic.dsl
 
 import com.github.scottbot95.stationeers.ic.Device
 import com.github.scottbot95.stationeers.ic.Register
+import com.github.scottbot95.stationeers.ic.util.once
 import io.ktor.utils.io.core.Closeable
 
 interface ScriptValue<out T : Any> : Closeable {
@@ -14,18 +15,21 @@ interface ScriptValue<out T : Any> : Closeable {
     companion object
 }
 
-// TODO make this sealed?
 class SimpleScriptValue<T : Any>(override val value: T) : ScriptValue<T>
 
+// TODO I do not like passing a lambda to release alias.
+//  Maybe store the container and add a public method to release aliases? Probably want to track instances again in that case
 class AliasedScriptValue<T : Any>(
     val alias: String?,
     private val delegate: ScriptValue<T>,
-    private val releaseAlias: () -> Unit = {},
+    releaseAlias: () -> Unit = {},
 ) : ScriptValue<T> by delegate {
+    private val releaseOnce = once(releaseAlias)
+
     override fun toString(options: CompileOptions): String =
         if (options.minify || alias === null) delegate.toString(options) else alias
 
-    override fun close() = releaseAlias()
+    override fun close() = releaseOnce()
 }
 
 // TODO Make this its own file?

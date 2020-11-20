@@ -3,7 +3,7 @@
 import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
-    kotlin("multiplatform") version "1.4.10"
+    kotlin("multiplatform") version "1.4.20"
     id("org.jlleitschuh.gradle.ktlint") version "9.4.1"
     id("org.jetbrains.dokka") version "1.4.10.2"
     id("maven-publish")
@@ -41,6 +41,7 @@ kotlin {
         }
     }
     js(IR) {
+        useCommonJs()
         nodejs {
             testTask {
                 useMocha()
@@ -50,6 +51,10 @@ kotlin {
     }
 
     sourceSets {
+        all {
+            languageSettings.useExperimentalAnnotation("kotlin.js.ExperimentalJsExport")
+        }
+
         val commonMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-io:1.4.1")

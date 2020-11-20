@@ -64,6 +64,6 @@ j 0
 
 ## Planned Features
 
-- Framework for unit testing your scripts
+- Framework for unit testing and simulating your scripts
 - Typesafe device vars (ie can't set "Setting" on something that doesn't have a Setting)
-   - This can be easily achieved in TS
+   - This can be easily achieved in TS with union types

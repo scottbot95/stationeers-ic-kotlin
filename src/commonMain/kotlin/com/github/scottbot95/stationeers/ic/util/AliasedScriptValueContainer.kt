@@ -36,15 +36,14 @@ abstract class AliasedScriptValueContainer<T : Any> : Compilable {
             aliasesUsed[name] = valueToUse
         }
 
-        valuesInUse.add(valueToUse)
+        valuesInUse.addOne(valueToUse)
 
         return AliasedScriptValue(
             name,
-            newInstance(valueToUse),
-            once {
-                valuesInUse.remove(valueToUse)
-            }
-        )
+            newInstance(valueToUse)
+        ) {
+            valuesInUse.removeOne(valueToUse)
+        }
     }
 
     fun getUsed(value: T): Int = valuesInUse[value]
