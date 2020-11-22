@@ -1,52 +1,59 @@
+@file:Suppress("PropertyName")
+
 package com.github.scottbot95.stationeers.ic.devices
 
 import com.github.scottbot95.stationeers.ic.Device
+import com.github.scottbot95.stationeers.ic.dsl.AliasedScriptValue
 import com.github.scottbot95.stationeers.ic.dsl.ScriptValue
-import com.github.scottbot95.stationeers.ic.util.Gases
+import kotlin.properties.ReadOnlyProperty
+import kotlin.reflect.KProperty
 
-typealias LogicVarMap = Map<String, Boolean>
+class LogicDeviceVar(
+    val device: LogicDevice,
+    val name: String,
+    val canRead: Boolean,
+    val canWrite: Boolean
+)
 
-private fun <K, V> mergeMaps(vararg maps: Map<K, V>): Map<K, V> = maps.map { it.asSequence() }
-    .reduce { acc, it -> acc + it }
-    .distinct()
-    .groupBy({ it.key }, { it.value })
-    .mapValues { (_, it) -> it.last() }
+abstract class LogicDevice(
+    alias: String?,
+    private val device: ScriptValue<Device>,
+    release: () -> Unit
+) : AliasedScriptValue<Device>(alias, device, release) {
+    protected val readWriteVar = readWriteVar()
 
-val STRUCTURE_LOGIC_VARS: LogicVarMap = mapOf("PrefabHash" to false)
-val POWERED_LOGIC_VARS: LogicVarMap = mapOf("On" to true, "Powered" to false, "RequiredPower" to false)
-val SETTABLE_LOGIC_VARS: LogicVarMap = mapOf("Setting" to true)
-val LOCKABLE_LOGIC_VARS: LogicVarMap = mapOf("Lock" to true)
-val GAS_READER_LOGIC_VARS: LogicVarMap = (Gases.values().map { it.name } + listOf("")).map { it to false }.toMap()
+    protected fun readWriteVar(name: String? = null): ReadOnlyProperty<LogicDevice, LogicDeviceVar> =
+        LogicDeviceProperty(this, name, canWrite = true)
 
-/**
- * Generic interface representing available device variables for a LogicDevice
- * TODO May be used to facilitate simulation in the future
- */
-interface LogicDevice {
-    fun canRead(value: String): Boolean = false
-    fun canWrite(value: String): Boolean = false
-}
+    protected val readOnlyVar = readOnlyVar()
+    protected fun readOnlyVar(name: String? = null): ReadOnlyProperty<LogicDevice, LogicDeviceVar> =
+        LogicDeviceProperty(this, name)
 
-abstract class DefaultLogicDevice(private val deviceVarMap: LogicVarMap) : LogicDevice {
-    constructor(vararg varMaps: LogicVarMap) : this(mergeMaps(*varMaps))
+    protected val writeOnlyVar = writeOnlyVar()
+    protected fun writeOnlyVar(name: String? = null): ReadOnlyProperty<LogicDevice, LogicDeviceVar> =
+        LogicDeviceProperty(this, name, canRead = false, canWrite = true)
 
-    override fun canRead(value: String): Boolean = deviceVarMap.containsKey(value)
-    override fun canWrite(value: String): Boolean = deviceVarMap[value] ?: false
-}
-
-abstract class StructureLogicDevice(vararg deviceVarMap: LogicVarMap) :
-    DefaultLogicDevice(STRUCTURE_LOGIC_VARS, *deviceVarMap)
-
-object Light : StructureLogicDevice(POWERED_LOGIC_VARS, LOCKABLE_LOGIC_VARS)
-object LogicMemory : StructureLogicDevice(SETTABLE_LOGIC_VARS)
-object GasSensor : StructureLogicDevice(GAS_READER_LOGIC_VARS)
-
-// THIS GOES INTO ANOTHER FILE!!!
-
-class LogicDeviceScriptValue<T : LogicDevice>(val logicDevice: T, override val value: Device) : ScriptValue<Device>
-
-private fun <T : LogicDevice> writeDevice(device: LogicDeviceScriptValue<T>, deviceVar: String) {
-    if (!device.logicDevice.canWrite(deviceVar)) {
-        throw IllegalArgumentException("Cannot write to $deviceVar on a ${device.logicDevice::class.simpleName}")
+    private class LogicDeviceProperty(
+        private val device: LogicDevice,
+        private val name: String? = null,
+        private val canRead: Boolean = true,
+        private val canWrite: Boolean = false
+    ) :
+        ReadOnlyProperty<LogicDevice, LogicDeviceVar> {
+        override fun getValue(thisRef: LogicDevice, property: KProperty<*>) =
+            LogicDeviceVar(device, name ?: property.name, canRead, canWrite)
     }
+}
+
+class Light(alias: String?, device: ScriptValue<Device>, release: () -> Unit) : LogicDevice(alias, device, release) {
+    val On by readWriteVar
+    val RequiredPower by readOnlyVar
+    val Powered by readOnlyVar
+    val Lock by readWriteVar
+}
+
+class Switch(alias: String?, device: ScriptValue<Device>, release: () -> Unit) : LogicDevice(alias, device, release) {
+    val Open by readWriteVar
+    val Lock by readWriteVar
+    val Setting by readOnlyVar
 }

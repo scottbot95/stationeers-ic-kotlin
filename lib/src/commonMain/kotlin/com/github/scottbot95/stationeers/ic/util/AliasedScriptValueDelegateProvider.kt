@@ -1,17 +1,31 @@
 package com.github.scottbot95.stationeers.ic.util
 
 import com.github.scottbot95.stationeers.ic.dsl.AliasedScriptValue
+import com.github.scottbot95.stationeers.ic.dsl.ScriptValue
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-class AliasedScriptValueDelegateProvider<T : Any>(
+open class AliasedScriptValueDelegateProvider<T : Any, U : AliasedScriptValue<T>>(
     private val container: AliasedScriptValueContainer<T>,
     private val desiredValue: T? = null,
     private val name: String? = null,
+    private val create: AliasedScriptValueConstructor<T, U>
 ) {
     operator fun provideDelegate(
         thisRef: Any?,
         prop: KProperty<*>
-    ): ReadOnlyProperty<Any?, AliasedScriptValue<T>> =
-        ConstantReadOnlyProperty(container.newAliasedValue(desiredValue, name ?: prop.name))
+    ): ReadOnlyProperty<Any?, U> =
+        ConstantReadOnlyProperty(container.newAliasedValue(desiredValue, name ?: prop.name, create))
 }
+
+class DefaultAliasedScriptValueDelegateProvider<T : Any>(
+    container: AliasedScriptValueContainer<T>,
+    desiredValue: T? = null,
+    name: String? = null,
+) : AliasedScriptValueDelegateProvider<T, AliasedScriptValue<T>>(
+    container,
+    desiredValue,
+    name,
+    // FIXME Ew grow this lambda is just a constructor reference but that's broke in JS IR compiler. Fixed in Kotlin 1.4.30
+    { alias: String?, value: ScriptValue<T>, release: () -> Unit -> AliasedScriptValue(alias, value, release) }
+)

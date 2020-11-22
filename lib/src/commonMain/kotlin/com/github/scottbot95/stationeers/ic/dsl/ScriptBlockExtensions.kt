@@ -3,8 +3,13 @@ package com.github.scottbot95.stationeers.ic.dsl
 import com.github.scottbot95.stationeers.ic.Device
 import com.github.scottbot95.stationeers.ic.Operation
 import com.github.scottbot95.stationeers.ic.Register
+import com.github.scottbot95.stationeers.ic.devices.LogicDevice
+import com.github.scottbot95.stationeers.ic.devices.LogicDeviceVar
+import com.github.scottbot95.stationeers.ic.util.AliasedScriptValueConstructor
 import com.github.scottbot95.stationeers.ic.util.AliasedScriptValueContainer
 import com.github.scottbot95.stationeers.ic.util.AliasedScriptValueDelegateProvider
+import com.github.scottbot95.stationeers.ic.util.DefaultAliasedScriptValueDelegateProvider
+import kotlin.properties.ReadOnlyProperty
 
 // #region Delegate extensions
 
@@ -13,15 +18,15 @@ inline fun ScriptBlock.registers(init: AliasedScriptValueContainer<Register>.() 
     return registers
 }
 
-inline val ScriptBlock.register: AliasedScriptValueDelegateProvider<Register> get() = register()
+inline val ScriptBlock.register: DefaultAliasedScriptValueDelegateProvider<Register> get() = register()
 
-fun ScriptBlock.register(name: String): AliasedScriptValueDelegateProvider<Register> = register(null, name)
+fun ScriptBlock.register(name: String): DefaultAliasedScriptValueDelegateProvider<Register> = register(null, name)
 
 fun ScriptBlock.register(
     register: Register? = null,
     name: String? = null
-): AliasedScriptValueDelegateProvider<Register> {
-    return AliasedScriptValueDelegateProvider(registers, register, name)
+): DefaultAliasedScriptValueDelegateProvider<Register> {
+    return DefaultAliasedScriptValueDelegateProvider(registers, register, name)
 }
 
 inline fun ScriptBlock.devices(init: AliasedScriptValueContainer<Device>.() -> Unit): AliasedScriptValueContainer<Device> {
@@ -29,16 +34,22 @@ inline fun ScriptBlock.devices(init: AliasedScriptValueContainer<Device>.() -> U
     return devices
 }
 
-inline val ScriptBlock.device: AliasedScriptValueDelegateProvider<Device> get() = device()
-
-fun ScriptBlock.device(name: String): AliasedScriptValueDelegateProvider<Device> = device(null, name)
-
-fun ScriptBlock.device(
+fun <T : LogicDevice> ScriptBlock.device(
+    deviceConstructor: AliasedScriptValueConstructor<Device, T>,
     device: Device? = null,
-    name: String? = null
-): AliasedScriptValueDelegateProvider<Device> {
-    return AliasedScriptValueDelegateProvider(devices, device, name)
+    name: String? = null,
+): AliasedScriptValueDelegateProvider<Device, T> {
+    return AliasedScriptValueDelegateProvider(devices, device, name, deviceConstructor)
 }
+
+// TODO should probably use an AliasedScriptValueContainer for this...
+fun ScriptBlock.define(name: String, value: Number): ScriptValue<Number> {
+    +Operation.Define(name, value)
+    return AliasedScriptValue(name, ScriptValue.of(value))
+}
+
+fun ScriptBlock.define(value: Number, name: String? = null) =
+    ReadOnlyProperty<Any?, ScriptValue<Number>> { _, prop -> define(name ?: prop.name, value) }
 
 // #endregion
 
@@ -67,12 +78,28 @@ fun ScriptBlock.readDevice(device: ScriptValue<Device>, deviceVar: String): Scri
         +Operation.Load(it, device, deviceVar)
     }
 
+fun ScriptBlock.readDevice(deviceVar: LogicDeviceVar) = readDevice(deviceVar.device, deviceVar.name)
+
 fun ScriptBlock.readDevice(output: ScriptValue<Register>, device: ScriptValue<Device>, deviceVar: String) {
     +Operation.Load(output, device, deviceVar)
 }
 
+fun ScriptBlock.readDevice(output: ScriptValue<Register>, deviceVar: LogicDeviceVar) {
+    if (!deviceVar.canRead) {
+        throw IllegalArgumentException("Cannot read from ${deviceVar.name} on ${deviceVar.device.alias ?: deviceVar.device.value}")
+    }
+    return readDevice(output, deviceVar.device, deviceVar.name)
+}
+
 fun ScriptBlock.writeDevice(device: ScriptValue<Device>, deviceVar: String, value: ScriptValue<*>) {
     +Operation.Save(device, deviceVar, value)
+}
+
+fun ScriptBlock.writeDevice(deviceVar: LogicDeviceVar, value: ScriptValue<*>) {
+    if (!deviceVar.canWrite) {
+        throw IllegalArgumentException("Cannot write to ${deviceVar.name} on ${deviceVar.device.alias ?: deviceVar.device.value}")
+    }
+    return writeDevice(deviceVar.device, deviceVar.name, value)
 }
 
 // #endregion

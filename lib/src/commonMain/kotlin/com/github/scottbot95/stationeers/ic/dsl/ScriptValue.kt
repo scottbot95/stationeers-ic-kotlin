@@ -8,18 +8,21 @@ import io.ktor.utils.io.core.Closeable
 interface ScriptValue<out T : Any> : Closeable {
     val value: T
 
-    fun toString(options: CompileOptions): String = value.toString()
+    fun toString(options: CompileOptions): String = when (value) {
+        is ScriptValue<*> -> toString(options)
+        else -> value.toString()
+    }
 
     override fun close() = Unit
 
     companion object
 }
 
-class SimpleScriptValue<T : Any>(override val value: T) : ScriptValue<T>
+class SimpleScriptValue<out T : Any>(override val value: T) : ScriptValue<T>
 
 // TODO I do not like passing a lambda to release alias.
 //  Maybe store the container and add a public method to release aliases? Probably want to track instances again in that case
-class AliasedScriptValue<T : Any>(
+open class AliasedScriptValue<out T : Any>(
     val alias: String?,
     private val delegate: ScriptValue<T>,
     releaseAlias: () -> Unit = {},

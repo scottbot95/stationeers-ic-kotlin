@@ -1,6 +1,7 @@
 package com.github.scottbot95.stationeers.ic.dsl
 
 import com.github.scottbot95.stationeers.ic.Device
+import com.github.scottbot95.stationeers.ic.devices.Light
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -11,11 +12,11 @@ class DeviceDelegateTest {
     fun testDeviceDelegateWorks() {
         // FIXME we should probably really do some mocking here once it's available in kotlin multiplatform
         script {
-            val d0 by device
-            val myDeviceName by device
-            val d2 by device(name = "OverriddenName")
-            val d5 by device(Device.D5)
-            val otherD5 by device(Device.D5)
+            val d0 by device(::Light)
+            val myDeviceName by device(::Light)
+            val d2 by device(::Light, name = "OverriddenName")
+            val d5 by device(::Light, Device.D5)
+            val otherD5 by device(::Light, Device.D5)
 
             assertEquals(Device.D0, d0.value)
             assertEquals("d0", d0.alias)
@@ -40,11 +41,11 @@ class DeviceDelegateTest {
     fun testAllDevicesInUse() {
         script {
             Device.values().forEach {
-                val testDevice by device(it, it.name)
+                val testDevice by device(::Light, it, it.name)
             }
 
             assertFailsWith<IllegalArgumentException> {
-                val shouldFail by device
+                val shouldFail by device(::Light)
             }
         }
     }

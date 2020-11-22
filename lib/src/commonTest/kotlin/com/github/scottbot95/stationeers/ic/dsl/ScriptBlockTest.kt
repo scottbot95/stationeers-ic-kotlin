@@ -1,6 +1,8 @@
 package com.github.scottbot95.stationeers.ic.dsl
 
 import com.github.scottbot95.stationeers.ic.Device
+import com.github.scottbot95.stationeers.ic.devices.Light
+import com.github.scottbot95.stationeers.ic.devices.Switch
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -12,14 +14,14 @@ class ScriptBlockTest {
     @BeforeTest
     fun setup() {
         testScript = script {
-            val lightSwitch by device(Device.D0)
-            val light by device(Device.D1, "Light")
+            val lightSwitch by device(::Switch, Device.D0)
+            val light by device(::Light, Device.D1, "Light")
             val loopCount by register
 
             comment("Loop forever")
             forever("loop") {
-                val switchSetting = readDevice(lightSwitch, "Setting")
-                writeDevice(light, "On", switchSetting)
+                val switchSetting = readDevice(lightSwitch.Open)
+                writeDevice(light.On, switchSetting)
                 inc(loopCount)
             }
 
@@ -31,13 +33,13 @@ class ScriptBlockTest {
     fun testCompileSettings() {
         val expected =
             """
-            alias lightSwitch d0
-            alias Light d1
-            alias loopCount r0
+            alias dlightSwitch d0
+            alias dLight d1
+            alias rloopCount r0
             # Loop forever
             loop:
             yield
-            l r1 lightSwitch Setting
+            l r1 lightSwitch Open
             s Light On r1
             add loopCount loopCount 1
             j loop
@@ -54,7 +56,7 @@ class ScriptBlockTest {
         val expected =
             """
             yield
-            l r1 d0 Setting
+            l r1 d0 Open
             s d1 On r1
             add r0 r0 1
             j 0

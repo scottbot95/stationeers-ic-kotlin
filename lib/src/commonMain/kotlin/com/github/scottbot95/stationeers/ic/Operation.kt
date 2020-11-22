@@ -104,6 +104,8 @@ sealed class Operation : Compilable {
         }
     }
 
+    class Define(val alias: String, target: Number) : SimpleOperation("define", ScriptValue.of(target))
+
     class Comment(val message: String) : SimpleOperation("#", ScriptValue.of(message)) {
         override fun compile(options: CompileOptions, context: CompileContext): CompileResults {
             return if (options.minify) {

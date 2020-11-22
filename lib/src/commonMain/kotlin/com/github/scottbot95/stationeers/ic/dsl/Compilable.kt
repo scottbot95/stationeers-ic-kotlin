@@ -5,6 +5,11 @@ data class CompileOptions(
     var preferRelativeJumps: Boolean = false,
 )
 
+data class ExportOptions(
+    var compileOptions: CompileOptions,
+    var destination: String,
+)
+
 data class CompileContext(val startLine: Int = 0)
 
 data class CompileResults(val lines: List<String>) {
@@ -24,6 +29,8 @@ operator fun CompileContext.plus(lines: Int): CompileContext = this.copy(startLi
 fun interface Compilable {
     fun compile(options: CompileOptions, context: CompileContext): CompileResults
 }
+
+fun Compilable.compile(options: CompileOptions): CompileResults = compile(options, CompileContext())
 
 inline fun Compilable.compile(init: CompileOptions.() -> Unit): CompileResults {
     val options = CompileOptions().apply(init)

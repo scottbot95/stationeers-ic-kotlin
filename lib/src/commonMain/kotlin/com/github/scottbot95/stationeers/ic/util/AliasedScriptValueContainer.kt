@@ -9,7 +9,9 @@ import com.github.scottbot95.stationeers.ic.dsl.CompileResults
 import com.github.scottbot95.stationeers.ic.dsl.ScriptValue
 import com.github.scottbot95.stationeers.ic.dsl.plus
 
-abstract class AliasedScriptValueContainer<T : Any> : Compilable {
+typealias AliasedScriptValueConstructor<T, U> = (alias: String?, value: ScriptValue<T>, release: () -> Unit) -> U
+
+abstract class AliasedScriptValueContainer<T : Any>(private val prefix: String = "") : Compilable {
 
     private val valuesInUse = CountingSet<T>()
 
@@ -24,7 +26,11 @@ abstract class AliasedScriptValueContainer<T : Any> : Compilable {
      * You may have multiple [AliasedScriptValue]s pointing the the same [T], however [newAliasedValue] will
      * throw if there are no unused registers and [desiredValue] is not provided.
      */
-    fun newAliasedValue(desiredValue: T?, name: String?): AliasedScriptValue<T> {
+    fun <V : AliasedScriptValue<T>> newAliasedValue(
+        desiredValue: T?,
+        name: String?,
+        createAliasedValue: AliasedScriptValueConstructor<T, V>
+    ): V {
         val valueToUse = desiredValue
             ?: nextFreeValue()
             ?: throw IllegalArgumentException("Must provided a desiredValue when all values are in use")
@@ -38,18 +44,21 @@ abstract class AliasedScriptValueContainer<T : Any> : Compilable {
 
         valuesInUse.addOne(valueToUse)
 
-        return AliasedScriptValue(
-            name,
-            newInstance(valueToUse)
-        ) {
+        return createAliasedValue(name, newInstance(valueToUse)) {
             valuesInUse.removeOne(valueToUse)
         }
     }
 
+    fun newAliasedValue(desiredValue: T?, name: String?): AliasedScriptValue<T> =
+        newAliasedValue(
+            desiredValue,
+            name
+        ) { alias: String?, value: ScriptValue<T>, release: () -> Unit -> AliasedScriptValue(alias, value, release) }
+
     fun getUsed(value: T): Int = valuesInUse[value]
 
     override fun compile(options: CompileOptions, context: CompileContext): CompileResults = aliases
-        .map { Operation.Alias(it.key, it.value).compile(options, context) }
+        .map { Operation.Alias(prefix + it.key, it.value).compile(options, context) }
         .reduceOrNull() { acc, it -> acc + it } ?: CompileResults()
 
     abstract fun nextFreeValue(): T?
@@ -60,7 +69,7 @@ abstract class AliasedScriptValueContainer<T : Any> : Compilable {
 class DelegatingAliasedScriptValueContainer<T : Any>(
     private val delegate: AliasedScriptValueContainer<T>
 ) : AliasedScriptValueContainer<T>() {
-    override fun nextFreeValue(): T? = delegate.nextFreeValue()
+    override fun nextFreeValue() = delegate.nextFreeValue()
 
-    override fun newInstance(value: T): ScriptValue<T> = delegate.newInstance(value)
+    override fun newInstance(value: T) = delegate.newInstance(value)
 }
