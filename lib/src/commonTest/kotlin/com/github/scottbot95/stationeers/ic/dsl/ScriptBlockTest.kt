@@ -2,6 +2,8 @@ package com.github.scottbot95.stationeers.ic.dsl
 
 import com.github.scottbot95.stationeers.ic.Device
 import com.github.scottbot95.stationeers.ic.devices.Light
+import com.github.scottbot95.stationeers.ic.devices.On
+import com.github.scottbot95.stationeers.ic.devices.Open
 import com.github.scottbot95.stationeers.ic.devices.Switch
 import kotlin.test.BeforeTest
 import kotlin.test.Test

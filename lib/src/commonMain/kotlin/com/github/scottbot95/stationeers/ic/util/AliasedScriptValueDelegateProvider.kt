@@ -2,6 +2,7 @@ package com.github.scottbot95.stationeers.ic.util
 
 import com.github.scottbot95.stationeers.ic.dsl.AliasedScriptValue
 import com.github.scottbot95.stationeers.ic.dsl.ScriptValue
+import com.github.scottbot95.stationeers.ic.dsl.SimpleAliasedScriptValue
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -27,5 +28,5 @@ class DefaultAliasedScriptValueDelegateProvider<T : Any>(
     desiredValue,
     name,
     // FIXME Ew grow this lambda is just a constructor reference but that's broke in JS IR compiler. Fixed in Kotlin 1.4.30
-    { alias: String?, value: ScriptValue<T>, release: () -> Unit -> AliasedScriptValue(alias, value, release) }
+    { alias: String?, value: ScriptValue<T>, release: () -> Unit -> SimpleAliasedScriptValue(alias, value, release) }
 )

@@ -54,7 +54,7 @@ kotlin {
 
         val commonMain by getting {
             dependencies {
-                implementation("io.ktor:ktor-io:1.4.1")
+                api("io.ktor:ktor-io:1.4.1")
             }
         }
         val commonTest by getting {

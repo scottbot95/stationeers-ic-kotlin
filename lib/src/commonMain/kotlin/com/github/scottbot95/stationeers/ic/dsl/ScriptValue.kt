@@ -20,17 +20,22 @@ interface ScriptValue<out T : Any> : Closeable {
 
 class SimpleScriptValue<out T : Any>(override val value: T) : ScriptValue<T>
 
+interface AliasedScriptValue<out T : Any> : ScriptValue<T> {
+    val alias: String?
+}
+
 // TODO I do not like passing a lambda to release alias.
 //  Maybe store the container and add a public method to release aliases? Probably want to track instances again in that case
-open class AliasedScriptValue<out T : Any>(
-    val alias: String?,
+open class SimpleAliasedScriptValue<out T : Any>(
+    override val alias: String?,
     private val delegate: ScriptValue<T>,
     releaseAlias: () -> Unit = {},
-) : ScriptValue<T> by delegate {
+) : ScriptValue<T> by delegate, AliasedScriptValue<T> {
     private val releaseOnce = once(releaseAlias)
 
+    // TODO ideally we wouldn't need the non-null assertion here
     override fun toString(options: CompileOptions): String =
-        if (options.minify || alias === null) delegate.toString(options) else alias
+        if (options.minify || alias === null) delegate.toString(options) else alias!!
 
     override fun close() = releaseOnce()
 }

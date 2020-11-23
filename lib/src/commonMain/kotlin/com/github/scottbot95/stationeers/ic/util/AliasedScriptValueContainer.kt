@@ -7,6 +7,7 @@ import com.github.scottbot95.stationeers.ic.dsl.CompileContext
 import com.github.scottbot95.stationeers.ic.dsl.CompileOptions
 import com.github.scottbot95.stationeers.ic.dsl.CompileResults
 import com.github.scottbot95.stationeers.ic.dsl.ScriptValue
+import com.github.scottbot95.stationeers.ic.dsl.SimpleAliasedScriptValue
 import com.github.scottbot95.stationeers.ic.dsl.plus
 
 typealias AliasedScriptValueConstructor<T, U> = (alias: String?, value: ScriptValue<T>, release: () -> Unit) -> U
@@ -53,7 +54,7 @@ abstract class AliasedScriptValueContainer<T : Any>(private val prefix: String =
         newAliasedValue(
             desiredValue,
             name
-        ) { alias: String?, value: ScriptValue<T>, release: () -> Unit -> AliasedScriptValue(alias, value, release) }
+        ) { alias: String?, value: ScriptValue<T>, release: () -> Unit -> SimpleAliasedScriptValue(alias, value, release) }
 
     fun getUsed(value: T): Int = valuesInUse[value]
 

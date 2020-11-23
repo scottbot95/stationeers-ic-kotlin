@@ -29,12 +29,17 @@ sealed class Operation : Compilable {
     abstract val args: Array<out ScriptValue<*>>
     abstract val opCode: String
 
+    override fun compile(options: CompileOptions, context: CompileContext): CompileResults {
+        val combinedArgs = args.joinToString(" ") { it.toString(options) }
+        return CompileResults(lines = listOf("$opCode $combinedArgs"))
+    }
+
     open class SimpleOperation internal constructor(
         override val opCode: String,
         override vararg val args: ScriptValue<*>
     ) : Operation()
 
-    // #region IO Operations
+    //region IO Operations
 
     class Load(val output: ScriptValue<Register>, val device: ScriptValue<Device>, val deviceVar: String) :
         SimpleOperation("l", output, device, ScriptValue.of(deviceVar))
@@ -44,16 +49,16 @@ sealed class Operation : Compilable {
 
     class Move(val output: ScriptValue<Register>, val value: ScriptValue<*>) : SimpleOperation("move", output, value)
 
-    // #endregion
+    //endregion
 
-    // #region Math operations
+    //region Math operations
 
     class Add(val output: ScriptValue<Register>, val a: ScriptValue<*>, val b: ScriptValue<*>) :
         SimpleOperation("add", output, a, b)
 
-    // #endregion
+    //endregion
 
-    // #region Control flow operations
+    //region Control flow operations
 
     // TODO refactor options into a JumpOptions data class
     class Jump(val target: JumpTarget<*>, val type: JumpType? = null) : Operation() {
@@ -89,9 +94,9 @@ sealed class Operation : Compilable {
         }
     }
 
-    // #endregion
+    //endregion
 
-    // #region Misc Operations
+    //region Misc Operations
 
     class Alias(val alias: String, val target: Any) :
         SimpleOperation("alias", ScriptValue.of(alias), ScriptValue.of(target.toString())) {
@@ -116,10 +121,5 @@ sealed class Operation : Compilable {
         }
     }
 
-    // #endregion
-
-    override fun compile(options: CompileOptions, context: CompileContext): CompileResults {
-        val combinedArgs = args.joinToString(" ") { it.toString(options) }
-        return CompileResults(lines = listOf("$opCode $combinedArgs"))
-    }
+    //endregion
 }

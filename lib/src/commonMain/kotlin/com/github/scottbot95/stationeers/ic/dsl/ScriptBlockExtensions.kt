@@ -5,13 +5,12 @@ import com.github.scottbot95.stationeers.ic.Operation
 import com.github.scottbot95.stationeers.ic.Register
 import com.github.scottbot95.stationeers.ic.devices.LogicDevice
 import com.github.scottbot95.stationeers.ic.devices.LogicDeviceVar
-import com.github.scottbot95.stationeers.ic.util.AliasedScriptValueConstructor
 import com.github.scottbot95.stationeers.ic.util.AliasedScriptValueContainer
 import com.github.scottbot95.stationeers.ic.util.AliasedScriptValueDelegateProvider
 import com.github.scottbot95.stationeers.ic.util.DefaultAliasedScriptValueDelegateProvider
 import kotlin.properties.ReadOnlyProperty
 
-// #region Delegate extensions
+//region Delegate extensions
 
 inline fun ScriptBlock.registers(init: AliasedScriptValueContainer<Register>.() -> Unit): AliasedScriptValueContainer<Register> {
     registers.init()
@@ -35,25 +34,30 @@ inline fun ScriptBlock.devices(init: AliasedScriptValueContainer<Device>.() -> U
 }
 
 fun <T : LogicDevice> ScriptBlock.device(
-    deviceConstructor: AliasedScriptValueConstructor<Device, T>,
+    deviceConstructor: (alias: String?, device: ScriptValue<Device>) -> T,
     device: Device? = null,
     name: String? = null,
 ): AliasedScriptValueDelegateProvider<Device, T> {
-    return AliasedScriptValueDelegateProvider(devices, device, name, deviceConstructor)
+    // TODO not sure I like the lambda here for ignoring a function arg...
+    return AliasedScriptValueDelegateProvider(
+        devices,
+        device,
+        name
+    ) { alias: String?, deviceValue: ScriptValue<Device>, _: () -> Unit -> deviceConstructor(alias, deviceValue) }
 }
 
 // TODO should probably use an AliasedScriptValueContainer for this...
 fun ScriptBlock.define(name: String, value: Number): ScriptValue<Number> {
     +Operation.Define(name, value)
-    return AliasedScriptValue(name, ScriptValue.of(value))
+    return SimpleAliasedScriptValue(name, ScriptValue.of(value))
 }
 
 fun ScriptBlock.define(value: Number, name: String? = null) =
     ReadOnlyProperty<Any?, ScriptValue<Number>> { _, prop -> define(name ?: prop.name, value) }
 
-// #endregion
+//endregion
 
-// #region Basic Operation extensions
+//region Basic Operation extensions
 
 inline fun ScriptBlock.block(init: ScriptBlock.() -> Unit): ScriptBlock {
     val block = SimpleScriptBlock(this)
@@ -102,9 +106,9 @@ fun ScriptBlock.writeDevice(deviceVar: LogicDeviceVar, value: ScriptValue<*>) {
     return writeDevice(deviceVar.device, deviceVar.name, value)
 }
 
-// #endregion
+//endregion
 
-// #region Composite Operation extensions
+//region Composite Operation extensions
 
 inline fun ScriptBlock.forever(
     label: String? = null,
@@ -121,4 +125,4 @@ fun ScriptBlock.inc(register: ScriptValue<Register>) {
     +Operation.Add(register, register, ScriptValue.of(1))
 }
 
-// #endregion
+//endregion
