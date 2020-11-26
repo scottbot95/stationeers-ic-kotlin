@@ -1,7 +1,6 @@
 package com.github.scottbot95.stationeers.ic.dsl
 
 import com.github.scottbot95.stationeers.ic.Device
-import com.github.scottbot95.stationeers.ic.JumpTarget
 import com.github.scottbot95.stationeers.ic.JumpType
 import com.github.scottbot95.stationeers.ic.Operation
 import com.github.scottbot95.stationeers.ic.Register
@@ -77,6 +76,10 @@ fun ScriptBlock.add(output: ScriptValue<Register>, a: ScriptValue<*>, b: ScriptV
     +Operation.Add(output, a, b)
 }
 
+fun ScriptBlock.subtract(output: ScriptValue<Register>, a: ScriptValue<*>, b: ScriptValue<*>) {
+    +Operation.Subtract(output, a, b)
+}
+
 /**
  * Allocates a temporary register and reads [deviceVar] from [device]
  */
@@ -109,8 +112,16 @@ fun ScriptBlock.writeDevice(deviceVar: LogicDeviceVar, value: ScriptValue<*>) {
     return writeDevice(deviceVar.device, deviceVar.name, value)
 }
 
-fun ScriptBlock.branch(condition: Conditional, target: JumpTarget<*>, function: Boolean = false) {
+fun ScriptBlock.jump(target: ScriptValue<*>, function: Boolean = false) {
+    +Operation.Jump(target, if (function) JumpType.FUNCTION else null)
+}
+
+fun ScriptBlock.branch(condition: Conditional, target: ScriptValue<*>, function: Boolean = false) {
     +Operation.Branch(condition, target, setOfNotNull(if (function) JumpType.FUNCTION else null))
+}
+
+fun ScriptBlock.move(register: ScriptValue<Register>, value: ScriptValue<*>) {
+    +Operation.Move(register, value)
 }
 
 //endregion
@@ -121,7 +132,7 @@ inline fun ScriptBlock.forever(
     label: String? = null,
     shouldYield: Boolean = true,
     init: LoopingScriptBlock.() -> Unit
-): ScriptBlock =
+): LoopingScriptBlock =
     LoopingScriptBlock(label, shouldYield = shouldYield, scope = this).also {
         it.init()
         +it

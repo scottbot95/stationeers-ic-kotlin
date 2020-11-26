@@ -22,8 +22,12 @@ class LoopingScriptBlock(
         override val value: String = loop.label ?: ""
 
         override fun toString(context: CompileContext): String {
+            if (loop.startLine == null) {
+                throw IllegalStateException("loopStart can only be used inside it's own loop")
+            }
+
             return if (value.isEmpty() || context.compileOptions.minify) {
-                loop.startLine?.toString() ?: throw IllegalStateException("loopStart can only be used inside it's own loop")
+                loop.startLine.toString()
             } else {
                 value
             }

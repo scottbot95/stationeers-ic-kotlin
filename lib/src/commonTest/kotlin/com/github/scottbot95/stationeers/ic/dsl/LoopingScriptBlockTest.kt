@@ -3,6 +3,7 @@ package com.github.scottbot95.stationeers.ic.dsl
 import com.github.scottbot95.stationeers.ic.util.GreaterThan
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class LoopingScriptBlockTest {
 
@@ -147,5 +148,70 @@ class LoopingScriptBlockTest {
         val results = loopingBlock.compile(context)
 
         assertEquals(expected, results.asString)
+    }
+
+    @Test
+    fun testStartPointWithLabel() {
+        val loopingBlock = LoopingScriptBlock("loop").apply {
+            comment("Something inside the block")
+            branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), loopStart)
+        }
+
+        val context = CompileContext(5)
+
+        val expected =
+            """
+            loop:
+            yield
+            # Something inside the block
+            bgt 0 0 loop
+            j loop
+            """.trimIndent()
+
+        val results = loopingBlock.compile(context)
+
+        assertEquals(expected, results.asString)
+    }
+
+    @Test
+    fun testStartPointWithoutLabel() {
+        val loopingBlock = LoopingScriptBlock().apply {
+            comment("Something inside the block")
+            branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), loopStart)
+        }
+
+        val context = CompileContext(5)
+
+        val expected =
+            """
+            yield
+            # Something inside the block
+            bgt 0 0 5
+            j 5
+            """.trimIndent()
+
+        val results = loopingBlock.compile(context)
+
+        assertEquals(expected, results.asString)
+    }
+
+    @Test
+    fun testLoopStartOnlyWorksInsideLoop() {
+        val block = script {
+            val loop = forever("loop") {
+                comment("Something inside the block")
+                branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), loopStart)
+            }
+
+            branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), loop.loopStart)
+        }
+
+        val context = CompileContext(5)
+
+        assertFailsWith(IllegalStateException::class) {
+            val results = block.compile(context)
+
+            assertEquals("", results.asString)
+        }
     }
 }

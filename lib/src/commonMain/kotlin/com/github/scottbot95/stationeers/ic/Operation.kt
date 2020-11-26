@@ -40,27 +40,31 @@ sealed class Operation : Compilable {
 
     //region IO Operations
 
-    class Load(val output: ScriptValue<Register>, val device: ScriptValue<Device>, val deviceVar: String) :
+    data class Load(val output: ScriptValue<Register>, val device: ScriptValue<Device>, val deviceVar: String) :
         SimpleOperation("l", output, device, ScriptValue.of(deviceVar))
 
-    class Save(val device: ScriptValue<Device>, val deviceVar: String, val value: ScriptValue<*>) :
+    data class Save(val device: ScriptValue<Device>, val deviceVar: String, val value: ScriptValue<*>) :
         SimpleOperation("s", device, ScriptValue.of(deviceVar), value)
 
-    class Move(val output: ScriptValue<Register>, val value: ScriptValue<*>) : SimpleOperation("move", output, value)
+    data class Move(val output: ScriptValue<Register>, val value: ScriptValue<*>) :
+        SimpleOperation("move", output, value)
 
     //endregion
 
     //region Math operations
 
-    class Add(val output: ScriptValue<Register>, val a: ScriptValue<*>, val b: ScriptValue<*>) :
+    data class Add(val output: ScriptValue<Register>, val a: ScriptValue<*>, val b: ScriptValue<*>) :
         SimpleOperation("add", output, a, b)
+
+    data class Subtract(val output: ScriptValue<Register>, val a: ScriptValue<*>, val b: ScriptValue<*>) :
+        SimpleOperation("sub", output, a, b)
 
     //endregion
 
     //region Control flow operations
 
     // TODO refactor options into a JumpOptions data class
-    class Jump(val target: ScriptValue<*>, val type: JumpType? = null) : Operation() {
+    data class Jump(val target: ScriptValue<*>, val type: JumpType? = null) : Operation() {
         override val opCode: String = when (type) {
             JumpType.FUNCTION -> "jal"
             JumpType.RELATIVE -> "jr"
@@ -69,7 +73,7 @@ sealed class Operation : Compilable {
         override val args: Array<out ScriptValue<*>> = arrayOf(target)
     }
 
-    class Branch(
+    data class Branch(
         val condition: Conditional,
         val target: ScriptValue<*>,
         val types: Set<JumpType> = setOf()
@@ -89,7 +93,7 @@ sealed class Operation : Compilable {
 
     //region Misc Operations
 
-    class Alias(val alias: String, val target: Any) :
+    data class Alias(val alias: String, val target: Any) :
         SimpleOperation("alias", ScriptValue.of(alias), ScriptValue.of(target.toString())) {
 
         init {
@@ -100,9 +104,9 @@ sealed class Operation : Compilable {
         }
     }
 
-    class Define(val alias: String, target: Number) : SimpleOperation("define", ScriptValue.of(target))
+    data class Define(val alias: String, val value: Number) : SimpleOperation("define", ScriptValue.of(value))
 
-    class Comment(val message: String) : SimpleOperation("#", ScriptValue.of(message)) {
+    data class Comment(val message: String) : SimpleOperation("#", ScriptValue.of(message)) {
         override fun compile(context: CompileContext): CompileResults {
             return if (context.compileOptions.minify) {
                 CompileResults(context)
