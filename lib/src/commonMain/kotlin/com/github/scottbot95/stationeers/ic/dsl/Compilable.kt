@@ -16,12 +16,22 @@ data class CompileContext(
     val labels: Map<String, Int> = mapOf()
 )
 
-data class CompileResults(val startContext: CompileContext, val lines: List<String>) {
+data class CompiledLine(val parts: List<ScriptValue<*>>) : ScriptValue<String> by CombinedScriptValue(parts) {
+    constructor(vararg parts: ScriptValue<*>) : this(parts.toList())
+    constructor(vararg parts: String) : this(parts.map(ScriptValue.Companion::of).toList())
+}
 
-    constructor(context: CompileContext, vararg lines: String) : this(context, lines.asList())
+data class CompileResults(val startContext: CompileContext, val lines: List<CompiledLine>) {
+
+    constructor(context: CompileContext) : this(context, listOf())
+    constructor(context: CompileContext, vararg lines: String) : this(context, lines.map { CompiledLine(it) })
+    constructor(context: CompileContext, vararg lines: CompiledLine) : this(context, lines.asList())
 
     val endContext by lazy { startContext + lines.size }
-    val asString by lazy { lines.joinToString("\n") }
+    val asString by lazy {
+        lines.mapIndexed { i, it -> it.toString(startContext + i) }
+            .joinToString("\n")
+    }
     val size by lazy { asString.length * 2 } // 2 bytes per character
 }
 
@@ -35,7 +45,7 @@ operator fun CompileResults.plus(other: CompileResults): CompileResults =
         startContext = this.startContext + other.startContext
     )
 
-fun CompileResults.withLines(lines: List<String>): CompileResults = this.copy(lines = lines)
+fun CompileResults.withLines(lines: List<CompiledLine>) = this.copy(lines = lines)
 
 operator fun CompileContext.plus(lines: Int): CompileContext = this.copy(startLine = this.startLine + lines)
 operator fun CompileContext.plus(other: CompileContext): CompileContext = this.copy(labels = this.labels + other.labels)

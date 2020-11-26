@@ -18,7 +18,7 @@ interface ScriptValue<out T : Any> : Closeable {
     companion object
 }
 
-class SimpleScriptValue<out T : Any>(override val value: T) : ScriptValue<T>
+data class SimpleScriptValue<out T : Any>(override val value: T) : ScriptValue<T>
 
 interface AliasedScriptValue<out T : Any> : ScriptValue<T> {
     val alias: String?
@@ -40,8 +40,17 @@ open class SimpleAliasedScriptValue<out T : Any>(
     override fun close() = releaseOnce()
 }
 
+data class CombinedScriptValue(private val parts: List<ScriptValue<*>>) : ScriptValue<String> {
+    constructor(vararg parts: ScriptValue<*>) : this(parts.toList())
+
+    override val value: String by lazy { parts.joinToString(" ") { it.value.toString() } }
+
+    override fun toString(context: CompileContext): String = parts.joinToString(" ") { it.toString(context) }
+}
+
 // TODO Make this its own file?
 fun ScriptValue.Companion.of(value: String): ScriptValue<String> = SimpleScriptValue(value)
 fun ScriptValue.Companion.of(value: Number): ScriptValue<Number> = SimpleScriptValue(value)
 fun ScriptValue.Companion.of(value: Device): ScriptValue<Device> = SimpleScriptValue(value)
 fun ScriptValue.Companion.of(value: Register): ScriptValue<Register> = SimpleScriptValue(value)
+fun ScriptValue.Companion.of(parts: List<ScriptValue<*>>): ScriptValue<String> = CombinedScriptValue(parts)

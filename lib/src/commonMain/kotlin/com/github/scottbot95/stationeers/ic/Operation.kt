@@ -3,6 +3,7 @@ package com.github.scottbot95.stationeers.ic
 import com.github.scottbot95.stationeers.ic.dsl.Compilable
 import com.github.scottbot95.stationeers.ic.dsl.CompileContext
 import com.github.scottbot95.stationeers.ic.dsl.CompileResults
+import com.github.scottbot95.stationeers.ic.dsl.CompiledLine
 import com.github.scottbot95.stationeers.ic.dsl.ScriptValue
 import com.github.scottbot95.stationeers.ic.dsl.of
 import com.github.scottbot95.stationeers.ic.util.Conditional
@@ -29,8 +30,8 @@ sealed class Operation : Compilable {
     abstract val opCode: String
 
     override fun compile(context: CompileContext): CompileResults {
-        val combinedArgs = args.joinToString(" ") { it.toString(context) }
-        return CompileResults(context, lines = listOf("$opCode $combinedArgs"))
+        val parts = listOf(ScriptValue.of(opCode), *args)
+        return CompileResults(context, CompiledLine(parts))
     }
 
     open class SimpleOperation internal constructor(

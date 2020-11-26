@@ -3,7 +3,6 @@ package com.github.scottbot95.stationeers.ic.dsl
 import com.github.scottbot95.stationeers.ic.util.GreaterThan
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 class LoopingScriptBlockTest {
 
@@ -196,7 +195,7 @@ class LoopingScriptBlockTest {
     }
 
     @Test
-    fun testLoopStartOnlyWorksInsideLoop() {
+    fun testLoopStartWorksAfterLoop() {
         val block = script {
             val loop = forever("loop") {
                 comment("Something inside the block")
@@ -208,10 +207,47 @@ class LoopingScriptBlockTest {
 
         val context = CompileContext(5)
 
-        assertFailsWith(IllegalStateException::class) {
-            val results = block.compile(context)
+        val expected =
+            """
+            loop:
+            yield
+            # Something inside the block
+            bgt 0 0 loop
+            j loop
+            bgt 0 0 loop
+            """.trimIndent()
 
-            assertEquals("", results.asString)
+        val results = block.compile(context)
+
+        assertEquals(expected, results.asString)
+    }
+
+    @Test
+    fun testLoopStartWorksBeforeLoop() {
+        val block = script {
+            val loop = LoopingScriptBlock("loop").apply {
+                comment("Something inside the block")
+                branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), loopStart)
+            }
+
+            branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), loop.loopStart)
+            +loop
         }
+
+        val context = CompileContext(5)
+
+        val expected =
+            """
+            bgt 0 0 loop
+            loop:
+            yield
+            # Something inside the block
+            bgt 0 0 loop
+            j loop
+            """.trimIndent()
+
+        val results = block.compile(context)
+
+        assertEquals(expected, results.asString)
     }
 }

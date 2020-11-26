@@ -12,4 +12,8 @@ fun Collection<Compilable>.compileAll(
     acc + results
 }
 
+fun Collection<Compilable>.combine() = Compilable { compileAll(it) }
+
 fun Array<Compilable>.compileAll(startContext: CompileContext) = this.toList().compileAll(startContext)
+
+fun Array<Compilable>.combine() = Compilable { compileAll(it) }

@@ -17,8 +17,10 @@ open class ValidatingCompilable(private val delegate: Compilable) : Compilable {
         }
         result.lines.forEachIndexed { i, it ->
             // I think technically the last line can be one longer, but we're gonna ignore that (:
-            if (it.length + 1 > MAX_SCRIPT_LINE_LEN) {
-                throw ValidationException("Line $i exceeded max line limit($MAX_SCRIPT_LINE_LEN). Got: ${it.length + 1}")
+            val line = it.toString(context + i)
+            val lineLen = line.length + 1
+            if (lineLen > MAX_SCRIPT_LINE_LEN) {
+                throw ValidationException("Line $i exceeded max line limit($MAX_SCRIPT_LINE_LEN). Got: $lineLen")
             }
         }
 

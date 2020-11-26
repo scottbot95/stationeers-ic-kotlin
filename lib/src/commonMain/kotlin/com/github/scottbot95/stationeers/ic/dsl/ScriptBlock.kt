@@ -4,6 +4,7 @@ import com.github.scottbot95.stationeers.ic.Device
 import com.github.scottbot95.stationeers.ic.Register
 import com.github.scottbot95.stationeers.ic.util.AliasedScriptValueContainer
 import com.github.scottbot95.stationeers.ic.util.DelegatingAliasedScriptValueContainer
+import com.github.scottbot95.stationeers.ic.util.combine
 import com.github.scottbot95.stationeers.ic.util.compileAll
 
 @DslMarker
@@ -11,14 +12,18 @@ annotation class ScriptBlockMarker
 
 @ScriptBlockMarker
 interface ScriptBlock : Compilable {
+    val registers: AliasedScriptValueContainer<Register>
+    val devices: AliasedScriptValueContainer<Device>
+
+    // FIXME Make these nullable. Can't with 1.4.20 due to bug in Kotlin JS IR Compiler https://youtrack.jetbrains.com/issue/KT-43549
     operator fun Compilable.unaryPlus()
 
     operator fun String.unaryPlus() {
-        +Compilable { context -> CompileResults(context, this) }
+        +Compilable { context -> CompileResults(context, CompiledLine(this)) }
     }
 
-    val registers: AliasedScriptValueContainer<Register>
-    val devices: AliasedScriptValueContainer<Device>
+    fun doFirst(init: ScriptBlock.() -> Unit)
+    fun doLast(init: ScriptBlock.() -> Unit)
 }
 
 abstract class AbstractScriptBlock(val scope: ScriptBlock? = null) : ScriptBlock {
@@ -27,23 +32,37 @@ abstract class AbstractScriptBlock(val scope: ScriptBlock? = null) : ScriptBlock
 }
 
 open class SimpleScriptBlock(scope: ScriptBlock? = null) : AbstractScriptBlock(scope) {
+    private val startBlockDelegate = lazy { SimpleScriptBlock(this) }
+    private val startBlock by startBlockDelegate
+
+    private val endBlockDelegate = lazy { SimpleScriptBlock(this) }
+    private val endBlock by endBlockDelegate
+
     private val operations = mutableListOf<Compilable>()
 
     override fun Compilable.unaryPlus() {
         operations.add(this)
     }
 
+    override fun doFirst(init: ScriptBlock.() -> Unit) = startBlock.run(init)
+
+    override fun doLast(init: ScriptBlock.() -> Unit) = endBlock.run(init)
+
     override fun compile(context: CompileContext): CompileResults {
-        val aliasResults = if (context.compileOptions.minify) {
+        val aliasBlock = if (context.compileOptions.minify) {
             listOf()
         } else {
             listOf(devices, registers)
-        }.compileAll(context)
+        }
 
-        // TODO do the wait for devices thing here
+        // TODO do the wait for devices thing here.
+        //  Actually this should probably go in the device container compile step...
 
-        val operationsResults = operations.compileAll(aliasResults.endContext)
-
-        return aliasResults + operationsResults
+        return listOfNotNull(
+            aliasBlock.combine(),
+            if (startBlockDelegate.isInitialized()) startBlock else null,
+            operations.combine(),
+            if (endBlockDelegate.isInitialized()) endBlock else null,
+        ).compileAll(context)
     }
 }
