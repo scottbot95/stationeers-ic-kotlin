@@ -17,22 +17,40 @@ class LoopingScriptBlock(
     private val shouldYield: Boolean = true,
     scope: ScriptBlock? = null
 ) : SimpleScriptBlock(scope) {
-    override fun compile(options: CompileOptions, context: CompileContext): CompileResults {
-        val (labelLine: String?, loopStart: JumpTarget<*>) = if (label !== null && !options.minify) {
-            "$label:" to JumpTarget.Label(label)
-        } else {
-            null to JumpTarget.Line(context.startLine)
+
+    private class LoopLabel(private val loop: LoopingScriptBlock) : ScriptValue<String> {
+        override val value: String = loop.label ?: ""
+
+        override fun toString(context: CompileContext): String {
+            return if (value.isEmpty() || context.compileOptions.minify) {
+                loop.startLine?.toString() ?: throw IllegalStateException("loopStart can only be used inside it's own loop")
+            } else {
+                value
+            }
+        }
+    }
+
+    // TODO not really a fan, maybe need to rework compile process
+    val loopStart: ScriptValue<String> = LoopLabel(this)
+
+    private var startLine: Int? = null
+
+    override fun compile(context: CompileContext): CompileResults {
+        startLine = context.startLine
+
+        val labelLine = when {
+            label !== null && !context.compileOptions.minify -> listOf("$label:")
+            else -> listOf()
         }
 
         val yieldLine = if (shouldYield) listOf("yield") else listOf()
 
-        return if (conditional !== null && !atLeastOnce) {
-            val labelLines = listOfNotNull(labelLine)
-            val innerResults = super.compile(options, context + labelLines.size)
-            val loopLines = labelLines.size + yieldLine.size + innerResults.lines.size + 2
-            val branchOp = Operation.Branch(conditional, JumpTarget.Line(context.startLine + loopLines)).compile(options, context)
-            val prefix = labelLines + branchOp.lines + yieldLine
-            val suffix = Operation.Jump(loopStart).compile(options, context + prefix.size + innerResults.lines.size)
+        val results = if (conditional !== null && !atLeastOnce) {
+            val innerResults = super.compile(context + labelLine.size)
+            val loopLines = labelLine.size + yieldLine.size + innerResults.lines.size + 2
+            val branchOp = Operation.Branch(conditional, JumpTarget.Line(context.startLine + loopLines)).compile(context)
+            val prefix = labelLine + branchOp.lines + yieldLine
+            val suffix = Operation.Jump(loopStart).compile(context + prefix.size + innerResults.lines.size)
 
             innerResults.withLines(prefix + innerResults.lines + suffix.lines)
         } else {
@@ -41,11 +59,15 @@ class LoopingScriptBlock(
             } else {
                 Operation.Jump(loopStart)
             }
-            val prefix = listOfNotNull(labelLine) + yieldLine
-            val innerResults = super.compile(options, context + prefix.size)
-            val suffix = operation.compile(options, context + prefix.size + innerResults.lines.size)
+            val prefix = labelLine + yieldLine
+            val innerResults = super.compile(context + prefix.size)
+            val suffix = operation.compile(context + prefix.size + innerResults.lines.size)
 
             innerResults.withLines(prefix + innerResults.lines + suffix.lines)
         }
+
+        startLine = null
+
+        return results
     }
 }

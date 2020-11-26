@@ -14,7 +14,7 @@ interface ScriptBlock : Compilable {
     operator fun Compilable.unaryPlus()
 
     operator fun String.unaryPlus() {
-        +Compilable { _, _ -> CompileResults(this) }
+        +Compilable { context -> CompileResults(context, this) }
     }
 
     val registers: AliasedScriptValueContainer<Register>
@@ -33,20 +33,16 @@ open class SimpleScriptBlock(scope: ScriptBlock? = null) : AbstractScriptBlock(s
         operations.add(this)
     }
 
-    override fun compile(options: CompileOptions, context: CompileContext): CompileResults {
-        val (aliasResults, opContext) = if (options.minify) {
-            CompileResults() to context
+    override fun compile(context: CompileContext): CompileResults {
+        val aliasResults = if (context.compileOptions.minify) {
+            listOf()
         } else {
-            listOf(devices, registers).compileAll(options, context)
-        }
+            listOf(devices, registers)
+        }.compileAll(context)
 
         // TODO do the wait for devices thing here
 
-        val operationsResults = operations.fold(CompileResults() to opContext) { (acc, currContext), it ->
-            it.compile(options, currContext).let {
-                (acc + it) to currContext + it.lines.size
-            }
-        }.first
+        val operationsResults = operations.compileAll(aliasResults.endContext)
 
         return aliasResults + operationsResults
     }

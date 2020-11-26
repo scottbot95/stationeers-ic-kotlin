@@ -4,11 +4,9 @@ import com.github.scottbot95.stationeers.ic.Operation
 import com.github.scottbot95.stationeers.ic.dsl.AliasedScriptValue
 import com.github.scottbot95.stationeers.ic.dsl.Compilable
 import com.github.scottbot95.stationeers.ic.dsl.CompileContext
-import com.github.scottbot95.stationeers.ic.dsl.CompileOptions
 import com.github.scottbot95.stationeers.ic.dsl.CompileResults
 import com.github.scottbot95.stationeers.ic.dsl.ScriptValue
 import com.github.scottbot95.stationeers.ic.dsl.SimpleAliasedScriptValue
-import com.github.scottbot95.stationeers.ic.dsl.plus
 
 typealias AliasedScriptValueConstructor<T, U> = (alias: String?, value: ScriptValue<T>, release: () -> Unit) -> U
 
@@ -58,9 +56,9 @@ abstract class AliasedScriptValueContainer<T : Any>(private val prefix: String =
 
     fun getUsed(value: T): Int = valuesInUse[value]
 
-    override fun compile(options: CompileOptions, context: CompileContext): CompileResults = aliases
-        .map { Operation.Alias(prefix + it.key, it.value).compile(options, context) }
-        .reduceOrNull() { acc, it -> acc + it } ?: CompileResults()
+    override fun compile(context: CompileContext): CompileResults = aliases
+        .map { Operation.Alias(prefix + it.key, it.value) }
+        .compileAll(context)
 
     abstract fun nextFreeValue(): T?
 

@@ -8,8 +8,8 @@ import io.ktor.utils.io.core.Closeable
 interface ScriptValue<out T : Any> : Closeable {
     val value: T
 
-    fun toString(options: CompileOptions): String = when (value) {
-        is ScriptValue<*> -> toString(options)
+    fun toString(context: CompileContext): String = when (value) {
+        is ScriptValue<*> -> toString(context)
         else -> value.toString()
     }
 
@@ -34,8 +34,8 @@ open class SimpleAliasedScriptValue<out T : Any>(
     private val releaseOnce = once(releaseAlias)
 
     // TODO ideally we wouldn't need the non-null assertion here
-    override fun toString(options: CompileOptions): String =
-        if (options.minify || alias === null) delegate.toString(options) else alias!!
+    override fun toString(context: CompileContext): String =
+        if (context.compileOptions.minify || alias === null) delegate.toString(context) else alias!!
 
     override fun close() = releaseOnce()
 }

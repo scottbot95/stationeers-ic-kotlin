@@ -48,7 +48,7 @@ class ScriptBlockTest {
             # You can add text directly as well
             """.trimIndent()
 
-        val results = testScript.compile(CompileOptions(), CompileContext())
+        val results = testScript.compile(CompileContext())
 
         assertEquals(expected, results.asString)
     }

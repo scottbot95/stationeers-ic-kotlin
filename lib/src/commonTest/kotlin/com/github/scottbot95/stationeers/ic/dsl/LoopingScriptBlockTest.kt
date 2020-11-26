@@ -13,7 +13,6 @@ class LoopingScriptBlockTest {
             comment("Should probably have something more complex here")
         }
 
-        val options = CompileOptions()
         val context = CompileContext(5)
 
         val expected =
@@ -24,7 +23,7 @@ class LoopingScriptBlockTest {
             # Should probably have something more complex here
             j loop
             """.trimIndent()
-        val results = loopingBlock.compile(options, context)
+        val results = loopingBlock.compile(context)
         assertEquals(expected, results.asString)
     }
 
@@ -35,7 +34,6 @@ class LoopingScriptBlockTest {
             comment("Should probably have something more complex here")
         }
 
-        val options = CompileOptions()
         val context = CompileContext(5)
 
         val expected =
@@ -45,7 +43,7 @@ class LoopingScriptBlockTest {
             # Should probably have something more complex here
             j 5
             """.trimIndent()
-        val results = loopingBlock.compile(options, context)
+        val results = loopingBlock.compile(context)
         assertEquals(expected, results.asString)
     }
 
@@ -59,7 +57,6 @@ class LoopingScriptBlockTest {
             comment("Should probably have something more complex here")
         }
 
-        val options = CompileOptions()
         val context = CompileContext(5)
 
         val expected =
@@ -70,7 +67,7 @@ class LoopingScriptBlockTest {
             # Should probably have something more complex here
             bgt 2 1 loop
             """.trimIndent()
-        val results = loopingBlock.compile(options, context)
+        val results = loopingBlock.compile(context)
         assertEquals(expected, results.asString)
     }
 
@@ -84,7 +81,6 @@ class LoopingScriptBlockTest {
             comment("Should probably have something more complex here")
         }
 
-        val options = CompileOptions()
         val context = CompileContext(5)
 
         val expected =
@@ -94,7 +90,7 @@ class LoopingScriptBlockTest {
             # Should probably have something more complex here
             bgt 2 1 5
             """.trimIndent()
-        val results = loopingBlock.compile(options, context)
+        val results = loopingBlock.compile(context)
         assertEquals(expected, results.asString)
     }
 
@@ -109,7 +105,6 @@ class LoopingScriptBlockTest {
             comment("Should probably have something more complex here")
         }
 
-        val options = CompileOptions()
         val context = CompileContext(5)
 
         val expected =
@@ -122,7 +117,7 @@ class LoopingScriptBlockTest {
             j loop
             """.trimIndent()
 
-        val results = loopingBlock.compile(options, context)
+        val results = loopingBlock.compile(context)
 
         assertEquals(expected, results.asString)
     }
@@ -138,7 +133,6 @@ class LoopingScriptBlockTest {
             comment("Should probably have something more complex here")
         }
 
-        val options = CompileOptions()
         val context = CompileContext(5)
 
         val expected =
@@ -150,7 +144,7 @@ class LoopingScriptBlockTest {
             j 5
             """.trimIndent()
 
-        val results = loopingBlock.compile(options, context)
+        val results = loopingBlock.compile(context)
 
         assertEquals(expected, results.asString)
     }

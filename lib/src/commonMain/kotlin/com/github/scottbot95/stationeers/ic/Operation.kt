@@ -2,7 +2,6 @@ package com.github.scottbot95.stationeers.ic
 
 import com.github.scottbot95.stationeers.ic.dsl.Compilable
 import com.github.scottbot95.stationeers.ic.dsl.CompileContext
-import com.github.scottbot95.stationeers.ic.dsl.CompileOptions
 import com.github.scottbot95.stationeers.ic.dsl.CompileResults
 import com.github.scottbot95.stationeers.ic.dsl.ScriptValue
 import com.github.scottbot95.stationeers.ic.dsl.of
@@ -29,9 +28,9 @@ sealed class Operation : Compilable {
     abstract val args: Array<out ScriptValue<*>>
     abstract val opCode: String
 
-    override fun compile(options: CompileOptions, context: CompileContext): CompileResults {
-        val combinedArgs = args.joinToString(" ") { it.toString(options) }
-        return CompileResults(lines = listOf("$opCode $combinedArgs"))
+    override fun compile(context: CompileContext): CompileResults {
+        val combinedArgs = args.joinToString(" ") { it.toString(context) }
+        return CompileResults(context, lines = listOf("$opCode $combinedArgs"))
     }
 
     open class SimpleOperation internal constructor(
@@ -61,22 +60,18 @@ sealed class Operation : Compilable {
     //region Control flow operations
 
     // TODO refactor options into a JumpOptions data class
-    class Jump(val target: JumpTarget<*>, val type: JumpType? = null) : Operation() {
+    class Jump(val target: ScriptValue<*>, val type: JumpType? = null) : Operation() {
         override val opCode: String = when (type) {
             JumpType.FUNCTION -> "jal"
             JumpType.RELATIVE -> "jr"
             null -> "j"
         }
-        override val args: Array<out ScriptValue<*>> = if (type == JumpType.RELATIVE && target is JumpTarget.Label) {
-            throw IllegalArgumentException("Cannot provide a label for relative jumps")
-        } else {
-            arrayOf(target)
-        }
+        override val args: Array<out ScriptValue<*>> = arrayOf(target)
     }
 
     class Branch(
         val condition: Conditional,
-        val target: JumpTarget<*>,
+        val target: ScriptValue<*>,
         val types: Set<JumpType> = setOf()
     ) : Operation() {
         override val opCode: String =
@@ -87,11 +82,7 @@ sealed class Operation : Compilable {
                 val suffix = if (JumpType.FUNCTION in types) "al" else ""
                 prefix + condition.shortName + suffix
             }
-        override val args: Array<out ScriptValue<*>> = if (JumpType.RELATIVE in types && target is JumpTarget.Label) {
-            throw IllegalArgumentException("Cannot provide a label for relative jumps")
-        } else {
-            arrayOf(*condition.args, target)
-        }
+        override val args: Array<out ScriptValue<*>> = arrayOf(*condition.args, target)
     }
 
     //endregion
@@ -112,11 +103,11 @@ sealed class Operation : Compilable {
     class Define(val alias: String, target: Number) : SimpleOperation("define", ScriptValue.of(target))
 
     class Comment(val message: String) : SimpleOperation("#", ScriptValue.of(message)) {
-        override fun compile(options: CompileOptions, context: CompileContext): CompileResults {
-            return if (options.minify) {
-                CompileResults()
+        override fun compile(context: CompileContext): CompileResults {
+            return if (context.compileOptions.minify) {
+                CompileResults(context)
             } else {
-                super.compile(options, context)
+                super.compile(context)
             }
         }
     }

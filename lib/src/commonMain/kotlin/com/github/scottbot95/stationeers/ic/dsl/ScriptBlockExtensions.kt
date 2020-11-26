@@ -1,12 +1,15 @@
 package com.github.scottbot95.stationeers.ic.dsl
 
 import com.github.scottbot95.stationeers.ic.Device
+import com.github.scottbot95.stationeers.ic.JumpTarget
+import com.github.scottbot95.stationeers.ic.JumpType
 import com.github.scottbot95.stationeers.ic.Operation
 import com.github.scottbot95.stationeers.ic.Register
 import com.github.scottbot95.stationeers.ic.devices.LogicDevice
 import com.github.scottbot95.stationeers.ic.devices.LogicDeviceVar
 import com.github.scottbot95.stationeers.ic.util.AliasedScriptValueContainer
 import com.github.scottbot95.stationeers.ic.util.AliasedScriptValueDelegateProvider
+import com.github.scottbot95.stationeers.ic.util.Conditional
 import com.github.scottbot95.stationeers.ic.util.DefaultAliasedScriptValueDelegateProvider
 import kotlin.properties.ReadOnlyProperty
 
@@ -106,6 +109,10 @@ fun ScriptBlock.writeDevice(deviceVar: LogicDeviceVar, value: ScriptValue<*>) {
     return writeDevice(deviceVar.device, deviceVar.name, value)
 }
 
+fun ScriptBlock.branch(condition: Conditional, target: JumpTarget<*>, function: Boolean = false) {
+    +Operation.Branch(condition, target, setOfNotNull(if (function) JumpType.FUNCTION else null))
+}
+
 //endregion
 
 //region Composite Operation extensions
@@ -113,7 +120,7 @@ fun ScriptBlock.writeDevice(deviceVar: LogicDeviceVar, value: ScriptValue<*>) {
 inline fun ScriptBlock.forever(
     label: String? = null,
     shouldYield: Boolean = true,
-    init: ScriptBlock.() -> Unit
+    init: LoopingScriptBlock.() -> Unit
 ): ScriptBlock =
     LoopingScriptBlock(label, shouldYield = shouldYield, scope = this).also {
         it.init()
