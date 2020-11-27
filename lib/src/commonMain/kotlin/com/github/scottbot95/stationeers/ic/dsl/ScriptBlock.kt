@@ -15,7 +15,6 @@ interface ScriptBlock : Compilable {
     val registers: AliasedScriptValueContainer<Register>
     val devices: AliasedScriptValueContainer<Device>
 
-    // FIXME Make these nullable. Can't with 1.4.20 due to bug in Kotlin JS IR Compiler https://youtrack.jetbrains.com/issue/KT-43549
     operator fun Compilable.unaryPlus()
 
     operator fun String.unaryPlus() {
@@ -54,9 +53,6 @@ open class SimpleScriptBlock(scope: ScriptBlock? = null) : AbstractScriptBlock(s
         } else {
             listOf(devices, registers)
         }
-
-        // TODO do the wait for devices thing here.
-        //  Actually this should probably go in the device container compile step...
 
         return listOfNotNull(
             aliasBlock.combine(),

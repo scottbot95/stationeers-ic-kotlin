@@ -48,7 +48,6 @@ fun <T : LogicDevice> ScriptBlock.device(
     ) { alias: String?, deviceValue: ScriptValue<Device>, _: () -> Unit -> deviceConstructor(alias, deviceValue) }
 }
 
-// TODO should probably use an AliasedScriptValueContainer for this...
 fun ScriptBlock.define(name: String, value: Number): ScriptValue<Number> {
     +Operation.Define(name, value)
     return SimpleAliasedScriptValue(name, ScriptValue.of(value))
@@ -137,6 +136,23 @@ inline fun ScriptBlock.forever(
         it.init()
         +it
     }
+
+// Maybe this should be inline?
+fun ScriptBlock.cond(vararg branches: Pair<Conditional, ScriptBlock.() -> Unit>, default: (ScriptBlock.() -> Unit)? =null) {
+    for ((condition, condBlock) in branches) {
+        val nextBranch = LineReference()
+        branch(condition, nextBranch)
+        condBlock()
+        +nextBranch.inject
+    }
+
+    if (default != null) {
+        val endLine = LineReference()
+        branch(branches.last().first, endLine)
+        default()
+        +endLine.inject
+    }
+}
 
 // TODO Not sure I like this...
 fun ScriptBlock.inc(register: ScriptValue<Register>) {

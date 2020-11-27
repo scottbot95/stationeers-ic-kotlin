@@ -33,9 +33,11 @@ open class SimpleAliasedScriptValue<out T : Any>(
 ) : ScriptValue<T> by delegate, AliasedScriptValue<T> {
     private val releaseOnce = once(releaseAlias)
 
-    // TODO ideally we wouldn't need the non-null assertion here
-    override fun toString(context: CompileContext): String =
-        if (context.compileOptions.minify || alias === null) delegate.toString(context) else alias!!
+    override fun toString(context: CompileContext): String {
+        // Need this for null check to work correctly
+        val theAlias = alias
+        return if (context.compileOptions.minify || theAlias == null) delegate.toString(context) else theAlias
+    }
 
     override fun close() = releaseOnce()
 }

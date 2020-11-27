@@ -9,13 +9,6 @@ import com.github.scottbot95.stationeers.ic.dsl.of
 import com.github.scottbot95.stationeers.ic.util.Conditional
 import com.github.scottbot95.stationeers.ic.util.FlagEnum
 
-sealed class JumpTarget<T : Any>(override val value: T) : ScriptValue<T> {
-    data class Line(val line: Int) : JumpTarget<Int>(line)
-
-    // TODO Make labels have their own boxed type?
-    data class Label(val label: String) : JumpTarget<String>(label)
-}
-
 enum class JumpType : FlagEnum {
     FUNCTION,
     RELATIVE,
@@ -64,7 +57,6 @@ sealed class Operation : Compilable {
 
     //region Control flow operations
 
-    // TODO refactor options into a JumpOptions data class
     data class Jump(val target: ScriptValue<*>, val type: JumpType? = null) : Operation() {
         override val opCode: String = when (type) {
             JumpType.FUNCTION -> "jal"

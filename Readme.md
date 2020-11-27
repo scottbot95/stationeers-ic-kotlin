@@ -61,9 +61,3 @@ add r0 r0 1
 j 0
 # You can add text directly as well
 ```
-
-## Planned Features
-
-- Framework for unit testing and simulating your scripts
-- Typesafe device vars (ie can't set "Setting" on something that doesn't have a Setting)
-   - This can be easily achieved in TS with union types

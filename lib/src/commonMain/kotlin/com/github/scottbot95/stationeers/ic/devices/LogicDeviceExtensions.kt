@@ -32,6 +32,7 @@ private class LogicDeviceProperty<T : LogicDevice>(
 //region Extensions for common types of devices
 
 // TODO should this be on a StructureDevice interface?
+//  Would need to better understand Stationeers logic devices. Maybe we can get a data-dump with device vars?
 val LogicDevice.PrefabHash by readOnlyVar
 
 interface LockableDevice : LogicDevice

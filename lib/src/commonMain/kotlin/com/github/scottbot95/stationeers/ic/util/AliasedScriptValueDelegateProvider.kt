@@ -27,6 +27,5 @@ class DefaultAliasedScriptValueDelegateProvider<T : Any>(
     container,
     desiredValue,
     name,
-    // FIXME Ew grow this lambda is just a constructor reference but that's broke in JS IR compiler. Fixed in Kotlin 1.4.30
     { alias: String?, value: ScriptValue<T>, release: () -> Unit -> SimpleAliasedScriptValue(alias, value, release) }
 )
