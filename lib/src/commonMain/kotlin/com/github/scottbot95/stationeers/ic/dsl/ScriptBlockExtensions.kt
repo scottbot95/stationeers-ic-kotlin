@@ -79,6 +79,14 @@ fun ScriptBlock.subtract(output: ScriptValue<Register>, a: ScriptValue<*>, b: Sc
     +Operation.Subtract(output, a, b)
 }
 
+fun ScriptBlock.max(output: ScriptValue<Register>, a: ScriptValue<*>, b: ScriptValue<*>) {
+    +Operation.Max(output, a, b)
+}
+
+fun ScriptBlock.min(output: ScriptValue<Register>, a: ScriptValue<*>, b: ScriptValue<*>) {
+    +Operation.Min(output, a, b)
+}
+
 /**
  * Allocates a temporary register and reads [deviceVar] from [device]
  */
@@ -111,11 +119,11 @@ fun ScriptBlock.writeDevice(deviceVar: LogicDeviceVar, value: ScriptValue<*>) {
     return writeDevice(deviceVar.device, deviceVar.name, value)
 }
 
-fun ScriptBlock.jump(target: ScriptValue<*>, function: Boolean = false) {
+fun ScriptBlock.jump(target: LineReference, function: Boolean = false) {
     +Operation.Jump(target, if (function) JumpType.FUNCTION else null)
 }
 
-fun ScriptBlock.branch(condition: Conditional, target: ScriptValue<*>, function: Boolean = false) {
+fun ScriptBlock.branch(condition: Conditional, target: LineReference, function: Boolean = false) {
     +Operation.Branch(condition, target, setOfNotNull(if (function) JumpType.FUNCTION else null))
 }
 
@@ -138,25 +146,36 @@ inline fun ScriptBlock.forever(
     }
 
 // Maybe this should be inline?
-fun ScriptBlock.cond(vararg branches: Pair<Conditional, ScriptBlock.() -> Unit>, default: (ScriptBlock.() -> Unit)? =null) {
-    for ((condition, condBlock) in branches) {
-        val nextBranch = LineReference()
-        branch(condition, nextBranch)
-        condBlock()
-        +nextBranch.inject
-    }
+fun ScriptBlock.cond(
+    vararg branches: Pair<Conditional, ScriptBlock.() -> Unit>,
+) {
+    val conditions = branches.filter { it.first !== Conditional.None }
+    val default = branches.asSequence().filter { it.first === Conditional.None }.map { it.second }.firstOrNull()
 
-    if (default != null) {
-        val endLine = LineReference()
-        branch(branches.last().first, endLine)
-        default()
-        +endLine.inject
+    block {
+        for ((condition, condBlock) in conditions) {
+            val nextBranch = FixedLineReference()
+            branch(condition, nextBranch)
+            condBlock()
+            jump(end)
+            +nextBranch.inject
+        }
+
+        if (default != null) {
+            val endLine = FixedLineReference()
+            default()
+            +endLine.inject
+        }
     }
 }
 
-// TODO Not sure I like this...
-fun ScriptBlock.inc(register: ScriptValue<Register>) {
-    +Operation.Add(register, register, ScriptValue.of(1))
+// TODO can we somehow wire these to ++ and -- on a register?
+fun ScriptBlock.inc(register: ScriptValue<Register>, increment: ScriptValue<*> = ScriptValue.of(1)) {
+    +Operation.Add(register, register, increment)
+}
+
+fun ScriptBlock.dec(register: ScriptValue<Register>, increment: ScriptValue<*> = ScriptValue.of(1)) {
+    +Operation.Subtract(register, register, increment)
 }
 
 //endregion

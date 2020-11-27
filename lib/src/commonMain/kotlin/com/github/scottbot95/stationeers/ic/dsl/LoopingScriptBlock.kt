@@ -16,16 +16,15 @@ class LoopingScriptBlock(
     scope: ScriptBlock? = null
 ) : SimpleScriptBlock(scope) {
 
-    val loopStart: LineReference = LineReference(label)
-    val loopEnd: LineReference = LineReference()
+    override val start = FixedLineReference(label)
 
     init {
         val yieldLine = if (shouldYield) "yield" else null
 
         doFirst {
-            +this@LoopingScriptBlock.loopStart.inject
+            +this@LoopingScriptBlock.start.inject
             if (conditional !== null && !atLeastOnce) {
-                branch(conditional, this@LoopingScriptBlock.loopEnd)
+                branch(conditional, this@LoopingScriptBlock.end)
             }
             yieldLine?.let { +it }
         }
@@ -33,12 +32,10 @@ class LoopingScriptBlock(
         doLast {
             when {
                 // We could probably do another branch here and just directly to the yield to save a single step at runtime
-                conditional != null && !atLeastOnce -> jump(this@LoopingScriptBlock.loopStart)
-                conditional != null -> branch(conditional, this@LoopingScriptBlock.loopStart)
-                else -> jump(this@LoopingScriptBlock.loopStart)
+                conditional != null && !atLeastOnce -> jump(this@LoopingScriptBlock.start)
+                conditional != null -> branch(conditional, this@LoopingScriptBlock.start)
+                else -> jump(this@LoopingScriptBlock.start)
             }
-
-            +this@LoopingScriptBlock.loopEnd.inject
         }
     }
 }

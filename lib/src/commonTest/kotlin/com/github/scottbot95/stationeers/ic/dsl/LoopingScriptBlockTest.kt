@@ -153,7 +153,7 @@ class LoopingScriptBlockTest {
     fun testStartPointWithLabel() {
         val loopingBlock = LoopingScriptBlock("loop").apply {
             comment("Something inside the block")
-            branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), loopStart)
+            branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), start)
         }
 
         val context = CompileContext(5)
@@ -176,7 +176,7 @@ class LoopingScriptBlockTest {
     fun testStartPointWithoutLabel() {
         val loopingBlock = LoopingScriptBlock().apply {
             comment("Something inside the block")
-            branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), loopStart)
+            branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), start)
         }
 
         val context = CompileContext(5)
@@ -199,10 +199,10 @@ class LoopingScriptBlockTest {
         val block = script {
             val loop = forever("loop") {
                 comment("Something inside the block")
-                branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), loopStart)
+                branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), start)
             }
 
-            branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), loop.loopStart)
+            branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), loop.start)
         }
 
         val context = CompileContext(5)
@@ -227,10 +227,10 @@ class LoopingScriptBlockTest {
         val block = script {
             val loop = LoopingScriptBlock("loop").apply {
                 comment("Something inside the block")
-                branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), loopStart)
+                branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), start)
             }
 
-            branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), loop.loopStart)
+            branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), loop.start)
             +loop
         }
 

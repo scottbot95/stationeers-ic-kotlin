@@ -4,8 +4,11 @@ import com.github.scottbot95.stationeers.ic.dsl.Compilable
 import com.github.scottbot95.stationeers.ic.dsl.CompileContext
 import com.github.scottbot95.stationeers.ic.dsl.CompileResults
 import com.github.scottbot95.stationeers.ic.dsl.CompiledLine
+import com.github.scottbot95.stationeers.ic.dsl.LineReference
 import com.github.scottbot95.stationeers.ic.dsl.ScriptValue
 import com.github.scottbot95.stationeers.ic.dsl.of
+import com.github.scottbot95.stationeers.ic.dsl.toFixed
+import com.github.scottbot95.stationeers.ic.dsl.toRelative
 import com.github.scottbot95.stationeers.ic.util.Conditional
 import com.github.scottbot95.stationeers.ic.util.FlagEnum
 
@@ -53,22 +56,30 @@ sealed class Operation : Compilable {
     data class Subtract(val output: ScriptValue<Register>, val a: ScriptValue<*>, val b: ScriptValue<*>) :
         SimpleOperation("sub", output, a, b)
 
+    data class Max(val output: ScriptValue<Register>, val a: ScriptValue<*>, val b: ScriptValue<*>) :
+        SimpleOperation("max", output, a, b)
+
+    data class Min(val output: ScriptValue<Register>, val a: ScriptValue<*>, val b: ScriptValue<*>) :
+        SimpleOperation("min", output, a, b)
+
     //endregion
 
     //region Control flow operations
 
-    data class Jump(val target: ScriptValue<*>, val type: JumpType? = null) : Operation() {
+    data class Jump(val target: LineReference, val type: JumpType? = null) : Operation() {
         override val opCode: String = when (type) {
             JumpType.FUNCTION -> "jal"
             JumpType.RELATIVE -> "jr"
             null -> "j"
         }
-        override val args: Array<out ScriptValue<*>> = arrayOf(target)
+
+        override val args: Array<out ScriptValue<*>> =
+            arrayOf(if (type === JumpType.RELATIVE) target.toRelative() else target.toFixed())
     }
 
     data class Branch(
         val condition: Conditional,
-        val target: ScriptValue<*>,
+        val target: LineReference,
         val types: Set<JumpType> = setOf()
     ) : Operation() {
         override val opCode: String =
@@ -79,7 +90,8 @@ sealed class Operation : Compilable {
                 val suffix = if (JumpType.FUNCTION in types) "al" else ""
                 prefix + condition.shortName + suffix
             }
-        override val args: Array<out ScriptValue<*>> = arrayOf(*condition.args, target)
+        override val args: Array<out ScriptValue<*>> =
+            arrayOf(*condition.args, if (types.contains(JumpType.RELATIVE)) target.toRelative() else target.toFixed())
     }
 
     //endregion
@@ -97,7 +109,7 @@ sealed class Operation : Compilable {
         }
     }
 
-    data class Define(val alias: String, val value: Number) : SimpleOperation("define", ScriptValue.of(value))
+    data class Define(val alias: String, val value: Number) : SimpleOperation("define", ScriptValue.of(alias), ScriptValue.of(value))
 
     data class Comment(val message: String) : SimpleOperation("#", ScriptValue.of(message)) {
         override fun compile(context: CompileContext): CompileResults {

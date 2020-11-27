@@ -11,22 +11,22 @@ class RegisterDelegateTest {
     fun testRegisterDelegateWorks() {
         // FIXME we should probably really do some mocking here once it's available in kotlin multiplatform
         script {
-            val r0 by register
+            val a by register
             val myRegisterName by register
-            val r2 by register(name = "OverriddenName")
-            val r14 by register(Register.R14)
+            val b by register(name = "OverriddenName")
+            val c by register(Register.R14)
             val otherR14 by register(Register.R14)
 
-            assertEquals(Register.R0, r0.value)
-            assertEquals("r0", r0.alias)
+            assertEquals(Register.R0, a.value)
+            assertEquals("ra", a.alias)
             assertEquals(Register.R1, myRegisterName.value)
-            assertEquals("myRegisterName", myRegisterName.alias)
-            assertEquals(Register.R2, r2.value)
-            assertEquals("OverriddenName", r2.alias)
-            assertEquals(Register.R14, r14.value)
-            assertEquals("r14", r14.alias)
+            assertEquals("rmyRegisterName", myRegisterName.alias)
+            assertEquals(Register.R2, b.value)
+            assertEquals("rOverriddenName", b.alias)
+            assertEquals(Register.R14, c.value)
+            assertEquals("rc", c.alias)
             assertEquals(Register.R14, otherR14.value)
-            assertEquals("otherR14", otherR14.alias)
+            assertEquals("rotherR14", otherR14.alias)
 
             assertEquals(1, registers.getUsed(Register.R0))
             assertEquals(1, registers.getUsed(Register.R1))

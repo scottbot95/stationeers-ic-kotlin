@@ -21,44 +21,48 @@ interface ScriptBlock : Compilable {
         +Compilable { context -> CompileResults(context, CompiledLine(this)) }
     }
 
-    fun doFirst(init: ScriptBlock.() -> Unit)
-    fun doLast(init: ScriptBlock.() -> Unit)
+    fun doFirst(init: ScriptBlock.() -> Unit) = doFirst(SimpleScriptBlock(this).apply(init))
+    fun doFirst(block: Compilable)
+
+    fun doLast(init: ScriptBlock.() -> Unit) = doLast(SimpleScriptBlock(this).apply(init))
+    fun doLast(block: Compilable)
+
+    val start: LineReference
+    val end: LineReference
 }
 
-abstract class AbstractScriptBlock(val scope: ScriptBlock? = null) : ScriptBlock {
-    override val registers = scope?.let { DelegatingAliasedScriptValueContainer(it.registers) } ?: RegisterContainer()
-    override val devices = scope?.let { DelegatingAliasedScriptValueContainer(it.devices) } ?: DeviceContainer()
-}
-
-open class SimpleScriptBlock(scope: ScriptBlock? = null) : AbstractScriptBlock(scope) {
-    private val startBlockDelegate = lazy { SimpleScriptBlock(this) }
-    private val startBlock by startBlockDelegate
-
-    private val endBlockDelegate = lazy { SimpleScriptBlock(this) }
-    private val endBlock by endBlockDelegate
+open class SimpleScriptBlock(val scope: ScriptBlock? = null) : ScriptBlock {
+    private val startBlocks = mutableListOf<Compilable>()
+    private val endBlocks = mutableListOf<Compilable>()
 
     private val operations = mutableListOf<Compilable>()
+
+    override val start = FixedLineReference().apply { doFirst(inject) }
+    override val end = FixedLineReference().apply { doLast(inject) }
+
+    override val devices =
+        scope?.let { DelegatingAliasedScriptValueContainer(it.devices) }
+            ?: DeviceContainer().apply(::doFirst)
+
+    override val registers =
+        scope?.let { DelegatingAliasedScriptValueContainer(it.registers) }
+            ?: RegisterContainer().also(::doFirst)
 
     override fun Compilable.unaryPlus() {
         operations.add(this)
     }
 
-    override fun doFirst(init: ScriptBlock.() -> Unit) = startBlock.run(init)
-
-    override fun doLast(init: ScriptBlock.() -> Unit) = endBlock.run(init)
-
-    override fun compile(context: CompileContext): CompileResults {
-        val aliasBlock = if (context.compileOptions.minify) {
-            listOf()
-        } else {
-            listOf(devices, registers)
-        }
-
-        return listOfNotNull(
-            aliasBlock.combine(),
-            if (startBlockDelegate.isInitialized()) startBlock else null,
-            operations.combine(),
-            if (endBlockDelegate.isInitialized()) endBlock else null,
-        ).compileAll(context)
+    override fun doFirst(block: Compilable) {
+        startBlocks.add(block)
     }
+
+    override fun doLast(block: Compilable) {
+        endBlocks.add(block)
+    }
+
+    override fun compile(context: CompileContext): CompileResults = listOfNotNull(
+        startBlocks.combine(),
+        operations.combine(),
+        endBlocks.asReversed().combine(),
+    ).compileAll(context)
 }

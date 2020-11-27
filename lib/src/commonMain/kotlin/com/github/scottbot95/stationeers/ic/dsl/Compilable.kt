@@ -54,6 +54,16 @@ fun interface Compilable {
     fun compile(context: CompileContext): CompileResults
 }
 
+class Spacer(private val numLines: Int) : Compilable {
+    override fun compile(context: CompileContext): CompileResults {
+        return if (context.compileOptions.minify) {
+            CompileResults(context)
+        } else {
+            CompileResults(context, lines = List(numLines) { CompiledLine("") })
+        }
+    }
+}
+
 fun Compilable.compile(options: CompileOptions): CompileResults = compile(CompileContext(compileOptions = options))
 
 inline fun Compilable.compile(init: CompileOptions.() -> Unit): CompileResults {

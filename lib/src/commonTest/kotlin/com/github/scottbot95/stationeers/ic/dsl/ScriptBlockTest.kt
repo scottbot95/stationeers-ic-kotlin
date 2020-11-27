@@ -41,9 +41,9 @@ class ScriptBlockTest {
             # Loop forever
             loop:
             yield
-            l r1 lightSwitch Open
-            s Light On r1
-            add loopCount loopCount 1
+            l r1 dlightSwitch Open
+            s dLight On r1
+            add rloopCount rloopCount 1
             j loop
             # You can add text directly as well
             """.trimIndent()

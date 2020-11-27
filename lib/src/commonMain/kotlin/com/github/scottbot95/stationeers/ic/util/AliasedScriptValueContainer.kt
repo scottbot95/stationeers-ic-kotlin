@@ -34,16 +34,18 @@ abstract class AliasedScriptValueContainer<T : Any>(private val prefix: String =
             ?: nextFreeValue()
             ?: throw IllegalArgumentException("Must provided a desiredValue when all values are in use")
 
-        if (name !== null) {
-            if (name in aliasesUsed) {
+        val prefixedName = name?.let { prefix + it }
+
+        if (prefixedName !== null) {
+            if (prefixedName in aliasesUsed) {
                 throw IllegalStateException("Rebinding aliases is not currently supported")
             }
-            aliasesUsed[name] = valueToUse
+            aliasesUsed[prefixedName] = valueToUse
         }
 
         valuesInUse.addOne(valueToUse)
 
-        return createAliasedValue(name, newInstance(valueToUse)) {
+        return createAliasedValue(prefixedName, newInstance(valueToUse)) {
             valuesInUse.removeOne(valueToUse)
         }
     }
@@ -52,13 +54,23 @@ abstract class AliasedScriptValueContainer<T : Any>(private val prefix: String =
         newAliasedValue(
             desiredValue,
             name
-        ) { alias: String?, value: ScriptValue<T>, release: () -> Unit -> SimpleAliasedScriptValue(alias, value, release) }
+        ) { alias: String?, value: ScriptValue<T>, release: () -> Unit ->
+            SimpleAliasedScriptValue(
+                alias,
+                value,
+                release
+            )
+        }
 
     fun getUsed(value: T): Int = valuesInUse[value]
 
-    override fun compile(context: CompileContext): CompileResults = aliases
-        .map { Operation.Alias(prefix + it.key, it.value) }
-        .compileAll(context)
+    override fun compile(context: CompileContext): CompileResults = if (context.compileOptions.minify) {
+        CompileResults(context)
+    } else {
+        aliases
+            .map { Operation.Alias(it.key, it.value) }
+            .compileAll(context)
+    }
 
     abstract fun nextFreeValue(): T?
 
