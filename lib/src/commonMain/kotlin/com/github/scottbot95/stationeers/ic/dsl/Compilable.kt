@@ -49,10 +49,22 @@ fun CompileResults.withLines(lines: List<CompiledLine>) = this.copy(lines = line
 operator fun CompileContext.plus(lines: Int): CompileContext = this.copy(startLine = this.startLine + lines)
 operator fun CompileContext.plus(other: CompileContext): CompileContext = this
 
+/**
+ * An object that can be compiled
+ */
 fun interface Compilable {
     fun compile(context: CompileContext): CompileResults
+
+    /**
+     * Object representing the empty [Compilable]. Will always return a blank [CompileResults]
+     */
+    object Empty : Compilable {
+        override fun compile(context: CompileContext): CompileResults = CompileResults(context)
+    }
 }
 
+// TODO if it ever becomes feasible make numLines a max spacing
+//  Probably would require context to include the running results
 class Spacer(private val numLines: Int) : Compilable {
     override fun compile(context: CompileContext): CompileResults {
         // Don't put spacers at start of file. Should we really do this...?

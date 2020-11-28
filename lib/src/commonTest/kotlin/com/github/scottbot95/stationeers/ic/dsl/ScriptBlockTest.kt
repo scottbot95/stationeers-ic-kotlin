@@ -47,6 +47,7 @@ class ScriptBlockTest {
             add rloopCount rloopCount 1
             j loop
             # You can add text directly as well
+            
             """.trimIndent()
 
         val results = testScript.compile(CompileContext())

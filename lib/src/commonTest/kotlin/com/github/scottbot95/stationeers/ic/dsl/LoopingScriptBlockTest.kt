@@ -220,13 +220,13 @@ class LoopingScriptBlockTest {
         // FIXME shouldn't need the blank line here
         val expected =
             """
-            
             loop:
             yield
             # Something inside the block
             bgt 0 0 loop
             j loop
             bgt 0 0 loop
+            
             """.trimIndent()
 
         val results = block.compile(context)
@@ -251,13 +251,13 @@ class LoopingScriptBlockTest {
         // FIXME shouldn't need the blank line here
         val expected =
             """
-            
             bgt 0 0 loop
             loop:
             yield
             # Something inside the block
             bgt 0 0 loop
             j loop
+            
             """.trimIndent()
 
         val results = block.compile(context)

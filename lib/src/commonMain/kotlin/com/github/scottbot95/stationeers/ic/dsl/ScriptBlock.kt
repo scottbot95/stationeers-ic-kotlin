@@ -61,9 +61,9 @@ open class SimpleScriptBlock(val scope: ScriptBlock? = null, private val spacing
     }
 
     override fun compile(context: CompileContext): CompileResults = listOfNotNull(
-        Spacer(spacing),
         startBlocks.combine(),
         operations.combine(),
         endBlocks.asReversed().combine(),
+        Spacer(spacing),
     ).compileAll(context)
 }

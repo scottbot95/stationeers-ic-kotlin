@@ -10,6 +10,7 @@ import com.github.scottbot95.stationeers.ic.util.AliasedScriptValueContainer
 import com.github.scottbot95.stationeers.ic.util.AliasedScriptValueDelegateProvider
 import com.github.scottbot95.stationeers.ic.util.Conditional
 import com.github.scottbot95.stationeers.ic.util.DefaultAliasedScriptValueDelegateProvider
+import com.github.scottbot95.stationeers.ic.util.combine
 import kotlin.properties.ReadOnlyProperty
 
 //region Delegate extensions
@@ -166,21 +167,30 @@ inline fun ScriptBlock.loop(
 fun ScriptBlock.cond(
     vararg branches: Pair<Conditional, ScriptBlock.() -> Unit>,
 ) {
-    val conditions = branches.filter { it.first !== Conditional.None }
-    val default = branches.asSequence().filter { it.first === Conditional.None }.map { it.second }.firstOrNull()
+    val branchSequence = branches.asSequence().map { it.first to SimpleScriptBlock(this).apply(it.second) }
+    // .firstOrNull {it.first !== Conditional.None } doesn't return nullable for some reason. Do this instead
+    val default = branchSequence.filter { it.first === Conditional.None }.map { it.second }.firstOrNull()
+    val conditions = branchSequence.filter { it.first !== Conditional.None }.toList()
 
-    block {
-        conditions.forEachIndexed { i, (condition, condBlock) ->
-            val nextBranch = FixedLineReference()
-            branch(condition.inverse, nextBranch)
-            condBlock()
-            if (i != branches.size - 1) jump(end)
-            +nextBranch.inject
+    block(0) {
+        conditions.forEach {
+            branch(it.first, it.second.start)
         }
+        val branchBlocks = listOfNotNull(default) + conditions.map { it.second }
+        +branchBlocks.combine(Operation.Jump(end))
 
-        if (default != null) {
-            default()
-        }
+        // old implementation. Technically one line shorter in cases without a default case
+//        conditions.forEachIndexed { i, (condition, condBlock) ->
+//            val nextBranch = FixedLineReference()
+//            branch(condition.inverse, nextBranch)
+//            condBlock()
+//            if (i != branches.size - 1) jump(end)
+//            +nextBranch.inject
+//        }
+//
+//        if (default != null) {
+//            default()
+//        }
     }
 }
 
