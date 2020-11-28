@@ -8,9 +8,9 @@ class LoopingScriptBlockTest {
 
     @Test
     fun testInfiniteLoopWithLabel() {
-        val loopingBlock = LoopingScriptBlock("loop").apply {
-            comment("Something inside the block")
-            comment("Should probably have something more complex here")
+        val loopingBlock = LoopingScriptBlock(LoopOptions(label = "loop", spacing = 0)).apply {
+            comment("Something inside the block", 0)
+            comment("Should probably have something more complex here", 0)
         }
 
         val context = CompileContext(5)
@@ -29,9 +29,9 @@ class LoopingScriptBlockTest {
 
     @Test
     fun testInfiniteLoopWithoutLabel() {
-        val loopingBlock = LoopingScriptBlock().apply {
-            comment("Something inside the block")
-            comment("Should probably have something more complex here")
+        val loopingBlock = LoopingScriptBlock(LoopOptions(spacing = 0)).apply {
+            comment("Something inside the block", 0)
+            comment("Should probably have something more complex here", 0)
         }
 
         val context = CompileContext(5)
@@ -50,11 +50,14 @@ class LoopingScriptBlockTest {
     @Test
     fun testConditionalLoopWithLabel() {
         val loopingBlock = LoopingScriptBlock(
-            "loop",
-            GreaterThan(ScriptValue.of(2), ScriptValue.of(1))
+            LoopOptions(
+                label = "loop",
+                conditional = GreaterThan(ScriptValue.of(2), ScriptValue.of(1)),
+                spacing = 0,
+            )
         ).apply {
-            comment("Something inside the block")
-            comment("Should probably have something more complex here")
+            comment("Something inside the block", 0)
+            comment("Should probably have something more complex here", 0)
         }
 
         val context = CompileContext(5)
@@ -74,11 +77,13 @@ class LoopingScriptBlockTest {
     @Test
     fun testConditionalLoopWithoutLabel() {
         val loopingBlock = LoopingScriptBlock(
-            null,
-            GreaterThan(ScriptValue.of(2), ScriptValue.of(1))
+            LoopOptions(
+                conditional = GreaterThan(ScriptValue.of(2), ScriptValue.of(1)),
+                spacing = 0,
+            )
         ).apply {
-            comment("Something inside the block")
-            comment("Should probably have something more complex here")
+            comment("Something inside the block", 0)
+            comment("Should probably have something more complex here", 0)
         }
 
         val context = CompileContext(5)
@@ -97,12 +102,15 @@ class LoopingScriptBlockTest {
     @Test
     fun testConditionalAtStartLoopWithLabel() {
         val loopingBlock = LoopingScriptBlock(
-            "loop",
-            GreaterThan(ScriptValue.of(2), ScriptValue.of(1)),
-            false
+            LoopOptions(
+                label = "loop",
+                conditional = GreaterThan(ScriptValue.of(2), ScriptValue.of(1)),
+                atLeastOnce = false,
+                spacing = 0,
+            )
         ).apply {
-            comment("Something inside the block")
-            comment("Should probably have something more complex here")
+            comment("Something inside the block", 0)
+            comment("Should probably have something more complex here", 0)
         }
 
         val context = CompileContext(5)
@@ -125,12 +133,14 @@ class LoopingScriptBlockTest {
     @Test
     fun testConditionalAtStartLoopWithoutLabel() {
         val loopingBlock = LoopingScriptBlock(
-            null,
-            GreaterThan(ScriptValue.of(2), ScriptValue.of(1)),
-            false
+            LoopOptions(
+                conditional = GreaterThan(ScriptValue.of(2), ScriptValue.of(1)),
+                atLeastOnce = false,
+                spacing = 0,
+            )
         ).apply {
-            comment("Something inside the block")
-            comment("Should probably have something more complex here")
+            comment("Something inside the block", 0)
+            comment("Should probably have something more complex here", 0)
         }
 
         val context = CompileContext(5)
@@ -151,8 +161,8 @@ class LoopingScriptBlockTest {
 
     @Test
     fun testStartPointWithLabel() {
-        val loopingBlock = LoopingScriptBlock("loop").apply {
-            comment("Something inside the block")
+        val loopingBlock = LoopingScriptBlock(LoopOptions(label = "loop", spacing = 0)).apply {
+            comment("Something inside the block", 0)
             branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), start)
         }
 
@@ -174,8 +184,8 @@ class LoopingScriptBlockTest {
 
     @Test
     fun testStartPointWithoutLabel() {
-        val loopingBlock = LoopingScriptBlock().apply {
-            comment("Something inside the block")
+        val loopingBlock = LoopingScriptBlock(LoopOptions(spacing = 0)).apply {
+            comment("Something inside the block", 0)
             branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), start)
         }
 
@@ -197,8 +207,8 @@ class LoopingScriptBlockTest {
     @Test
     fun testLoopStartWorksAfterLoop() {
         val block = script {
-            val loop = forever("loop") {
-                comment("Something inside the block")
+            val loop = forever("loop", 0) {
+                comment("Something inside the block", 0)
                 branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), start)
             }
 
@@ -207,8 +217,10 @@ class LoopingScriptBlockTest {
 
         val context = CompileContext(5)
 
+        // FIXME shouldn't need the blank line here
         val expected =
             """
+            
             loop:
             yield
             # Something inside the block
@@ -225,8 +237,8 @@ class LoopingScriptBlockTest {
     @Test
     fun testLoopStartWorksBeforeLoop() {
         val block = script {
-            val loop = LoopingScriptBlock("loop").apply {
-                comment("Something inside the block")
+            val loop = LoopingScriptBlock(LoopOptions(label = "loop", spacing = 0)).apply {
+                comment("Something inside the block", 0)
                 branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), start)
             }
 
@@ -236,8 +248,10 @@ class LoopingScriptBlockTest {
 
         val context = CompileContext(5)
 
+        // FIXME shouldn't need the blank line here
         val expected =
             """
+            
             bgt 0 0 loop
             loop:
             yield

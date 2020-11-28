@@ -21,17 +21,17 @@ interface ScriptBlock : Compilable {
         +Compilable { context -> CompileResults(context, CompiledLine(this)) }
     }
 
-    fun doFirst(init: ScriptBlock.() -> Unit) = doFirst(SimpleScriptBlock(this).apply(init))
+    fun doFirst(init: ScriptBlock.() -> Unit) = doFirst(SimpleScriptBlock(this, 0).apply(init))
     fun doFirst(block: Compilable)
 
-    fun doLast(init: ScriptBlock.() -> Unit) = doLast(SimpleScriptBlock(this).apply(init))
+    fun doLast(init: ScriptBlock.() -> Unit) = doLast(SimpleScriptBlock(this, 0).apply(init))
     fun doLast(block: Compilable)
 
     val start: LineReference
     val end: LineReference
 }
 
-open class SimpleScriptBlock(val scope: ScriptBlock? = null) : ScriptBlock {
+open class SimpleScriptBlock(val scope: ScriptBlock? = null, private val spacing: Int = 1) : ScriptBlock {
     private val startBlocks = mutableListOf<Compilable>()
     private val endBlocks = mutableListOf<Compilable>()
 
@@ -61,6 +61,7 @@ open class SimpleScriptBlock(val scope: ScriptBlock? = null) : ScriptBlock {
     }
 
     override fun compile(context: CompileContext): CompileResults = listOfNotNull(
+        Spacer(spacing),
         startBlocks.combine(),
         operations.combine(),
         endBlocks.asReversed().combine(),

@@ -60,14 +60,15 @@ fun ScriptBlock.define(value: Number, name: String? = null) =
 
 //region Basic Operation extensions
 
-inline fun ScriptBlock.block(init: ScriptBlock.() -> Unit): ScriptBlock {
-    val block = SimpleScriptBlock(this)
+inline fun ScriptBlock.block(spacing: Int = 1, init: ScriptBlock.() -> Unit): ScriptBlock {
+    val block = SimpleScriptBlock(this, spacing)
     block.init()
     +block
     return block
 }
 
-fun ScriptBlock.comment(message: String) {
+fun ScriptBlock.comment(message: String, spacing: Int = 1) {
+    spacing(spacing)
     +Operation.Comment(message)
 }
 
@@ -127,8 +128,16 @@ fun ScriptBlock.branch(condition: Conditional, target: LineReference, function: 
     +Operation.Branch(condition, target, setOfNotNull(if (function) JumpType.FUNCTION else null))
 }
 
+fun ScriptBlock.yield() {
+    +Operation.Yield()
+}
+
 fun ScriptBlock.move(register: ScriptValue<Register>, value: ScriptValue<*>) {
     +Operation.Move(register, value)
+}
+
+fun ScriptBlock.spacing(size: Int) {
+    +Spacer(size)
 }
 
 //endregion
@@ -137,13 +146,21 @@ fun ScriptBlock.move(register: ScriptValue<Register>, value: ScriptValue<*>) {
 
 inline fun ScriptBlock.forever(
     label: String? = null,
-    shouldYield: Boolean = true,
+    spacing: Int = 1,
     init: LoopingScriptBlock.() -> Unit
 ): LoopingScriptBlock =
-    LoopingScriptBlock(label, shouldYield = shouldYield, scope = this).also {
+    LoopingScriptBlock(LoopOptions(label = label, spacing = spacing), this).also {
         it.init()
         +it
     }
+
+inline fun ScriptBlock.loop(
+    options: LoopOptions,
+    init: LoopingScriptBlock.() -> Unit
+): LoopingScriptBlock = LoopingScriptBlock(options, this).also {
+    it.init()
+    +it
+}
 
 // Maybe this should be inline?
 fun ScriptBlock.cond(
@@ -153,18 +170,16 @@ fun ScriptBlock.cond(
     val default = branches.asSequence().filter { it.first === Conditional.None }.map { it.second }.firstOrNull()
 
     block {
-        for ((condition, condBlock) in conditions) {
+        conditions.forEachIndexed { i, (condition, condBlock) ->
             val nextBranch = FixedLineReference()
-            branch(condition, nextBranch)
+            branch(condition.inverse, nextBranch)
             condBlock()
-            jump(end)
+            if (i != branches.size - 1) jump(end)
             +nextBranch.inject
         }
 
         if (default != null) {
-            val endLine = FixedLineReference()
             default()
-            +endLine.inject
         }
     }
 }

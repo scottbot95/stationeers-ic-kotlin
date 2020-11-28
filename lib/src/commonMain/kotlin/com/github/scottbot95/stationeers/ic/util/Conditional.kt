@@ -34,19 +34,19 @@ class NotEqualToZero(a: ScriptValue<*>) : Conditional("nez", a) {
     override val inverse: Conditional by lazy { EqualToZero(a) }
 }
 
-class ApproximatelyEqual(a: ScriptValue<*>, b: ScriptValue<*>) : Conditional("ap") {
+class ApproximatelyEqual(a: ScriptValue<*>, b: ScriptValue<*>) : Conditional("ap", a, b) {
     override val inverse: Conditional by lazy { NotApproximatelyEqual(a, b) }
 }
 
-class ApproximatelyEqualZero(a: ScriptValue<*>) : Conditional("ap") {
+class ApproximatelyEqualZero(a: ScriptValue<*>) : Conditional("apz", a) {
     override val inverse: Conditional by lazy { NotApproximatelyEqualZero(a) }
 }
 
-class NotApproximatelyEqual(a: ScriptValue<*>, b: ScriptValue<*>) : Conditional("na") {
+class NotApproximatelyEqual(a: ScriptValue<*>, b: ScriptValue<*>) : Conditional("na", a, b) {
     override val inverse: Conditional by lazy { ApproximatelyEqual(b, a) }
 }
 
-class NotApproximatelyEqualZero(a: ScriptValue<*>) : Conditional("na") {
+class NotApproximatelyEqualZero(a: ScriptValue<*>) : Conditional("naz", a) {
     override val inverse: Conditional by lazy { ApproximatelyEqualZero(a) }
 }
 
@@ -54,7 +54,7 @@ class GreaterThan(a: ScriptValue<*>, b: ScriptValue<*>) : Conditional("gt", a, b
     override val inverse: Conditional by lazy { LessThanEqualTo(a, b) }
 }
 
-class GreaterThanZero(a: ScriptValue<*>) : Conditional("gt", a) {
+class GreaterThanZero(a: ScriptValue<*>) : Conditional("gtz", a) {
     override val inverse: Conditional by lazy { LessThanEqualToZero(a) }
 }
 
@@ -62,22 +62,22 @@ class GreaterThanEqualTo(a: ScriptValue<*>, b: ScriptValue<*>) : Conditional("ge
     override val inverse: Conditional by lazy { LessThan(a, b) }
 }
 
-class GreaterThanEqualToZero(a: ScriptValue<*>) : Conditional("ge", a) {
+class GreaterThanEqualToZero(a: ScriptValue<*>) : Conditional("gez", a) {
     override val inverse: Conditional by lazy { LessThanZero(a) }
 }
 
-class LessThan(a: ScriptValue<*>, b: ScriptValue<*>) : Conditional("gt", a, b) {
+class LessThan(a: ScriptValue<*>, b: ScriptValue<*>) : Conditional("lt", a, b) {
     override val inverse: Conditional by lazy { GreaterThanEqualTo(a, b) }
 }
 
-class LessThanZero(a: ScriptValue<*>) : Conditional("gt", a) {
+class LessThanZero(a: ScriptValue<*>) : Conditional("ltz", a) {
     override val inverse: Conditional by lazy { GreaterThanEqualToZero(a) }
 }
 
-class LessThanEqualTo(a: ScriptValue<*>, b: ScriptValue<*>) : Conditional("ge", a, b) {
+class LessThanEqualTo(a: ScriptValue<*>, b: ScriptValue<*>) : Conditional("le", a, b) {
     override val inverse: Conditional by lazy { GreaterThan(a, b) }
 }
 
-class LessThanEqualToZero(a: ScriptValue<*>) : Conditional("ge", a) {
+class LessThanEqualToZero(a: ScriptValue<*>) : Conditional("lez", a) {
     override val inverse: Conditional by lazy { GreaterThanZero(a) }
 }

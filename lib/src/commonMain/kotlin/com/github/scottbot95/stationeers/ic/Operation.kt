@@ -94,6 +94,8 @@ sealed class Operation : Compilable {
             arrayOf(*condition.args, if (types.contains(JumpType.RELATIVE)) target.toRelative() else target.toFixed())
     }
 
+    class Yield : SimpleOperation("yield")
+
     //endregion
 
     //region Misc Operations
@@ -109,7 +111,8 @@ sealed class Operation : Compilable {
         }
     }
 
-    data class Define(val alias: String, val value: Number) : SimpleOperation("define", ScriptValue.of(alias), ScriptValue.of(value))
+    data class Define(val alias: String, val value: Number) :
+        SimpleOperation("define", ScriptValue.of(alias), ScriptValue.of(value))
 
     data class Comment(val message: String) : SimpleOperation("#", ScriptValue.of(message)) {
         override fun compile(context: CompileContext): CompileResults {

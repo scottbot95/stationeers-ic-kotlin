@@ -13,7 +13,6 @@ data class ExportOptions(
 data class CompileContext(
     val startLine: Int = 0,
     val compileOptions: CompileOptions = CompileOptions(),
-    val labels: Map<String, Int> = mapOf()
 )
 
 data class CompiledLine(val parts: List<ScriptValue<*>>) : ScriptValue<String> by CombinedScriptValue(parts) {
@@ -36,7 +35,7 @@ data class CompileResults(val startContext: CompileContext, val lines: List<Comp
 }
 
 /**
- * Appends the [lines] from [other] to [this] and merges the values of [CompileContext.labels] from [CompileResults.startContext].
+ * Appends the [lines] from [other] to [this].
  * Keeps all other values from [this] NOTE: A + B != B + A
  */
 operator fun CompileResults.plus(other: CompileResults): CompileResults =
@@ -48,7 +47,7 @@ operator fun CompileResults.plus(other: CompileResults): CompileResults =
 fun CompileResults.withLines(lines: List<CompiledLine>) = this.copy(lines = lines)
 
 operator fun CompileContext.plus(lines: Int): CompileContext = this.copy(startLine = this.startLine + lines)
-operator fun CompileContext.plus(other: CompileContext): CompileContext = this.copy(labels = this.labels + other.labels)
+operator fun CompileContext.plus(other: CompileContext): CompileContext = this
 
 fun interface Compilable {
     fun compile(context: CompileContext): CompileResults
@@ -56,7 +55,8 @@ fun interface Compilable {
 
 class Spacer(private val numLines: Int) : Compilable {
     override fun compile(context: CompileContext): CompileResults {
-        return if (context.compileOptions.minify) {
+        // Don't put spacers at start of file. Should we really do this...?
+        return if (context.compileOptions.minify || context.startLine == 0) {
             CompileResults(context)
         } else {
             CompileResults(context, lines = List(numLines) { CompiledLine("") })

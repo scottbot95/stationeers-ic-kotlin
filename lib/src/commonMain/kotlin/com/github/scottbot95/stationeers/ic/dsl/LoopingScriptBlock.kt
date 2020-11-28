@@ -2,6 +2,14 @@ package com.github.scottbot95.stationeers.ic.dsl
 
 import com.github.scottbot95.stationeers.ic.util.Conditional
 
+data class LoopOptions(
+    val label: String? = null,
+    val conditional: Conditional? = null,
+    val atLeastOnce: Boolean = true,
+    val shouldYield: Boolean = true,
+    val spacing: Int = 1
+)
+
 /**
  * [ScriptBlock] that will wrap contents in a loop, optionally with a condition
  * If label is specified and [CompileOptions.minify] is not set, a label will be created at the start of the loop
@@ -9,31 +17,31 @@ import com.github.scottbot95.stationeers.ic.util.Conditional
  * at least once
  */
 class LoopingScriptBlock(
-    label: String? = null,
-    conditional: Conditional? = null,
-    atLeastOnce: Boolean = true,
-    shouldYield: Boolean = true,
+    options: LoopOptions,
     scope: ScriptBlock? = null
-) : SimpleScriptBlock(scope) {
+) : SimpleScriptBlock(scope, options.spacing) {
 
-    override val start = FixedLineReference(label)
+    constructor(label: String? = null, scope: ScriptBlock? = null) : this(LoopOptions(label), scope)
+
+    override val start = FixedLineReference(options.label)
 
     init {
-        val yieldLine = if (shouldYield) "yield" else null
 
         doFirst {
             +this@LoopingScriptBlock.start.inject
-            if (conditional !== null && !atLeastOnce) {
-                branch(conditional, this@LoopingScriptBlock.end)
+            if (options.conditional !== null && !options.atLeastOnce) {
+                branch(options.conditional, this@LoopingScriptBlock.end)
             }
-            yieldLine?.let { +it }
+            if (options.shouldYield) {
+                yield()
+            }
         }
 
         doLast {
             when {
                 // We could probably do another branch here and just directly to the yield to save a single step at runtime
-                conditional != null && !atLeastOnce -> jump(this@LoopingScriptBlock.start)
-                conditional != null -> branch(conditional, this@LoopingScriptBlock.start)
+                options.conditional != null && !options.atLeastOnce -> jump(this@LoopingScriptBlock.start)
+                options.conditional != null -> branch(options.conditional, this@LoopingScriptBlock.start)
                 else -> jump(this@LoopingScriptBlock.start)
             }
         }

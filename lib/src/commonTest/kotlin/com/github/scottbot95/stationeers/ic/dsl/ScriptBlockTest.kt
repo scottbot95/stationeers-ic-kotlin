@@ -21,7 +21,7 @@ class ScriptBlockTest {
             val loopCount by register
 
             comment("Loop forever")
-            forever("loop") {
+            forever("loop", 0) {
                 val switchSetting = readDevice(lightSwitch.Open)
                 writeDevice(light.On, switchSetting)
                 inc(loopCount)
@@ -38,6 +38,7 @@ class ScriptBlockTest {
             alias dlightSwitch d0
             alias dLight d1
             alias rloopCount r0
+            
             # Loop forever
             loop:
             yield

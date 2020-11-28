@@ -21,7 +21,7 @@ private class InjectableReference(override val label: String? = null) : LineRefe
     }
 
     override var lineNum: Int? = null
-        protected set
+        private set
 
     override val inject: Compilable = Compilable { context ->
         if (lineNum !== null) {
@@ -35,6 +35,13 @@ private class InjectableReference(override val label: String? = null) : LineRefe
     }
 
     override fun toString(context: CompileContext) = lineNum.toString()
+}
+
+class OffsetLineReference<out T : LineReference>(
+    private val reference: T,
+    private val offset: Int
+) : LineReference by reference {
+    override val lineNum: Int? get() = reference.lineNum?.plus(offset)
 }
 
 class FixedLineReference(
@@ -55,7 +62,10 @@ class RelativeLineReference(
     reference: LineReference = InjectableReference(label)
 ) : LineReference by reference {
     override fun toString(context: CompileContext): String = (value - context.startLine).toString()
+
+    val foo = this.offset(5).offset(6)
 }
 
 fun LineReference.toRelative() = RelativeLineReference(label, this)
 fun LineReference.toFixed() = FixedLineReference(label, this)
+fun <T : LineReference> T.offset(offset: Int) = OffsetLineReference(this, offset)
