@@ -39,7 +39,7 @@ class RegisterDelegateTest {
     @Suppress("UNUSED_VARIABLE")
     fun testAllRegistersInUse() {
         script {
-            Register.values().forEach {
+            Register.values().filter { it.userRegister }.forEach {
                 val testRegister by register(name = it.name)
             }
 

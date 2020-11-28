@@ -4,6 +4,9 @@ import com.github.scottbot95.stationeers.ic.Device
 import com.github.scottbot95.stationeers.ic.Register
 import com.github.scottbot95.stationeers.ic.util.AliasedScriptValueContainer
 import com.github.scottbot95.stationeers.ic.util.DelegatingAliasedScriptValueContainer
+import com.github.scottbot95.stationeers.ic.util.DelegatingLabelContainer
+import com.github.scottbot95.stationeers.ic.util.LabelContainer
+import com.github.scottbot95.stationeers.ic.util.LabelContainerImpl
 import com.github.scottbot95.stationeers.ic.util.combine
 import com.github.scottbot95.stationeers.ic.util.compileAll
 
@@ -14,6 +17,7 @@ annotation class ScriptBlockMarker
 interface ScriptBlock : Compilable {
     val registers: AliasedScriptValueContainer<Register>
     val devices: AliasedScriptValueContainer<Device>
+    val labels: LabelContainer
 
     operator fun Compilable.unaryPlus()
 
@@ -27,18 +31,33 @@ interface ScriptBlock : Compilable {
     fun doLast(init: ScriptBlock.() -> Unit) = doLast(SimpleScriptBlock(this, 0).apply(init))
     fun doLast(block: Compilable)
 
+    /**
+     * [LineReference] to the start of the [ScriptBlock]
+     */
     val start: LineReference
+
+    /**
+     * [LineReference] to the end of the [ScriptBlock]
+     */
     val end: LineReference
 }
 
+/**
+ * Basic implementation of [ScriptBlock].
+ *
+ * Provides basic implementation of [compile] and ensures containers get set appropriate from the [scope].
+ * Also ensure that [start] and [end] get injected correctly
+ */
 open class SimpleScriptBlock(val scope: ScriptBlock? = null, private val spacing: Int = 1) : ScriptBlock {
     private val startBlocks = mutableListOf<Compilable>()
     private val endBlocks = mutableListOf<Compilable>()
 
     private val operations = mutableListOf<Compilable>()
 
-    override val start = FixedLineReference().apply { doFirst(inject) }
-    override val end = FixedLineReference().apply { doLast(inject) }
+    override val labels = scope?.let { DelegatingLabelContainer(it.labels) } ?: LabelContainerImpl()
+
+    override val start: LineReference = reference(inject = false).apply { doFirst(inject) }
+    override val end: LineReference = reference(inject = false).apply { doLast(inject) }
 
     override val devices =
         scope?.let { DelegatingAliasedScriptValueContainer(it.devices) }

@@ -37,14 +37,14 @@ private class InjectableReference(override val label: String? = null) : LineRefe
     override fun toString(context: CompileContext) = lineNum.toString()
 }
 
-class OffsetLineReference<out T : LineReference>(
+class OffsetLineReference<out T : LineReference> internal constructor(
     private val reference: T,
     private val offset: Int
 ) : LineReference by reference {
     override val lineNum: Int? get() = reference.lineNum?.plus(offset)
 }
 
-class FixedLineReference(
+class FixedLineReference internal constructor(
     override val label: String? = null,
     reference: LineReference = InjectableReference(label)
 ) : LineReference by reference {
@@ -57,7 +57,7 @@ class FixedLineReference(
     }
 }
 
-class RelativeLineReference(
+class RelativeLineReference internal constructor(
     override val label: String? = null,
     reference: LineReference = InjectableReference(label)
 ) : LineReference by reference {

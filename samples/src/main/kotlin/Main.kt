@@ -11,6 +11,6 @@ fun main() {
     ).forEach {
         val headerSize = (50.0 - it.key.length) / 2.0
         println("*".repeat(floor(headerSize).toInt()) + it.key + "*".repeat(ceil(headerSize).toInt()))
-        println(electricFurnaceControl.compile(compileOptions).asString)
+        println(it.value.compile(compileOptions).asString)
     }
 }

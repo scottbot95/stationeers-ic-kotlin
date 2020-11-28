@@ -9,9 +9,12 @@ import com.github.scottbot95.stationeers.ic.devices.LogicDeviceVar
 import com.github.scottbot95.stationeers.ic.util.AliasedScriptValueContainer
 import com.github.scottbot95.stationeers.ic.util.AliasedScriptValueDelegateProvider
 import com.github.scottbot95.stationeers.ic.util.Conditional
+import com.github.scottbot95.stationeers.ic.util.ConstantReadOnlyProperty
 import com.github.scottbot95.stationeers.ic.util.DefaultAliasedScriptValueDelegateProvider
+import com.github.scottbot95.stationeers.ic.util.LabelDelegateProvider
 import com.github.scottbot95.stationeers.ic.util.combine
 import kotlin.properties.ReadOnlyProperty
+import kotlin.reflect.KProperty
 
 //region Delegate extensions
 
@@ -54,8 +57,16 @@ fun ScriptBlock.define(name: String, value: Number): ScriptValue<Number> {
     return SimpleAliasedScriptValue(name, ScriptValue.of(value))
 }
 
-fun ScriptBlock.define(value: Number, name: String? = null) =
-    ReadOnlyProperty<Any?, ScriptValue<Number>> { _, prop -> define(name ?: prop.name, value) }
+class DefineDelegateProvider(
+    private val block: ScriptBlock,
+    private val value: Number,
+    private val name: String? = null
+) {
+    operator fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, ScriptValue<Number>> =
+        ConstantReadOnlyProperty(block.define(name ?: prop.name, value))
+}
+
+fun ScriptBlock.define(value: Number, name: String? = null) = DefineDelegateProvider(this, value, name)
 
 //endregion
 
@@ -202,5 +213,17 @@ fun ScriptBlock.inc(register: ScriptValue<Register>, increment: ScriptValue<*> =
 fun ScriptBlock.dec(register: ScriptValue<Register>, increment: ScriptValue<*> = ScriptValue.of(1)) {
     +Operation.Subtract(register, register, increment)
 }
+
+/**
+ * Creates a label [label] or the property name if [label] is null. Optionally automatically injects the [LineReference]
+ * NOTE: The label will **not** be created if not being used as a delegate (eg just calling [ScriptBlock.label] directly)
+ */
+fun ScriptBlock.label(label: String? = null, inject: Boolean = true) = LabelDelegateProvider(this, label, inject)
+
+fun ScriptBlock.reference(label: String? = null, inject: Boolean = true): LineReference =
+    FixedLineReference(label).also {
+        if (label != null) labels.add(it)
+        if (inject) +it.inject
+    }
 
 //endregion

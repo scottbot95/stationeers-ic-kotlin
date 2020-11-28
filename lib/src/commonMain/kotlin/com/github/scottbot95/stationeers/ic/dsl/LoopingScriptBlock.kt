@@ -23,10 +23,9 @@ class LoopingScriptBlock(
 
     constructor(label: String? = null, scope: ScriptBlock? = null) : this(LoopOptions(label), scope)
 
-    override val start = FixedLineReference(options.label)
+    override val start: LineReference = reference(options.label, inject = false)
 
     init {
-
         doFirst {
             +this@LoopingScriptBlock.start.inject
             if (options.conditional !== null && !options.atLeastOnce) {
