@@ -2,6 +2,7 @@ package com.github.scottbot95.stationeers.ic.dsl
 
 import com.github.scottbot95.stationeers.ic.Device
 import com.github.scottbot95.stationeers.ic.Register
+import com.github.scottbot95.stationeers.ic.simulation.SimulationState
 import com.github.scottbot95.stationeers.ic.util.once
 import io.ktor.utils.io.core.Closeable
 
@@ -56,3 +57,11 @@ fun ScriptValue.Companion.of(value: Number): ScriptValue<Number> = SimpleScriptV
 fun ScriptValue.Companion.of(value: Device): ScriptValue<Device> = SimpleScriptValue(value)
 fun ScriptValue.Companion.of(value: Register): ScriptValue<Register> = SimpleScriptValue(value)
 fun ScriptValue.Companion.of(parts: List<ScriptValue<*>>): ScriptValue<String> = CombinedScriptValue(parts)
+
+fun ScriptValue<*>.toNumber(state: SimulationState) = value.let {
+    when (it) {
+        is Number -> it
+        is Register -> state.registers.getValue(it)
+        else -> throw IllegalArgumentException("Operand can must be a Number or Register. Given ${this::class.simpleName}")
+    }
+}

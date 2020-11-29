@@ -173,7 +173,7 @@ class LoopingScriptBlockTest {
             loop:
             yield
             # Something inside the block
-            bgt 0 0 loop
+            bgtz 0 loop
             j loop
             """.trimIndent()
 
@@ -195,7 +195,7 @@ class LoopingScriptBlockTest {
             """
             yield
             # Something inside the block
-            bgt 0 0 5
+            bgtz 0 5
             j 5
             """.trimIndent()
 
@@ -223,9 +223,9 @@ class LoopingScriptBlockTest {
             loop:
             yield
             # Something inside the block
-            bgt 0 0 loop
+            bgtz 0 loop
             j loop
-            bgt 0 0 loop
+            bgtz 0 loop
             
             """.trimIndent()
 
@@ -251,11 +251,11 @@ class LoopingScriptBlockTest {
         // FIXME shouldn't need the blank line here
         val expected =
             """
-            bgt 0 0 loop
+            bgtz 0 loop
             loop:
             yield
             # Something inside the block
-            bgt 0 0 loop
+            bgtz 0 loop
             j loop
             
             """.trimIndent()
