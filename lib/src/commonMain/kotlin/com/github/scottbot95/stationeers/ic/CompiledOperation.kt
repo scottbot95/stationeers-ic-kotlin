@@ -1,31 +1,38 @@
 package com.github.scottbot95.stationeers.ic
 
+import com.github.scottbot95.stationeers.ic.dsl.CompileContext
+import com.github.scottbot95.stationeers.ic.dsl.ScriptValue
+import com.github.scottbot95.stationeers.ic.dsl.of
 import com.github.scottbot95.stationeers.ic.simulation.SimulationState
-import com.github.scottbot95.stationeers.ic.simulation.next
 
 /**
  * Something that can be simulated
  */
-fun interface Simulator {
+fun interface Statement {
     /**
-     * Simulates this operation and returns a new [SimulationState] object.
+     * Simulates this [Statement] against [SimulationState] and returns the new [SimulationState] object.
      * Most likely, this should end with a call to [SimulationState.next]
      */
-    fun simulate(state: SimulationState): SimulationState
+    operator fun invoke(state: SimulationState): SimulationState
 }
 
-fun interface Evaluator<out T> {
+fun interface Expression<out T> {
     fun evaluate(state: SimulationState): T
 }
 
 /**
  * An [Operation] that has been compiled
  */
-open class CompiledOperation(private val stringValue: String, simulated: Simulator) : Simulator by simulated {
-    override fun toString(): String = stringValue
+open class CompiledOperation(
+    private val value: ScriptValue<String>,
+    private val context: CompileContext = CompileContext(),
+    statement: Statement
+) : Statement by statement {
+
+    override fun toString(): String = value.toString(context)
 
     /**
      * Noop blank line
      */
-    object Noop : CompiledOperation("", { it.next() })
+    object Noop : CompiledOperation(ScriptValue.of(""), statement = { it.next() })
 }

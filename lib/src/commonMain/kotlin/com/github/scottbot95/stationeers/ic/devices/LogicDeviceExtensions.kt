@@ -5,6 +5,8 @@ import kotlin.reflect.KProperty
 
 //region Delegate functions
 
+// TODO it would be nice if these were extensions of LogicDevice.
+//  That doesn't seem to work with the delegated extension properties unfortunately
 inline val readOnlyVar get() = readOnlyVar()
 fun readOnlyVar(name: String? = null): ReadOnlyProperty<LogicDevice, LogicDeviceVar> =
     LogicDeviceProperty(name)

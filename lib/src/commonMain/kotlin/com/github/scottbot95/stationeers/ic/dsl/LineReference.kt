@@ -62,8 +62,6 @@ class RelativeLineReference internal constructor(
     reference: LineReference = InjectableReference(label)
 ) : LineReference by reference {
     override fun toString(context: CompileContext): String = (value - context.startLine).toString()
-
-    val foo = this.offset(5).offset(6)
 }
 
 fun LineReference.toRelative() = RelativeLineReference(label, this)

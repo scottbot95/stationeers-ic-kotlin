@@ -11,9 +11,9 @@ import com.github.scottbot95.stationeers.ic.util.combine
 import com.github.scottbot95.stationeers.ic.util.compileAll
 
 @DslMarker
-annotation class ScriptBlockMarker
+annotation class ScriptBuilder
 
-@ScriptBlockMarker
+@ScriptBuilder
 interface ScriptBlock : Compilable {
     val registers: AliasedScriptValueContainer<Register>
     val devices: AliasedScriptValueContainer<Device>

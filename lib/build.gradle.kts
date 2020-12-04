@@ -55,6 +55,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api("io.ktor:ktor-io:1.4.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.3")
             }
         }
         val commonTest by getting {
@@ -66,6 +67,7 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-io-jvm:1.4.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable-jvm:0.3.3")
             }
         }
         val jvmTest by getting {
@@ -78,6 +80,7 @@ kotlin {
         }
         val jsMain by getting {
             dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable-js:0.3.3")
                 implementation("io.ktor:ktor-io-js:1.4.1")
             }
         }

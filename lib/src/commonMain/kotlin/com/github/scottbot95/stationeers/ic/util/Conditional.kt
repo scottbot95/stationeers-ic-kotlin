@@ -1,6 +1,6 @@
 package com.github.scottbot95.stationeers.ic.util
 
-import com.github.scottbot95.stationeers.ic.Evaluator
+import com.github.scottbot95.stationeers.ic.Expression
 import com.github.scottbot95.stationeers.ic.dsl.ScriptValue
 import com.github.scottbot95.stationeers.ic.dsl.of
 import com.github.scottbot95.stationeers.ic.dsl.toNumber
@@ -15,7 +15,7 @@ private fun approximatelyEqual(a: Double, b: Double, c: Double): Boolean =
 
 private fun approximatelyZero(a: Double): Boolean = abs(a) <= Float.MIN_VALUE.toDouble() * 8
 
-sealed class Conditional(val shortName: String, vararg val args: ScriptValue<*>) : Evaluator<Boolean> {
+sealed class Conditional(val shortName: String, vararg val args: ScriptValue<*>) : Expression<Boolean> {
     abstract val inverse: Conditional
 
     /**

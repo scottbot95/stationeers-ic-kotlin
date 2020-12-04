@@ -1,14 +1,18 @@
 package com.github.scottbot95.stationeers.ic
 
 import com.github.scottbot95.stationeers.ic.dsl.Compilable
+import com.github.scottbot95.stationeers.ic.dsl.Compilable2
 import com.github.scottbot95.stationeers.ic.dsl.CompileContext
 import com.github.scottbot95.stationeers.ic.dsl.CompileResults
 import com.github.scottbot95.stationeers.ic.dsl.CompiledLine
+import com.github.scottbot95.stationeers.ic.dsl.CompiledScript
 import com.github.scottbot95.stationeers.ic.dsl.LineReference
 import com.github.scottbot95.stationeers.ic.dsl.ScriptValue
+import com.github.scottbot95.stationeers.ic.dsl.builder
 import com.github.scottbot95.stationeers.ic.dsl.of
 import com.github.scottbot95.stationeers.ic.dsl.toFixed
 import com.github.scottbot95.stationeers.ic.dsl.toRelative
+import com.github.scottbot95.stationeers.ic.simulation.SimulationState
 import com.github.scottbot95.stationeers.ic.util.Conditional
 import com.github.scottbot95.stationeers.ic.util.FlagEnum
 
@@ -20,7 +24,7 @@ enum class JumpType : FlagEnum {
 /**
  * Generic class representing an operation within the MIPS language
  */
-sealed class Operation : Compilable {
+sealed class Operation : Compilable, Compilable2, Statement {
 
     abstract val args: Array<out ScriptValue<*>>
     abstract val opCode: String
@@ -30,7 +34,19 @@ sealed class Operation : Compilable {
         return CompileResults(context, CompiledLine(parts))
     }
 
-    open class SimpleOperation internal constructor(
+    override fun compile2(compiledScript: CompiledScript): CompiledScript {
+        val combined = ScriptValue.of(listOf(ScriptValue.of(opCode), *args))
+        val compileContext = CompileContext(compiledScript.nextLine, compiledScript.options)
+        return compiledScript.builder {
+            this.addOperation(CompiledOperation(combined, compileContext, this@Operation))
+        }
+    }
+
+    override fun invoke(state: SimulationState): SimulationState {
+        TODO("Hack just so it compiles, this doesn't belong here")
+    }
+
+    abstract class SimpleOperation internal constructor(
         override val opCode: String,
         override vararg val args: ScriptValue<*>
     ) : Operation()
