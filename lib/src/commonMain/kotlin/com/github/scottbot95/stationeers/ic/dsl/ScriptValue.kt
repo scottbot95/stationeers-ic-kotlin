@@ -10,9 +10,16 @@ import io.ktor.utils.io.core.Closeable
 interface ScriptValue<out T : Any> : Closeable {
     val value: T
 
-    fun toString(context: CompileContext): String = when (value) {
-        is ScriptValue<*> -> toString(context)
-        else -> value.toString()
+    fun toString(context: CompileContext): String {
+        return when (val value = this.value) {
+            is ScriptValue<*> -> toString(context)
+            is Double -> if (value.toInt().toDouble() == value) {
+                value.toInt().toString()
+            } else {
+                value.toString()
+            }
+            else -> value.toString()
+        }
     }
 
     override fun close() = Unit
@@ -54,7 +61,10 @@ data class CombinedScriptValue(private val parts: List<ScriptValue<*>>) : Script
 
 // TODO Make this its own file?
 fun ScriptValue.Companion.of(value: String): ScriptValue<String> = SimpleScriptValue(value)
-fun ScriptValue.Companion.of(value: Number): ScriptValue<Double> = SimpleScriptValue(value.toDouble())
+fun ScriptValue.Companion.of(value: Double): ScriptValue<Double> = SimpleScriptValue(value)
+
+@ExperimentalUnsignedTypes
+fun ScriptValue.Companion.of(value: UInt): ScriptValue<UInt> = SimpleScriptValue(value)
 fun ScriptValue.Companion.of(value: Device): ScriptValue<Device> = SimpleScriptValue(value)
 fun ScriptValue.Companion.of(value: Register): ScriptValue<Register> = SimpleScriptValue(value)
 fun ScriptValue.Companion.of(parts: List<ScriptValue<*>>): ScriptValue<String> = CombinedScriptValue(parts)

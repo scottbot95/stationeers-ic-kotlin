@@ -31,13 +31,23 @@ repositories {
 kotlin {
     jvm {
         compilations.all {
-            kotlinOptions.jvmTarget = "1.8"
+            kotlinOptions {
+                jvmTarget = "1.8"
+                freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+            }
+
         }
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
         }
     }
     js(IR) {
+        compilations.all {
+            kotlinOptions {
+                freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+            }
+        }
+
         useCommonJs()
         nodejs {
             testTask {

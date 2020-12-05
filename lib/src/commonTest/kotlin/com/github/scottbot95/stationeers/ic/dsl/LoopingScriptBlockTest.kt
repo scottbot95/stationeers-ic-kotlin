@@ -52,7 +52,7 @@ class LoopingScriptBlockTest {
         val loopingBlock = LoopingScriptBlock(
             LoopOptions(
                 label = "loop",
-                conditional = GreaterThan(ScriptValue.of(2), ScriptValue.of(1)),
+                conditional = GreaterThan(ScriptValue.of(2.0), ScriptValue.of(1.0)),
                 spacing = 0,
             )
         ).apply {
@@ -78,7 +78,7 @@ class LoopingScriptBlockTest {
     fun testConditionalLoopWithoutLabel() {
         val loopingBlock = LoopingScriptBlock(
             LoopOptions(
-                conditional = GreaterThan(ScriptValue.of(2), ScriptValue.of(1)),
+                conditional = GreaterThan(ScriptValue.of(2.0), ScriptValue.of(1.0)),
                 spacing = 0,
             )
         ).apply {
@@ -104,7 +104,7 @@ class LoopingScriptBlockTest {
         val loopingBlock = LoopingScriptBlock(
             LoopOptions(
                 label = "loop",
-                conditional = GreaterThan(ScriptValue.of(2), ScriptValue.of(1)),
+                conditional = GreaterThan(ScriptValue.of(2.0), ScriptValue.of(1.0)),
                 atLeastOnce = false,
                 spacing = 0,
             )
@@ -134,7 +134,7 @@ class LoopingScriptBlockTest {
     fun testConditionalAtStartLoopWithoutLabel() {
         val loopingBlock = LoopingScriptBlock(
             LoopOptions(
-                conditional = GreaterThan(ScriptValue.of(2), ScriptValue.of(1)),
+                conditional = GreaterThan(ScriptValue.of(2.0), ScriptValue.of(1.0)),
                 atLeastOnce = false,
                 spacing = 0,
             )
@@ -163,7 +163,7 @@ class LoopingScriptBlockTest {
     fun testStartPointWithLabel() {
         val loopingBlock = LoopingScriptBlock(LoopOptions(label = "loop", spacing = 0)).apply {
             comment("Something inside the block", 0)
-            branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), start)
+            branch(GreaterThan(ScriptValue.of(0.0), ScriptValue.of(0.0)), start)
         }
 
         val context = CompileContext(5)
@@ -186,7 +186,7 @@ class LoopingScriptBlockTest {
     fun testStartPointWithoutLabel() {
         val loopingBlock = LoopingScriptBlock(LoopOptions(spacing = 0)).apply {
             comment("Something inside the block", 0)
-            branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), start)
+            branch(GreaterThan(ScriptValue.of(0.0), ScriptValue.of(0.0)), start)
         }
 
         val context = CompileContext(5)
@@ -209,10 +209,10 @@ class LoopingScriptBlockTest {
         val block = script {
             val loop = forever("loop", 0) {
                 comment("Something inside the block", 0)
-                branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), start)
+                branch(GreaterThan(ScriptValue.of(0.0), ScriptValue.of(0.0)), start)
             }
 
-            branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), loop.start)
+            branch(GreaterThan(ScriptValue.of(0.0), ScriptValue.of(0.0)), loop.start)
         }
 
         val context = CompileContext(5)
@@ -239,10 +239,10 @@ class LoopingScriptBlockTest {
         val block = script {
             val loop = LoopingScriptBlock(LoopOptions(label = "loop", spacing = 0)).apply {
                 comment("Something inside the block", 0)
-                branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), start)
+                branch(GreaterThan(ScriptValue.of(0.0), ScriptValue.of(0.0)), start)
             }
 
-            branch(GreaterThan(ScriptValue.of(0), ScriptValue.of(0)), loop.start)
+            branch(GreaterThan(ScriptValue.of(0.5), ScriptValue.of(0.0)), loop.start)
             +loop
         }
 
@@ -251,7 +251,7 @@ class LoopingScriptBlockTest {
         // FIXME shouldn't need the blank line here
         val expected =
             """
-            bgtz 0 loop
+            bgtz 0.5 loop
             loop:
             yield
             # Something inside the block

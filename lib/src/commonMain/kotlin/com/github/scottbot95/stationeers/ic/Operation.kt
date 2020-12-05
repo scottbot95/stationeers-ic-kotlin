@@ -127,7 +127,7 @@ sealed class Operation : Compilable, Compilable2, Statement {
         }
     }
 
-    data class Define(val alias: String, val value: Number) :
+    data class Define(val alias: String, val value: Double) :
         SimpleOperation("define", ScriptValue.of(alias), ScriptValue.of(value))
 
     data class Comment(val message: String) : SimpleOperation("#", ScriptValue.of(message)) {

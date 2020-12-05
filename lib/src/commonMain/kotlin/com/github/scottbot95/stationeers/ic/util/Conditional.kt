@@ -1,3 +1,5 @@
+//@file:OptIn(ExperimentalUnsignedTypes::class)
+
 package com.github.scottbot95.stationeers.ic.util
 
 import com.github.scottbot95.stationeers.ic.Expression
@@ -58,7 +60,7 @@ abstract class BinomialConditional(
     shortName + if (a.value.isZero() || b.value.isZero()) "z" else "",
     *listOf(a, b).filter { !it.value.isZero() }.let {
         if (it.isEmpty()) { // Ensure we don't prune both args
-            listOf(ScriptValue.of(0))
+            listOf(ScriptValue.of(0.0))
         } else {
             it
         }
@@ -104,7 +106,7 @@ open class EqualTo(a: ScriptValue<*>, b: ScriptValue<*>) : BinomialConditional("
     override val inverse: Conditional by lazy { NotEqualTo(a, b) }
 }
 
-class EqualToZero(a: ScriptValue<*>) : EqualTo(a, ScriptValue.of(0)) {
+class EqualToZero(a: ScriptValue<*>) : EqualTo(a, ScriptValue.of(0.0)) {
     override val inverse: Conditional by lazy { NotEqualToZero(a) }
 }
 
@@ -114,7 +116,7 @@ open class NotEqualTo(a: ScriptValue<*>, b: ScriptValue<*>) : BinomialConditiona
     override val inverse: Conditional by lazy { EqualTo(a, b) }
 }
 
-class NotEqualToZero(a: ScriptValue<*>) : NotEqualTo(a, ScriptValue.of(0)) {
+class NotEqualToZero(a: ScriptValue<*>) : NotEqualTo(a, ScriptValue.of(0.0)) {
     override val inverse: Conditional by lazy { EqualToZero(a) }
 }
 
@@ -150,7 +152,7 @@ open class GreaterThan(a: ScriptValue<*>, b: ScriptValue<*>) : BinomialCondition
     override val inverse: Conditional by lazy { LessThanEqualTo(a, b) }
 }
 
-class GreaterThanZero(a: ScriptValue<*>) : GreaterThan(a, ScriptValue.of(0)) {
+class GreaterThanZero(a: ScriptValue<*>) : GreaterThan(a, ScriptValue.of(0.0)) {
     override val inverse: Conditional by lazy { LessThanEqualToZero(a) }
 }
 
@@ -160,7 +162,7 @@ open class GreaterThanEqualTo(a: ScriptValue<*>, b: ScriptValue<*>) : BinomialCo
     override val inverse: Conditional by lazy { LessThan(a, b) }
 }
 
-class GreaterThanEqualToZero(a: ScriptValue<*>) : GreaterThanEqualTo(a, ScriptValue.of(0)) {
+class GreaterThanEqualToZero(a: ScriptValue<*>) : GreaterThanEqualTo(a, ScriptValue.of(0.0)) {
     override val inverse: Conditional by lazy { LessThanZero(a) }
 }
 
@@ -170,7 +172,7 @@ open class LessThan(a: ScriptValue<*>, b: ScriptValue<*>) : BinomialConditional(
     override val inverse: Conditional by lazy { GreaterThanEqualTo(a, b) }
 }
 
-class LessThanZero(a: ScriptValue<*>) : LessThan(a, ScriptValue.of(0)) {
+class LessThanZero(a: ScriptValue<*>) : LessThan(a, ScriptValue.of(0.0)) {
     override val inverse: Conditional by lazy { GreaterThanEqualToZero(a) }
 }
 
@@ -180,6 +182,6 @@ open class LessThanEqualTo(a: ScriptValue<*>, b: ScriptValue<*>) : BinomialCondi
     override val inverse: Conditional by lazy { GreaterThan(a, b) }
 }
 
-class LessThanEqualToZero(a: ScriptValue<*>) : LessThanEqualTo(a, ScriptValue.of(0)) {
+class LessThanEqualToZero(a: ScriptValue<*>) : LessThanEqualTo(a, ScriptValue.of(0.0)) {
     override val inverse: Conditional by lazy { GreaterThanZero(a) }
 }

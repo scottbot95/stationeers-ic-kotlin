@@ -52,21 +52,21 @@ fun <T : LogicDevice> ScriptBlock.device(
     ) { alias: String?, deviceValue: ScriptValue<Device>, _: () -> Unit -> deviceConstructor(alias, deviceValue) }
 }
 
-fun ScriptBlock.define(name: String, value: Number): ScriptValue<Double> {
+fun ScriptBlock.define(name: String, value: Double): ScriptValue<Double> {
     +Operation.Define(name, value)
     return SimpleAliasedScriptValue(name, ScriptValue.of(value))
 }
 
 class DefineDelegateProvider(
     private val block: ScriptBlock,
-    private val value: Number,
+    private val value: Double,
     private val name: String? = null
 ) {
     operator fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, ScriptValue<Double>> =
         ConstantReadOnlyProperty(block.define(name ?: prop.name, value))
 }
 
-fun ScriptBlock.define(value: Number, name: String? = null) = DefineDelegateProvider(this, value, name)
+fun ScriptBlock.define(value: Double, name: String? = null) = DefineDelegateProvider(this, value, name)
 
 //endregion
 
@@ -206,11 +206,11 @@ fun ScriptBlock.cond(
 }
 
 // TODO can we somehow wire these to ++ and -- on a register?
-fun ScriptBlock.inc(register: ScriptValue<Register>, increment: ScriptValue<*> = ScriptValue.of(1)) {
+fun ScriptBlock.inc(register: ScriptValue<Register>, increment: ScriptValue<*> = ScriptValue.of(1.0)) {
     +Operation.Add(register, register, increment)
 }
 
-fun ScriptBlock.dec(register: ScriptValue<Register>, increment: ScriptValue<*> = ScriptValue.of(1)) {
+fun ScriptBlock.dec(register: ScriptValue<Register>, increment: ScriptValue<*> = ScriptValue.of(1.0)) {
     +Operation.Subtract(register, register, increment)
 }
 
