@@ -1,5 +1,6 @@
 package com.github.scottbot95.stationeers.ic.simulation
 
+import com.github.scottbot95.stationeers.ic.Device
 import com.github.scottbot95.stationeers.ic.Register
 import com.github.scottbot95.stationeers.ic.devices.LogicDeviceVar
 import com.github.scottbot95.stationeers.ic.util.UUID
@@ -9,7 +10,8 @@ import kotlin.jvm.JvmName
 import kotlin.jvm.JvmStatic
 
 typealias RegisterValues = PersistentMap<Register, Double>
-typealias DeviceVarValues = PersistentMap<LogicDeviceVar, Double>
+
+typealias DeviceVarValues = PersistentMap<Device, PersistentMap<String, Double>>
 
 private typealias RegisterChangeHandler = SimulationChangeHandler<Register, Double>
 private typealias DeviceVarChangeHandler = SimulationChangeHandler<LogicDeviceVar, Double>
@@ -27,7 +29,7 @@ class SimulationState private constructor(
      * [Map] of the registers and their current value. All registers default to 0
      */
     val registers: RegisterValues = persistentMapOf(),
-    val deviceVars: DeviceVarValues = persistentMapOf()
+    val devices: DeviceVarValues = persistentMapOf()
 ) {
 
     /**
@@ -54,23 +56,39 @@ class SimulationState private constructor(
      * [deviceVar] to [newValue] validated against the [deviceVarHandlers]
      */
     fun next(deviceVar: LogicDeviceVar, newValue: Double, nextIP: Int = instructionPointer + 1): SimulationState {
-        val currValue = deviceVars[deviceVar] ?: 0.0
+        val currValues = devices.getValue(deviceVar.device.value)
+        val currValue = currValues[deviceVar.name] ?: 0.0
         val validatedValue = deviceVarHandlers.validateChange(deviceVar, currValue, newValue)
         return copy(
             instructionPointer = nextIP,
-            deviceVars = deviceVars.put(deviceVar, validatedValue)
+            devices = devices.put(deviceVar.device.value, currValues.put(deviceVar.name, validatedValue))
         )
     }
+
+    fun connect(device: Device, handler: ((oldValue: Double, newValue: Double) -> Double)? = null): SimulationState {
+        if (handler != null) {
+            deviceVarHandlers += DeviceVarChangeHandler { deviceVar: LogicDeviceVar, old: Double, new: Double ->
+                if (deviceVar.device.value == device) handler(old, new) else new
+            }
+        }
+        return copy(
+            devices = devices.put(device, persistentMapOf())
+        )
+    }
+
+    fun disconnect(device: Device): SimulationState = copy(
+        devices = devices.remove(device)
+    )
 
     // Make our own copy so we can control visibility and prevent changing [runId]
     private fun copy(
         instructionPointer: Int = this.instructionPointer,
         registers: RegisterValues = this.registers,
-        deviceVars: DeviceVarValues = this.deviceVars
+        devices: DeviceVarValues = this.devices
     ) = SimulationState(
         instructionPointer = instructionPointer,
         registers = registers,
-        deviceVars = deviceVars,
+        devices = devices,
     )
 
     companion object {

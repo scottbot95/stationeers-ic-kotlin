@@ -13,10 +13,12 @@ interface ScriptValue<out T : Any> : Closeable {
     fun toString(context: CompileContext): String {
         return when (val value = this.value) {
             is ScriptValue<*> -> toString(context)
-            is Double -> if (value.toInt().toDouble() == value) {
-                value.toInt().toString()
-            } else {
-                value.toString()
+            is Double -> {
+                if (value.toInt().toDouble() == value) {
+                    value.toInt().toString()
+                } else {
+                    value.toString()
+                }
             }
             else -> value.toString()
         }

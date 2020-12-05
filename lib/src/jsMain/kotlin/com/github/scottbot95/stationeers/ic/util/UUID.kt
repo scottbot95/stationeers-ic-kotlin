@@ -8,7 +8,6 @@ actual class UUID private constructor(private val value: String) {
         actual fun fromString(string: String): UUID = UUID(string)
 
         actual fun randomUUID(): UUID = fromString(NpmUUID.v4())
-
     }
 
     override fun equals(other: Any?): Boolean = if (other is UUID) {

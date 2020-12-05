@@ -8,10 +8,9 @@ actual class UUID private constructor(private val uuid: java.util.UUID) {
         actual fun fromString(string: String): UUID = UUID(java.util.UUID.fromString(string))
 
         actual fun randomUUID(): UUID = UUID(java.util.UUID.randomUUID())
-
     }
 
-    override fun equals(other: Any?): Boolean = if(other is UUID) {
+    override fun equals(other: Any?): Boolean = if (other is UUID) {
         this.uuid == other.uuid
     } else {
         false

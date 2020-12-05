@@ -35,7 +35,6 @@ kotlin {
                 jvmTarget = "1.8"
                 freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
             }
-
         }
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()

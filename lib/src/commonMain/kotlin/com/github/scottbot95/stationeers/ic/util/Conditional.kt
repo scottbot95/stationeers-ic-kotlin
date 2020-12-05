@@ -1,5 +1,3 @@
-//@file:OptIn(ExperimentalUnsignedTypes::class)
-
 package com.github.scottbot95.stationeers.ic.util
 
 import com.github.scottbot95.stationeers.ic.Expression

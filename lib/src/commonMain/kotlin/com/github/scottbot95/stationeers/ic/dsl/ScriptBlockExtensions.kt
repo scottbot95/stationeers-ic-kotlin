@@ -101,35 +101,25 @@ fun ScriptBlock.min(output: ScriptValue<Register>, a: ScriptValue<*>, b: ScriptV
 }
 
 /**
- * Allocates a temporary register and reads [deviceVar] from [device]
+ * Allocates a temporary register and reads [deviceVar]
  */
-fun ScriptBlock.readDevice(device: ScriptValue<Device>, deviceVar: String): ScriptValue<Register> =
+fun ScriptBlock.readDevice(deviceVar: LogicDeviceVar): ScriptValue<Register> =
     registers.newAliasedValue(null, null).also {
-        +Operation.Load(it, device, deviceVar)
+        +Operation.Load(it, deviceVar)
     }
-
-fun ScriptBlock.readDevice(deviceVar: LogicDeviceVar) = readDevice(deviceVar.device, deviceVar.name)
-
-fun ScriptBlock.readDevice(output: ScriptValue<Register>, device: ScriptValue<Device>, deviceVar: String) {
-    +Operation.Load(output, device, deviceVar)
-}
 
 fun ScriptBlock.readDevice(output: ScriptValue<Register>, deviceVar: LogicDeviceVar) {
     if (!deviceVar.canRead) {
         throw IllegalArgumentException("Cannot read from ${deviceVar.name} on ${deviceVar.device.alias ?: deviceVar.device.value}")
     }
-    return readDevice(output, deviceVar.device, deviceVar.name)
-}
-
-fun ScriptBlock.writeDevice(device: ScriptValue<Device>, deviceVar: String, value: ScriptValue<*>) {
-    +Operation.Save(device, deviceVar, value)
+    +Operation.Load(output, deviceVar)
 }
 
 fun ScriptBlock.writeDevice(deviceVar: LogicDeviceVar, value: ScriptValue<*>) {
     if (!deviceVar.canWrite) {
         throw IllegalArgumentException("Cannot write to ${deviceVar.name} on ${deviceVar.device.alias ?: deviceVar.device.value}")
     }
-    return writeDevice(deviceVar.device, deviceVar.name, value)
+    +Operation.Save(deviceVar, value)
 }
 
 fun ScriptBlock.jump(target: LineReference, function: Boolean = false) {
