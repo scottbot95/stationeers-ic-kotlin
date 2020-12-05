@@ -3,17 +3,20 @@ package com.github.scottbot95.stationeers.ic.util
 import com.github.scottbot95.stationeers.ic.Expression
 import com.github.scottbot95.stationeers.ic.dsl.ScriptValue
 import com.github.scottbot95.stationeers.ic.dsl.of
-import com.github.scottbot95.stationeers.ic.dsl.toNumber
+import com.github.scottbot95.stationeers.ic.dsl.toDouble
 import com.github.scottbot95.stationeers.ic.simulation.SimulationState
 import kotlin.math.abs
 import kotlin.math.max
 
-private fun Any?.isZero(): Boolean = this is Number && this.toInt() == 0
+// Valued pulled from decompiled Stationeers binary
+private const val EPSILON = Float.MIN_VALUE * 8.0
+
+private fun Any?.isZero(): Boolean = this is Double && approximatelyZero(this)
+
+private fun approximatelyZero(a: Double): Boolean = approximatelyEqual(a, 0.0, 0.0)
 
 private fun approximatelyEqual(a: Double, b: Double, c: Double): Boolean =
-    abs(a - b) <= max(c * max(abs(a), abs(b)), Float.MIN_VALUE.toDouble() * 8)
-
-private fun approximatelyZero(a: Double): Boolean = abs(a) <= Float.MIN_VALUE.toDouble() * 8
+    abs(a - b) <= max(c * max(abs(a), abs(b)), EPSILON)
 
 sealed class Conditional(val shortName: String, vararg val args: ScriptValue<*>) : Expression<Boolean> {
     abstract val inverse: Conditional
@@ -33,7 +36,7 @@ abstract class NumberConditional(
     private vararg val values: ScriptValue<*>
 ) : Conditional(shortName, *values) {
 
-    override fun evaluate(state: SimulationState): Boolean = evaluate(values.map { it.toNumber(state).toDouble() })
+    override fun evaluate(state: SimulationState): Boolean = evaluate(values.map { it.toDouble(state) })
 
     protected abstract fun evaluate(values: List<Double>): Boolean
 }

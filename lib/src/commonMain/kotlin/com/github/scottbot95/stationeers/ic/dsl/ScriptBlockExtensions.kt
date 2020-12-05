@@ -52,7 +52,7 @@ fun <T : LogicDevice> ScriptBlock.device(
     ) { alias: String?, deviceValue: ScriptValue<Device>, _: () -> Unit -> deviceConstructor(alias, deviceValue) }
 }
 
-fun ScriptBlock.define(name: String, value: Number): ScriptValue<Number> {
+fun ScriptBlock.define(name: String, value: Number): ScriptValue<Double> {
     +Operation.Define(name, value)
     return SimpleAliasedScriptValue(name, ScriptValue.of(value))
 }
@@ -62,7 +62,7 @@ class DefineDelegateProvider(
     private val value: Number,
     private val name: String? = null
 ) {
-    operator fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, ScriptValue<Number>> =
+    operator fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ReadOnlyProperty<Any?, ScriptValue<Double>> =
         ConstantReadOnlyProperty(block.define(name ?: prop.name, value))
 }
 

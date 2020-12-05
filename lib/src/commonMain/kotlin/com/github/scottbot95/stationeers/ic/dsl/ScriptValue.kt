@@ -6,6 +6,7 @@ import com.github.scottbot95.stationeers.ic.simulation.SimulationState
 import com.github.scottbot95.stationeers.ic.util.once
 import io.ktor.utils.io.core.Closeable
 
+// TODO We should probably make this a sealed class with only the allowed types
 interface ScriptValue<out T : Any> : Closeable {
     val value: T
 
@@ -53,14 +54,14 @@ data class CombinedScriptValue(private val parts: List<ScriptValue<*>>) : Script
 
 // TODO Make this its own file?
 fun ScriptValue.Companion.of(value: String): ScriptValue<String> = SimpleScriptValue(value)
-fun ScriptValue.Companion.of(value: Number): ScriptValue<Number> = SimpleScriptValue(value)
+fun ScriptValue.Companion.of(value: Number): ScriptValue<Double> = SimpleScriptValue(value.toDouble())
 fun ScriptValue.Companion.of(value: Device): ScriptValue<Device> = SimpleScriptValue(value)
 fun ScriptValue.Companion.of(value: Register): ScriptValue<Register> = SimpleScriptValue(value)
 fun ScriptValue.Companion.of(parts: List<ScriptValue<*>>): ScriptValue<String> = CombinedScriptValue(parts)
 
-fun ScriptValue<*>.toNumber(state: SimulationState) = value.let {
+fun ScriptValue<*>.toDouble(state: SimulationState) = value.let {
     when (it) {
-        is Number -> it
+        is Number -> it.toDouble()
         is Register -> state.registers.getValue(it)
         else -> throw IllegalArgumentException("Operand can must be a Number or Register. Given ${this::class.simpleName}")
     }
