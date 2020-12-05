@@ -7,7 +7,7 @@ import com.github.scottbot95.stationeers.ic.dsl.AliasedScriptValue
 import com.github.scottbot95.stationeers.ic.dsl.ScriptValue
 import com.github.scottbot95.stationeers.ic.dsl.SimpleAliasedScriptValue
 
-class LogicDeviceVar(
+data class LogicDeviceVar(
     val device: LogicDevice,
     val name: String,
     val canRead: Boolean,
