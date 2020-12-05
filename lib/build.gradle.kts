@@ -82,6 +82,7 @@ kotlin {
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable-js:0.3.3")
                 implementation("io.ktor:ktor-io-js:1.4.1")
+                implementation(npm("uuid", "8.3.1"))
             }
         }
         val jsTest by getting {
