@@ -1,9 +1,20 @@
 package com.github.scottbot95.stationeers.ic.dsl
 
 data class CompileOptions(
-    var minify: Boolean = false,
-    var preferRelativeJumps: Boolean = false,
-)
+    val minify: Boolean = false,
+    val preferRelativeJumps: Boolean = false,
+) {
+    @ScriptDSL
+    class Builder(
+        var minify: Boolean = false,
+        var preferRelativeJumps: Boolean = false
+    ) {
+        fun build(): CompileOptions = CompileOptions(
+            minify,
+            preferRelativeJumps
+        )
+    }
+}
 
 data class ExportOptions(
     var compileOptions: CompileOptions,
@@ -77,8 +88,3 @@ class Spacer(private val numLines: Int) : Compilable {
 }
 
 fun Compilable.compile(options: CompileOptions): CompileResults = compile(CompileContext(compileOptions = options))
-
-inline fun Compilable.compile(init: CompileOptions.() -> Unit): CompileResults {
-    val options = CompileOptions().apply(init)
-    return compile(options)
-}

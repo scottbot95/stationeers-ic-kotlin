@@ -29,10 +29,10 @@ data class CompiledScript constructor(
     override fun toString(): String = asString
 
     companion object {
-        fun empty(options: CompileOptions = CompileOptions()) = Builder(options)
+        fun empty(options: CompileOptions = CompileOptions()) = Builder(options).build()
     }
 
-    @ScriptBuilder
+    @ScriptDSL
     class Builder(
         var options: CompileOptions = CompileOptions(),
         private val operations: PersistentList.Builder<CompiledOperation> = persistentListOf<CompiledOperation>().builder()
