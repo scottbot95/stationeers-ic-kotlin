@@ -24,7 +24,6 @@ publishing {
 }
 
 repositories {
-    mavenCentral()
     jcenter()
 }
 
@@ -33,7 +32,7 @@ kotlin {
         compilations.all {
             kotlinOptions {
                 jvmTarget = "1.8"
-                freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+                freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn"
             }
         }
         testRuns["test"].executionTask.configure {
@@ -43,7 +42,7 @@ kotlin {
     js(IR) {
         compilations.all {
             kotlinOptions {
-                freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+                freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn"
             }
         }
 

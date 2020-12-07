@@ -1,6 +1,6 @@
 package com.github.scottbot95.stationeers.ic.dsl
 
-inline fun Compilable.compile(init: CompileOptions.Builder.() -> Unit): CompileResults {
+inline fun Compilable.compile(init: CompileOptions.Builder.() -> Unit): PartialCompiledScript {
     val options = CompileOptions.Builder().apply(init).build()
     return compile(options)
 }

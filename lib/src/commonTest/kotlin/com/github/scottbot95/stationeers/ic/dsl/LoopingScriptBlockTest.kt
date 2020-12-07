@@ -6,14 +6,14 @@ import kotlin.test.assertEquals
 
 class LoopingScriptBlockTest {
 
+    private val startPartial = PartialCompiledScript.empty()
+
     @Test
     fun testInfiniteLoopWithLabel() {
         val loopingBlock = LoopingScriptBlock(LoopOptions(label = "loop", spacing = 0)).apply {
             comment("Something inside the block", 0)
             comment("Should probably have something more complex here", 0)
         }
-
-        val context = CompileContext(5)
 
         val expected =
             """
@@ -23,8 +23,8 @@ class LoopingScriptBlockTest {
             # Should probably have something more complex here
             j loop
             """.trimIndent()
-        val results = loopingBlock.compile(context)
-        assertEquals(expected, results.asString)
+        val results = loopingBlock.compile(startPartial)
+        assertEquals(expected, results.toString())
     }
 
     @Test
@@ -34,17 +34,15 @@ class LoopingScriptBlockTest {
             comment("Should probably have something more complex here", 0)
         }
 
-        val context = CompileContext(5)
-
         val expected =
             """
             yield
             # Something inside the block
             # Should probably have something more complex here
-            j 5
+            j 0
             """.trimIndent()
-        val results = loopingBlock.compile(context)
-        assertEquals(expected, results.asString)
+        val results = loopingBlock.compile(startPartial)
+        assertEquals(expected, results.toString())
     }
 
     @Test
@@ -60,8 +58,6 @@ class LoopingScriptBlockTest {
             comment("Should probably have something more complex here", 0)
         }
 
-        val context = CompileContext(5)
-
         val expected =
             """
             loop:
@@ -70,8 +66,8 @@ class LoopingScriptBlockTest {
             # Should probably have something more complex here
             bgt 2 1 loop
             """.trimIndent()
-        val results = loopingBlock.compile(context)
-        assertEquals(expected, results.asString)
+        val results = loopingBlock.compile(startPartial)
+        assertEquals(expected, results.toString())
     }
 
     @Test
@@ -86,17 +82,15 @@ class LoopingScriptBlockTest {
             comment("Should probably have something more complex here", 0)
         }
 
-        val context = CompileContext(5)
-
         val expected =
             """
             yield
             # Something inside the block
             # Should probably have something more complex here
-            bgt 2 1 5
+            bgt 2 1 0
             """.trimIndent()
-        val results = loopingBlock.compile(context)
-        assertEquals(expected, results.asString)
+        val results = loopingBlock.compile(startPartial)
+        assertEquals(expected, results.toString())
     }
 
     @Test
@@ -113,21 +107,19 @@ class LoopingScriptBlockTest {
             comment("Should probably have something more complex here", 0)
         }
 
-        val context = CompileContext(5)
-
         val expected =
             """
             loop:
-            bgt 2 1 11
+            bgt 2 1 6
             yield
             # Something inside the block
             # Should probably have something more complex here
             j loop
             """.trimIndent()
 
-        val results = loopingBlock.compile(context)
+        val results = loopingBlock.compile(startPartial)
 
-        assertEquals(expected, results.asString)
+        assertEquals(expected, results.toString())
     }
 
     @Test
@@ -143,20 +135,18 @@ class LoopingScriptBlockTest {
             comment("Should probably have something more complex here", 0)
         }
 
-        val context = CompileContext(5)
-
         val expected =
             """
-            bgt 2 1 10
+            bgt 2 1 5
             yield
             # Something inside the block
             # Should probably have something more complex here
-            j 5
+            j 0
             """.trimIndent()
 
-        val results = loopingBlock.compile(context)
+        val results = loopingBlock.compile(startPartial)
 
-        assertEquals(expected, results.asString)
+        assertEquals(expected, results.toString())
     }
 
     @Test
@@ -165,8 +155,6 @@ class LoopingScriptBlockTest {
             comment("Something inside the block", 0)
             branch(GreaterThan(ScriptValue.of(0.0), ScriptValue.of(0.0)), start)
         }
-
-        val context = CompileContext(5)
 
         val expected =
             """
@@ -177,9 +165,9 @@ class LoopingScriptBlockTest {
             j loop
             """.trimIndent()
 
-        val results = loopingBlock.compile(context)
+        val results = loopingBlock.compile(startPartial)
 
-        assertEquals(expected, results.asString)
+        assertEquals(expected, results.toString())
     }
 
     @Test
@@ -189,19 +177,17 @@ class LoopingScriptBlockTest {
             branch(GreaterThan(ScriptValue.of(0.0), ScriptValue.of(0.0)), start)
         }
 
-        val context = CompileContext(5)
-
         val expected =
             """
             yield
             # Something inside the block
-            bgtz 0 5
-            j 5
+            bgtz 0 0
+            j 0
             """.trimIndent()
 
-        val results = loopingBlock.compile(context)
+        val results = loopingBlock.compile(startPartial)
 
-        assertEquals(expected, results.asString)
+        assertEquals(expected, results.toString())
     }
 
     @Test
@@ -215,8 +201,6 @@ class LoopingScriptBlockTest {
             branch(GreaterThan(ScriptValue.of(0.0), ScriptValue.of(0.0)), loop.start)
         }
 
-        val context = CompileContext(5)
-
         // FIXME shouldn't need the blank line here
         val expected =
             """
@@ -226,12 +210,11 @@ class LoopingScriptBlockTest {
             bgtz 0 loop
             j loop
             bgtz 0 loop
-            
             """.trimIndent()
 
-        val results = block.compile(context)
+        val results = block.compile(startPartial)
 
-        assertEquals(expected, results.asString)
+        assertEquals(expected, results.toString())
     }
 
     @Test
@@ -246,8 +229,6 @@ class LoopingScriptBlockTest {
             +loop
         }
 
-        val context = CompileContext(5)
-
         // FIXME shouldn't need the blank line here
         val expected =
             """
@@ -257,11 +238,10 @@ class LoopingScriptBlockTest {
             # Something inside the block
             bgtz 0 loop
             j loop
-            
             """.trimIndent()
 
-        val results = block.compile(context)
+        val results = block.compile(startPartial)
 
-        assertEquals(expected, results.asString)
+        assertEquals(expected, results.toString())
     }
 }

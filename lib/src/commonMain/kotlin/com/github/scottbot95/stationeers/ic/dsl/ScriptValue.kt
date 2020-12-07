@@ -26,7 +26,9 @@ interface ScriptValue<out T : Any> : Closeable {
 
     override fun close() = Unit
 
-    companion object
+    companion object {
+        val EMPTY = ScriptValue.of("")
+    }
 }
 
 data class SimpleScriptValue<out T : Any>(override val value: T) : ScriptValue<T>
@@ -70,6 +72,7 @@ fun ScriptValue.Companion.of(value: UInt): ScriptValue<UInt> = SimpleScriptValue
 fun ScriptValue.Companion.of(value: Device): ScriptValue<Device> = SimpleScriptValue(value)
 fun ScriptValue.Companion.of(value: Register): ScriptValue<Register> = SimpleScriptValue(value)
 fun ScriptValue.Companion.of(parts: List<ScriptValue<*>>): ScriptValue<String> = CombinedScriptValue(parts)
+fun ScriptValue.Companion.of(vararg parts: ScriptValue<*>): ScriptValue<String> = CombinedScriptValue(parts.toList())
 
 fun ScriptValue<*>.toDouble(state: SimulationState) = value.let {
     when (it) {

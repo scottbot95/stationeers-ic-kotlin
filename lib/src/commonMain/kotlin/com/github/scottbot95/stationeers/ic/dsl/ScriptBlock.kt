@@ -1,5 +1,6 @@
 package com.github.scottbot95.stationeers.ic.dsl
 
+import com.github.scottbot95.stationeers.ic.CompiledOperation
 import com.github.scottbot95.stationeers.ic.Device
 import com.github.scottbot95.stationeers.ic.Register
 import com.github.scottbot95.stationeers.ic.util.AliasedScriptValueContainer
@@ -22,7 +23,14 @@ interface ScriptBlock : Compilable {
     operator fun Compilable.unaryPlus()
 
     operator fun String.unaryPlus() {
-        +Compilable { context -> CompileResults(context, CompiledLine(this)) }
+        +Compilable { partial ->
+            partial + CompiledOperation(ScriptValue.of(this)) {
+                // TODO improve this warning
+                println("WARN: Text added directly is not currently simulated.")
+                println("\tIgnoring `$this`")
+                it.next()
+            }
+        }
     }
 
     fun doFirst(init: ScriptBlock.() -> Unit) = doFirst(SimpleScriptBlock(this, 0).apply(init))
@@ -79,10 +87,10 @@ open class SimpleScriptBlock(val scope: ScriptBlock? = null, private val spacing
         endBlocks.add(block)
     }
 
-    override fun compile(context: CompileContext): CompileResults = listOfNotNull(
+    override fun compile(partial: PartialCompiledScript) = listOf(
+        Spacer(spacing),
         startBlocks.combine(),
         operations.combine(),
         endBlocks.asReversed().combine(),
-        Spacer(spacing),
-    ).compileAll(context)
+    ).compileAll(partial)
 }

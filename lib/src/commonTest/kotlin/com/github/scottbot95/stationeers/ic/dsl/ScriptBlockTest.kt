@@ -47,12 +47,11 @@ class ScriptBlockTest {
             add rloopCount rloopCount 1
             j loop
             # You can add text directly as well
-            
             """.trimIndent()
 
-        val results = testScript.compile(CompileContext())
+        val results = testScript.compile()
 
-        assertEquals(expected, results.asString)
+        assertEquals(expected, results.toString())
     }
 
     @Test
@@ -71,6 +70,6 @@ class ScriptBlockTest {
             minify = true
         }
 
-        assertEquals(expected, results.asString)
+        assertEquals(expected, results.toString())
     }
 }

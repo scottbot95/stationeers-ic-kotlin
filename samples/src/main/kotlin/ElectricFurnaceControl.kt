@@ -42,9 +42,9 @@ val electricFurnaceControl = script {
     val targetPres by register
     val outputRate by register
 
-    val negThreshold by define(-200)
-    val posThreshold by define(200)
-    val outputInc by define(1)
+    val negThreshold by define(-200.0)
+    val posThreshold by define(200.0)
+    val outputInc by define(1.0)
 
     // TODO this should go inside the loop probably?
     val presDiff by register
@@ -66,8 +66,8 @@ val electricFurnaceControl = script {
         readDevice(targetPres, presInput.Setting)
 
         comment("Reset state")
-        writeDevice(furnace.SettingInput, ScriptValue.of(0))
-        writeDevice(furnace.SettingOutput, ScriptValue.of(0))
+        writeDevice(furnace.SettingInput, ScriptValue.of(0.0))
+        writeDevice(furnace.SettingOutput, ScriptValue.of(0.0))
 
         comment("Pressure Check")
         readDevice(furnace.Pressure).use {
@@ -75,12 +75,12 @@ val electricFurnaceControl = script {
         }
         cond(
             LessThan(presDiff, negThreshold) to {
-                writeDevice(furnace.SettingInput, ScriptValue.of(100))
-                writeDevice(furnace.SettingOutput, ScriptValue.of(0))
+                writeDevice(furnace.SettingInput, ScriptValue.of(100.0))
+                writeDevice(furnace.SettingOutput, ScriptValue.of(0.0))
             },
             GreaterThan(presDiff, posThreshold) to {
-                writeDevice(furnace.SettingInput, ScriptValue.of(0))
-                writeDevice(furnace.SettingOutput, ScriptValue.of(100))
+                writeDevice(furnace.SettingInput, ScriptValue.of(0.0))
+                writeDevice(furnace.SettingOutput, ScriptValue.of(100.0))
             },
         )
 
@@ -100,8 +100,8 @@ val electricFurnaceControl = script {
                 }
             )
         }
-        max(outputRate, outputRate, ScriptValue.of(0))
-        min(outputRate, outputRate, ScriptValue.of(100))
+        max(outputRate, outputRate, ScriptValue.of(0.0))
+        min(outputRate, outputRate, ScriptValue.of(100.0))
         writeDevice(furnace.SettingOutput, outputRate)
     }
 }

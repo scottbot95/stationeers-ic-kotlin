@@ -2,12 +2,8 @@ package com.github.scottbot95.stationeers.ic
 
 import com.github.scottbot95.stationeers.ic.devices.LogicDeviceVar
 import com.github.scottbot95.stationeers.ic.dsl.Compilable
-import com.github.scottbot95.stationeers.ic.dsl.Compilable2
-import com.github.scottbot95.stationeers.ic.dsl.CompileContext
-import com.github.scottbot95.stationeers.ic.dsl.CompileResults
-import com.github.scottbot95.stationeers.ic.dsl.CompiledLine
-import com.github.scottbot95.stationeers.ic.dsl.CompiledScript
 import com.github.scottbot95.stationeers.ic.dsl.LineReference
+import com.github.scottbot95.stationeers.ic.dsl.PartialCompiledScript
 import com.github.scottbot95.stationeers.ic.dsl.ScriptValue
 import com.github.scottbot95.stationeers.ic.dsl.builder
 import com.github.scottbot95.stationeers.ic.dsl.of
@@ -36,21 +32,15 @@ private fun makeJump(state: SimulationState, target: LineReference, functionCall
 /**
  * Generic class representing an operation within the MIPS language
  */
-sealed class Operation : Compilable, Compilable2, Statement {
+sealed class Operation : Compilable, Statement {
 
     abstract val args: Array<out ScriptValue<*>>
     abstract val opCode: String
 
-    override fun compile(context: CompileContext): CompileResults {
-        val parts = listOf(ScriptValue.of(opCode), *args)
-        return CompileResults(context, CompiledLine(parts))
-    }
-
-    override fun compile2(compiledScript: CompiledScript): CompiledScript {
-        val combined = ScriptValue.of(listOf(ScriptValue.of(opCode), *args))
-        val compileContext = CompileContext(compiledScript.nextLine, compiledScript.options)
-        return compiledScript.builder {
-            this.addOperation(CompiledOperation(combined, compileContext, this@Operation))
+    override fun compile(partial: PartialCompiledScript): PartialCompiledScript {
+        val combined = ScriptValue.of(ScriptValue.of(opCode), *args)
+        return partial.builder {
+            this.addOperation(CompiledOperation(combined, statement = this@Operation))
         }
     }
 
@@ -199,11 +189,11 @@ sealed class Operation : Compilable, Compilable2, Statement {
     }
 
     data class Comment(val message: String) : SimpleOperation("#", ScriptValue.of(message)) {
-        override fun compile(context: CompileContext): CompileResults {
-            return if (context.compileOptions.minify) {
-                CompileResults(context)
+        override fun compile(partial: PartialCompiledScript): PartialCompiledScript {
+            return if (partial.options.minify) {
+                partial
             } else {
-                super.compile(context)
+                super.compile(partial)
             }
         }
 

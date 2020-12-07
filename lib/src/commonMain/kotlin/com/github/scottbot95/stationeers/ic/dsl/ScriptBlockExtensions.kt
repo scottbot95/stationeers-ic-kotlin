@@ -138,8 +138,8 @@ fun ScriptBlock.move(register: ScriptValue<Register>, value: ScriptValue<*>) {
     +Operation.Move(register, value)
 }
 
-fun ScriptBlock.spacing(size: Int) {
-    +Spacer(size)
+fun ScriptBlock.spacing(size: Int, allowAtStart: Boolean = false) {
+    +Spacer(size, allowAtStart)
 }
 
 //endregion

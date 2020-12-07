@@ -1,5 +1,8 @@
 package com.github.scottbot95.stationeers.ic.dsl
 
+import com.github.scottbot95.stationeers.ic.CompiledOperation
+import com.github.scottbot95.stationeers.ic.Statement
+
 interface LineReference : ScriptValue<Int> {
     /**
      * A [Compilable] used to create the label line and specify which line this [LineReference] is pointing to.
@@ -16,22 +19,22 @@ interface LineReference : ScriptValue<Int> {
 }
 
 private class InjectableReference(override val label: String? = null) : LineReference {
-    override val value: Int by lazy {
-        lineNum ?: throw IllegalStateException("Cannot access LineReference value before it has been injected")
-    }
-
+    override val value: Int
+        get() = checkLinePresent(lineNum)
     override var lineNum: Int? = null
         private set
 
-    override val inject: Compilable = Compilable { context ->
+    override val inject: Compilable = Compilable { partial ->
         if (lineNum !== null) {
             throw IllegalStateException("Cannot inject the same reference more than once. Already injected on line $lineNum")
         }
-        lineNum = context.startLine
-        CompileResults(
-            context,
-            listOfNotNull(if (label !== null && !context.compileOptions.minify) CompiledLine("$label:") else null)
-        )
+        lineNum = partial.nextLine
+
+        if (label != null && !partial.options.minify) {
+            partial + CompiledOperation(ScriptValue.of("$label:"), statement = Statement.Noop)
+        } else {
+            partial
+        }
     }
 
     override fun toString(context: CompileContext) = lineNum.toString()
@@ -67,3 +70,6 @@ class RelativeLineReference internal constructor(
 fun LineReference.toRelative() = RelativeLineReference(label, this)
 fun LineReference.toFixed() = FixedLineReference(label, this)
 fun <T : LineReference> T.offset(offset: Int) = OffsetLineReference(this, offset)
+
+private fun checkLinePresent(lineNum: Int?) =
+    lineNum ?: throw IllegalStateException("Cannot access value of LineReference value before it has been injected")

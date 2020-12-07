@@ -1,23 +1,25 @@
 package com.github.scottbot95.stationeers.ic.dsl
 
 import com.github.scottbot95.stationeers.ic.CompiledOperation
-import com.github.scottbot95.stationeers.ic.simulation.SimulationState
+import com.github.scottbot95.stationeers.ic.util.toString
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 
-data class CompiledScript constructor(
+data class PartialCompiledScript constructor(
     val options: CompileOptions,
     val operations: PersistentList<CompiledOperation>
 ) {
-    private val asString by lazy { operations.joinToString() }
+    private val asString by lazy {
+        operations
+            .asSequence()
+            .mapIndexed { i, it -> it.values.toString(CompileContext(i, options)) }
+            .joinToString("\n")
+    }
 
     val size get() = asString.length * 2 // 2 bytes per character
     val numLines by operations::size
-    val nextLine get() = numLines + 1
-
-    fun simulate(startState: SimulationState) =
-        operations.fold(startState) { stepState, op -> op(stepState) }
+    val nextLine get() = numLines
 
     fun addOperation(operation: CompiledOperation) = copy(operations = operations.add(operation))
 
@@ -54,7 +56,7 @@ data class CompiledScript constructor(
             this.operations.addAll(operations)
         }
 
-        fun build(): CompiledScript = CompiledScript(options, operations.toPersistentList())
+        fun build(): PartialCompiledScript = PartialCompiledScript(options, operations.toPersistentList())
     }
 }
 
@@ -62,6 +64,5 @@ data class CompiledScript constructor(
 // Extensions file
 // **************************************
 
-operator fun CompiledScript.plus(operation: CompiledOperation) = addOperation(operation)
-operator fun CompiledScript.plus(newOperations: Collection<CompiledOperation>) = addOperations(newOperations)
-operator fun CompiledScript.invoke() = simulate(SimulationState.Initial)
+operator fun PartialCompiledScript.plus(operation: CompiledOperation) = addOperation(operation)
+operator fun PartialCompiledScript.plus(newOperations: Collection<CompiledOperation>) = addOperations(newOperations)

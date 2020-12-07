@@ -1,15 +1,17 @@
 package com.github.scottbot95.stationeers.ic.util
 
 import com.github.scottbot95.stationeers.ic.Operation
-import com.github.scottbot95.stationeers.ic.dsl.CompileContext
+import com.github.scottbot95.stationeers.ic.dsl.PartialCompiledScript
+import com.github.scottbot95.stationeers.ic.dsl.compile
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class CollectionExtensionTests {
 
+    private val startContext = PartialCompiledScript.empty()
+
     @Test
     fun testCompileAll() {
-        val startContext = CompileContext(startLine = 5)
         val results = listOf(
             Operation.Comment("Hello1"),
             Operation.Comment("Hello2"),
@@ -22,12 +24,11 @@ class CollectionExtensionTests {
             # Hello2
             # Hello3
             """.trimIndent()
-        assertEquals(expected, results.asString)
+        assertEquals(expected, results.toString())
     }
 
     @Test
     fun testCombine() {
-        val startContext = CompileContext(startLine = 5)
         val results = listOf(
             Operation.Comment("Hello1"),
             Operation.Comment("Hello2"),
@@ -40,6 +41,6 @@ class CollectionExtensionTests {
             # Hello2
             # Hello3
             """.trimIndent()
-        assertEquals(expected, results.asString)
+        assertEquals(expected, results.toString())
     }
 }
