@@ -9,3 +9,5 @@ expect class UUID {
         fun randomUUID(): UUID
     }
 }
+
+inline val UUID.Companion.random get() = randomUUID()
