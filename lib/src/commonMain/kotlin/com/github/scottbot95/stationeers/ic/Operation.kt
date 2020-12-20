@@ -1,16 +1,10 @@
 package com.github.scottbot95.stationeers.ic
 
 import com.github.scottbot95.stationeers.ic.devices.LogicDeviceVar
-import com.github.scottbot95.stationeers.ic.dsl.Compilable
-import com.github.scottbot95.stationeers.ic.dsl.LineReference
-import com.github.scottbot95.stationeers.ic.dsl.PartialCompiledScript
-import com.github.scottbot95.stationeers.ic.dsl.ScriptValue
-import com.github.scottbot95.stationeers.ic.dsl.builder
-import com.github.scottbot95.stationeers.ic.dsl.of
-import com.github.scottbot95.stationeers.ic.dsl.toDouble
-import com.github.scottbot95.stationeers.ic.dsl.toFixed
-import com.github.scottbot95.stationeers.ic.dsl.toRelative
+import com.github.scottbot95.stationeers.ic.dsl.*
+import com.github.scottbot95.stationeers.ic.simulation.SimulationException
 import com.github.scottbot95.stationeers.ic.simulation.SimulationState
+import com.github.scottbot95.stationeers.ic.simulation.SimulationStatus
 import com.github.scottbot95.stationeers.ic.util.Conditional
 import com.github.scottbot95.stationeers.ic.util.FlagEnum
 import kotlin.math.max
@@ -20,13 +14,15 @@ enum class JumpType : FlagEnum {
     RELATIVE,
 }
 
-private fun makeJump(state: SimulationState, target: LineReference, functionCall: Boolean): SimulationState {
+private fun makeJump(state: SimulationState, target: LineReference, functionCall: Boolean): SimulationResults {
     val nextIP = target.toFixed().value
-    return if (functionCall) {
-        state.next(Register.RA, state.instructionPointer + 1.0, nextIP)
-    } else {
-        state.next(nextIP)
-    }
+    return SimulationResults(
+        if (functionCall) {
+            state.next(Register.RA, state.instructionPointer + 1.0, nextIP)
+        } else {
+            state.next(nextIP)
+        }
+    )
 }
 
 /**
@@ -54,25 +50,41 @@ sealed class Operation : Compilable, Statement {
     data class Load(val output: ScriptValue<Register>, val deviceVar: LogicDeviceVar) :
         SimpleOperation("l", output, deviceVar.device, ScriptValue.of(deviceVar.name)) {
 
-        override fun invoke(state: SimulationState): SimulationState {
-            val deviceValue = state.devices.getValue(deviceVar.device.value)[deviceVar.name] ?: 0.0
-            return state.next(output.value, deviceValue)
+        override fun invoke(state: SimulationState): SimulationResults {
+
+            // TODO can we somehow bake this into the data structure holding devices?
+            val device = deviceVar.device.value
+            val varName = deviceVar.name
+            if (device !in state.devices) {
+                throw SimulationException(
+                    state,
+                    "Cannot read var '$varName' on disconnected device '$device'"
+                )
+            }
+
+            val deviceValue = state.devices.getValue(device)[varName] ?: 0.0
+            return SimulationResults(state.next(output.value, deviceValue))
         }
     }
 
     data class Save(val deviceVar: LogicDeviceVar, val value: ScriptValue<*>) :
         SimpleOperation("s", deviceVar.device, ScriptValue.of(deviceVar.name), value) {
 
-        override fun invoke(state: SimulationState): SimulationState {
-            return state.next(deviceVar, value.toDouble(state))
+        override fun invoke(state: SimulationState): SimulationResults {
+            return SimulationResults(state.next(deviceVar, value.toDouble(state)))
         }
     }
 
     data class Move(val output: ScriptValue<Register>, val value: ScriptValue<*>) :
         SimpleOperation("move", output, value) {
 
-        override fun invoke(state: SimulationState): SimulationState {
-            return state.next(output.value, value.toDouble(state))
+        override fun invoke(state: SimulationState): SimulationResults {
+            val register = output.value
+            if (!register.userRegister) {
+                throw SimulationException(state, "Cannot write to system register $register")
+            }
+
+            return SimulationResults(state.next(register, value.toDouble(state)))
         }
     }
 
@@ -83,32 +95,32 @@ sealed class Operation : Compilable, Statement {
     data class Add(val output: ScriptValue<Register>, val a: ScriptValue<*>, val b: ScriptValue<*>) :
         SimpleOperation("add", output, a, b) {
 
-        override fun invoke(state: SimulationState): SimulationState {
-            return state.next(output.value, a.toDouble(state) + b.toDouble(state))
+        override fun invoke(state: SimulationState): SimulationResults {
+            return SimulationResults(state.next(output.value, a.toDouble(state) + b.toDouble(state)))
         }
     }
 
     data class Subtract(val output: ScriptValue<Register>, val a: ScriptValue<*>, val b: ScriptValue<*>) :
         SimpleOperation("sub", output, a, b) {
 
-        override fun invoke(state: SimulationState): SimulationState {
-            return state.next(output.value, a.toDouble(state) - b.toDouble(state))
+        override fun invoke(state: SimulationState): SimulationResults {
+            return SimulationResults(state.next(output.value, a.toDouble(state) - b.toDouble(state)))
         }
     }
 
     data class Max(val output: ScriptValue<Register>, val a: ScriptValue<*>, val b: ScriptValue<*>) :
         SimpleOperation("max", output, a, b) {
 
-        override fun invoke(state: SimulationState): SimulationState {
-            return state.next(output.value, max(a.toDouble(state), b.toDouble(state)))
+        override fun invoke(state: SimulationState): SimulationResults {
+            return SimulationResults(state.next(output.value, max(a.toDouble(state), b.toDouble(state))))
         }
     }
 
     data class Min(val output: ScriptValue<Register>, val a: ScriptValue<*>, val b: ScriptValue<*>) :
         SimpleOperation("min", output, a, b) {
 
-        override fun invoke(state: SimulationState): SimulationState {
-            return state.next(output.value, max(a.toDouble(state), b.toDouble(state)))
+        override fun invoke(state: SimulationState): SimulationResults {
+            return SimulationResults(state.next(output.value, max(a.toDouble(state), b.toDouble(state))))
         }
     }
 
@@ -126,7 +138,7 @@ sealed class Operation : Compilable, Statement {
         override val args: Array<out ScriptValue<*>> =
             arrayOf(if (type === JumpType.RELATIVE) target.toRelative() else target.toFixed())
 
-        override fun invoke(state: SimulationState): SimulationState {
+        override fun invoke(state: SimulationState): SimulationResults {
             return when (type) {
                 JumpType.FUNCTION -> makeJump(state, target, true)
                 JumpType.RELATIVE, null -> makeJump(state, target, false)
@@ -150,16 +162,16 @@ sealed class Operation : Compilable, Statement {
         override val args: Array<out ScriptValue<*>> =
             arrayOf(*condition.args, if (types.contains(JumpType.RELATIVE)) target.toRelative() else target.toFixed())
 
-        override fun invoke(state: SimulationState): SimulationState = if (condition.evaluate(state)) {
+        override fun invoke(state: SimulationState): SimulationResults = if (condition.evaluate(state)) {
             makeJump(state, target, JumpType.FUNCTION in types)
         } else {
-            state.next()
+            SimulationResults(state.next())
         }
     }
 
     class Yield : SimpleOperation("yield") {
-        override fun invoke(state: SimulationState): SimulationState {
-            TODO("Figure out the yield hook stuff")
+        override fun invoke(state: SimulationState): SimulationResults {
+            return SimulationResults(state.next(), SimulationStatus.Yielded)
         }
     }
 
@@ -178,14 +190,14 @@ sealed class Operation : Compilable, Statement {
         }
 
         // TODO We should probably actually simulation alias look-ups instead of cheating...
-        override fun invoke(state: SimulationState): SimulationState = state.next()
+        override fun invoke(state: SimulationState): SimulationResults = SimulationResults(state.next())
     }
 
     data class Define(val alias: String, val value: Double) :
         SimpleOperation("define", ScriptValue.of(alias), ScriptValue.of(value)) {
 
         // TODO We should probably actually simulation alias look-ups instead of cheating...
-        override fun invoke(state: SimulationState): SimulationState = state.next()
+        override fun invoke(state: SimulationState): SimulationResults = SimulationResults(state.next())
     }
 
     data class Comment(val message: String) : SimpleOperation("#", ScriptValue.of(message)) {
@@ -197,7 +209,7 @@ sealed class Operation : Compilable, Statement {
             }
         }
 
-        override fun invoke(state: SimulationState): SimulationState = state.next()
+        override fun invoke(state: SimulationState): SimulationResults = SimulationResults(state.next())
     }
 
     //endregion

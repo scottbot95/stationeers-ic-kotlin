@@ -3,13 +3,8 @@ package com.github.scottbot95.stationeers.ic.dsl
 import com.github.scottbot95.stationeers.ic.CompiledOperation
 import com.github.scottbot95.stationeers.ic.Device
 import com.github.scottbot95.stationeers.ic.Register
-import com.github.scottbot95.stationeers.ic.util.AliasedScriptValueContainer
-import com.github.scottbot95.stationeers.ic.util.DelegatingAliasedScriptValueContainer
-import com.github.scottbot95.stationeers.ic.util.DelegatingLabelContainer
-import com.github.scottbot95.stationeers.ic.util.LabelContainer
-import com.github.scottbot95.stationeers.ic.util.LabelContainerImpl
-import com.github.scottbot95.stationeers.ic.util.combine
-import com.github.scottbot95.stationeers.ic.util.compileAll
+import com.github.scottbot95.stationeers.ic.SimulationResults
+import com.github.scottbot95.stationeers.ic.util.*
 
 @DslMarker
 annotation class ScriptDSL
@@ -28,7 +23,7 @@ interface ScriptBlock : Compilable {
                 // TODO improve this warning
                 println("WARN: Text added directly is not currently simulated.")
                 println("\tIgnoring `$this`")
-                it.next()
+                SimulationResults(it.next())
             }
         }
     }

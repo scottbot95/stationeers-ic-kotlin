@@ -21,6 +21,8 @@ private fun approximatelyEqual(a: Double, b: Double, c: Double): Boolean =
 sealed class Conditional(val shortName: String, vararg val args: ScriptValue<*>) : Expression<Boolean> {
     abstract val inverse: Conditional
 
+//    protected abstract fun evaluateInternal(state: SimulationState): Boolean
+
     /**
      * The [Conditional] that is always true
      */

@@ -66,9 +66,9 @@ class TransformingMapTest {
     fun testRemoveHandler() {
         val (key, value) = testOtherMap.entries.first()
 
-        val transform: ValueTransformer<String, String> = {_, _, _ -> "ROBOTS IN DISGUISE" }
+        val transform: ValueTransformer<String, String> = { _, _, _ -> "ROBOTS IN DISGUISE" }
 
-        val transformingMap = transformingMapOf<String,String>()
+        val transformingMap = transformingMapOf<String, String>()
 
         transformingMap.registerTransformer(transform)
         transformingMap[key] = value

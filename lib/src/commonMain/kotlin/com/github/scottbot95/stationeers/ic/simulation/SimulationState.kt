@@ -35,6 +35,7 @@ class SimulationState private constructor(
     /**
      * Creates a new simulation state advancing the [instructionPointer] to [nextIP]
      */
+    // TODO I think I might want this to return a SimulationResult instead of another SimulationState...
     fun next(nextIP: Int = instructionPointer + 1) = copy(instructionPointer = nextIP)
 
     /**
@@ -56,12 +57,18 @@ class SimulationState private constructor(
      * [deviceVar] to [newValue] validated against the [deviceVarHandlers]
      */
     fun next(deviceVar: LogicDeviceVar, newValue: Double, nextIP: Int = instructionPointer + 1): SimulationState {
-        val currValues = devices.getValue(deviceVar.device.value)
-        val currValue = currValues[deviceVar.name] ?: 0.0
+        val device = deviceVar.device.value
+        val varName = deviceVar.name
+
+        val currValues = devices[device] ?: throw SimulationException(
+            this,
+            "Cannot read var '$varName' on disconnected device '$device'"
+        )
+        val currValue = currValues[varName] ?: 0.0
         val validatedValue = deviceVarHandlers.validateChange(deviceVar, currValue, newValue)
         return copy(
             instructionPointer = nextIP,
-            devices = devices.put(deviceVar.device.value, currValues.put(deviceVar.name, validatedValue))
+            devices = devices.put(device, currValues.put(varName, validatedValue))
         )
     }
 
