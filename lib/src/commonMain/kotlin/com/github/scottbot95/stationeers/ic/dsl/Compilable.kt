@@ -1,6 +1,7 @@
 package com.github.scottbot95.stationeers.ic.dsl
 
 import com.github.scottbot95.stationeers.ic.CompiledOperation
+import com.github.scottbot95.stationeers.ic.simulation.CompiledScript
 
 data class CompileOptions(
     val minify: Boolean = false,
@@ -43,5 +44,5 @@ fun interface Compilable {
     }
 }
 
-fun Compilable.compile(options: CompileOptions = CompileOptions()): PartialCompiledScript =
-    compile(PartialCompiledScript.empty(options))
+fun Compilable.compile(options: CompileOptions = CompileOptions()): CompiledScript =
+    compile(PartialCompiledScript.empty(options)).toCompiledScript()

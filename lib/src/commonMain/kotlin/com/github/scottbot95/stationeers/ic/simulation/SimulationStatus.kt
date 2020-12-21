@@ -6,11 +6,11 @@ sealed class SimulationStatus(val isSuccess: Boolean = true) {
     object Initialized : SimulationStatus()
     object Running : SimulationStatus()
     object Yielded : SimulationStatus()
-    object Finished : SimulationStatus()
+    object Finished : SimulationStatus(false)
 
     /**
      * Indicates an error occurred while simulating. In most cases, you do no need to return this directly,
      * but instead should just throw a [SimulationException]
      */
-    data class Errored(val message: String, val cause: Throwable?) : SimulationStatus(false)
+    data class Errored(val message: String?, val cause: Throwable?) : SimulationStatus(false)
 }

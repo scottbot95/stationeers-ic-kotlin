@@ -64,7 +64,7 @@ abstract class AliasedScriptValueContainer<T : Any>(private val prefix: String =
     fun getUsed(value: T): Int = valuesInUse[value]
 
     override fun compile(partial: PartialCompiledScript): PartialCompiledScript {
-        return if (partial.options.minify) {
+        return if (partial.compileOptions.minify) {
             partial
         } else {
             aliases

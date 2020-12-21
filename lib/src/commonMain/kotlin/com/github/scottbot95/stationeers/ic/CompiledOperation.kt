@@ -4,10 +4,16 @@ import com.github.scottbot95.stationeers.ic.dsl.ScriptValue
 import com.github.scottbot95.stationeers.ic.simulation.SimulationState
 import com.github.scottbot95.stationeers.ic.simulation.SimulationStatus
 
+// Ewwww using the "I" prefix. Find something better
+interface ISimulationResults {
+    val endState: SimulationState
+    val status: SimulationStatus
+}
+
 data class SimulationResults(
-    val endState: SimulationState,
-    val status: SimulationStatus = SimulationStatus.Running
-)
+    override val endState: SimulationState,
+    override val status: SimulationStatus = SimulationStatus.Running
+) : ISimulationResults
 
 /**
  * Something that can be simulated
@@ -17,7 +23,7 @@ fun interface Statement {
      * Simulates this [Statement] against [SimulationState] and returns the new [SimulationState] object.
      * Most likely, this should end with a call to [SimulationState.next]
      */
-    operator fun invoke(state: SimulationState): SimulationResults
+    operator fun invoke(state: SimulationState): ISimulationResults
 
     companion object {
         //        val Noop = Statement { it.next() }

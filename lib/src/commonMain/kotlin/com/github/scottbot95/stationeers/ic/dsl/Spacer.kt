@@ -10,7 +10,7 @@ private object CompiledSpacer : CompiledOperation(ScriptValue.EMPTY, statement =
 
 class Spacer(private val numLines: Int, private val allowAtStart: Boolean = false) : Compilable {
     override fun compile(partial: PartialCompiledScript): PartialCompiledScript {
-        return if (partial.options.minify || (!allowAtStart && partial.nextLine == 0)) {
+        return if (partial.compileOptions.minify || (!allowAtStart && partial.nextLine == 0)) {
             partial
         } else {
             val reversed = partial.operations.asReversed()

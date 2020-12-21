@@ -30,7 +30,7 @@ private class InjectableReference(override val label: String? = null) : LineRefe
         }
         lineNum = partial.nextLine
 
-        if (label != null && !partial.options.minify) {
+        if (label != null && !partial.compileOptions.minify) {
             partial + CompiledOperation(ScriptValue.of("$label:"), statement = Statement.Noop)
         } else {
             partial

@@ -29,7 +29,8 @@ class SimulationState private constructor(
      * [Map] of the registers and their current value. All registers default to 0
      */
     val registers: RegisterValues = persistentMapOf(),
-    val devices: DeviceVarValues = persistentMapOf()
+    val devices: DeviceVarValues = persistentMapOf(),
+    val executionCount: Int = 0,
 ) {
 
     /**
@@ -96,6 +97,7 @@ class SimulationState private constructor(
         instructionPointer = instructionPointer,
         registers = registers,
         devices = devices,
+        executionCount = executionCount + 1
     )
 
     companion object {

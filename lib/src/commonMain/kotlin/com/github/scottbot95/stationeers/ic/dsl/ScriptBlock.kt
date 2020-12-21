@@ -4,7 +4,13 @@ import com.github.scottbot95.stationeers.ic.CompiledOperation
 import com.github.scottbot95.stationeers.ic.Device
 import com.github.scottbot95.stationeers.ic.Register
 import com.github.scottbot95.stationeers.ic.SimulationResults
-import com.github.scottbot95.stationeers.ic.util.*
+import com.github.scottbot95.stationeers.ic.util.AliasedScriptValueContainer
+import com.github.scottbot95.stationeers.ic.util.DelegatingAliasedScriptValueContainer
+import com.github.scottbot95.stationeers.ic.util.DelegatingLabelContainer
+import com.github.scottbot95.stationeers.ic.util.LabelContainer
+import com.github.scottbot95.stationeers.ic.util.LabelContainerImpl
+import com.github.scottbot95.stationeers.ic.util.combine
+import com.github.scottbot95.stationeers.ic.util.compileAll
 
 @DslMarker
 annotation class ScriptDSL
