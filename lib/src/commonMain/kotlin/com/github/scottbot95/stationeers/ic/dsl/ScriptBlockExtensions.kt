@@ -72,8 +72,14 @@ fun ScriptBlock.define(value: Double, name: String? = null) = DefineDelegateProv
 
 //region Basic Operation extensions
 
-inline fun ScriptBlock.block(spacing: Int = 1, init: ScriptBlock.() -> Unit): ScriptBlock {
+inline fun ScriptBlock.block(comment: String? = null, spacing: Int = 1, init: ScriptBlock.() -> Unit): ScriptBlock {
     val block = SimpleScriptBlock(this, spacing)
+
+    // Perhaps this belongs in SimpleScriptBlock?
+    if (comment != null) {
+        block.comment(comment)
+    }
+
     block.init()
     +block
     return block
@@ -173,7 +179,7 @@ fun ScriptBlock.cond(
     val default = branchSequence.filter { it.first === Conditional.None }.map { it.second }.firstOrNull()
     val conditions = branchSequence.filter { it.first !== Conditional.None }.toList()
 
-    block(0) {
+    block(spacing = 0) {
         conditions.forEach {
             branch(it.first, it.second.start)
         }

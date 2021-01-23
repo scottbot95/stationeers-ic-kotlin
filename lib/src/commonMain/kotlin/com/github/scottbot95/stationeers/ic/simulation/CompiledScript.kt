@@ -1,12 +1,17 @@
 package com.github.scottbot95.stationeers.ic.simulation
 
 import com.github.scottbot95.stationeers.ic.CompiledOperation
+import com.github.scottbot95.stationeers.ic.Device
 import com.github.scottbot95.stationeers.ic.ISimulationResults
+import com.github.scottbot95.stationeers.ic.Register
 import com.github.scottbot95.stationeers.ic.SimulationResults
+import com.github.scottbot95.stationeers.ic.devices.LogicDeviceVar
 import com.github.scottbot95.stationeers.ic.dsl.CompileOptions
 import com.github.scottbot95.stationeers.ic.util.OperationList
+import com.github.scottbot95.stationeers.ic.util.ValueTransformer
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
+import kotlin.jvm.JvmName
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
@@ -30,8 +35,8 @@ class CompiledScript(
         reset()
     }
 
-    fun reset() {
-        currState = SimulationState.Initial
+    fun reset(initialState: SimulationState = SimulationState.Initial) {
+        currState = initialState
     }
 
     fun step(): TimedSimulationResults {
@@ -69,6 +74,18 @@ class CompiledScript(
         }
 
         return MultiSimulationResults(totalResults, totalTime.inMilliseconds)
+    }
+
+    @JvmName("addRegisterTransformer")
+    fun addTransformer(transformer: ValueTransformer<Register, Double>): CompiledScript {
+        currState += transformer
+        return this
+    }
+
+    @JvmName("addDeviceTransformer")
+    fun addTransformer(transformer: ValueTransformer<LogicDeviceVar, Double>): CompiledScript {
+        currState += transformer
+        return this
     }
 
     private fun stepInternal(): ISimulationResults {
