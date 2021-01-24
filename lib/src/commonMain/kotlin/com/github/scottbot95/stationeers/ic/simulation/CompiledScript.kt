@@ -22,8 +22,7 @@ data class MultiSimulationResults(
     val totalTime: Double
 ) : ISimulationResults by results.last()
 
-@ICSimulation
-@OptIn(ExperimentalTime::class)
+@OptIn(ExperimentalTime::class, ICSimulation::class)
 class CompiledScript(
     compileOptions: CompileOptions,
     operations: List<CompiledOperation>,

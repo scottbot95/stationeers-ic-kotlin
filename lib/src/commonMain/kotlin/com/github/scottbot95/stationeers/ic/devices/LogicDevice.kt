@@ -26,6 +26,14 @@ class LogicMemory(
     device: ScriptValue<Device>,
 ) : LogicDeviceBase(alias, device), SettableDevice
 
+class DaylightSensor(
+    alias: String?,
+    device: ScriptValue<Device>
+): LogicDeviceBase(alias, device) {
+    val Mode by readWriteVar
+    val SolarAngle by readOnlyVar
+}
+
 class Light(alias: String?, device: ScriptValue<Device>) :
     LogicDeviceBase(alias, device),
     PoweredLogicDevice,

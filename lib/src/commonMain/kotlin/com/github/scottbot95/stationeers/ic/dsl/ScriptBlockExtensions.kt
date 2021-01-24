@@ -95,6 +95,10 @@ fun ScriptBlock.add(output: ScriptValue<Register>, a: ScriptValue<*>, b: ScriptV
     +Operation.Add(output, a, b)
 }
 
+fun ScriptBlock.divide(output: ScriptValue<Register>, a: ScriptValue<*>, b:ScriptValue<*>) {
+    +Operation.Divide(output, a, b)
+}
+
 fun ScriptBlock.subtract(output: ScriptValue<Register>, a: ScriptValue<*>, b: ScriptValue<*>) {
     +Operation.Subtract(output, a, b)
 }
@@ -136,7 +140,7 @@ fun ScriptBlock.writeDevice(deviceVar: LogicDeviceVar, value: ScriptValue<*>) {
 
 fun ScriptBlock.readBatchDevices(
     type: ScriptValue<Hash>,
-    deviceVar: LogicDeviceVar,
+    deviceVar: ScriptValue<String>,
     batchMode: Operation.BatchLoad.BatchMode
 ): ScriptValue<Register> = registers.newAliasedValue(null, null).also {
     +Operation.BatchLoad(it, type, deviceVar, batchMode)
@@ -145,20 +149,13 @@ fun ScriptBlock.readBatchDevices(
 fun ScriptBlock.readBatchDevices(
     output: ScriptValue<Register>,
     type: ScriptValue<Hash>,
-    deviceVar: LogicDeviceVar,
+    deviceVar: ScriptValue<String>,
     batchMode: Operation.BatchLoad.BatchMode
 ) {
-    if (!deviceVar.canRead) {
-        throw IllegalArgumentException("Cannot read from ${deviceVar.name} on ${deviceVar.device.alias ?: deviceVar.device.value}")
-    }
     +Operation.BatchLoad(output, type, deviceVar, batchMode)
 }
 
-fun ScriptBlock.writeBatchDevices(type: ScriptValue<Hash>, deviceVar: LogicDeviceVar, value: ScriptValue<*>) {
-    if (!deviceVar.canWrite) {
-        throw IllegalArgumentException("Cannot write to ${deviceVar.name} on ${deviceVar.device.alias ?: deviceVar.device.value}")
-    }
-
+fun ScriptBlock.writeBatchDevices(type: ScriptValue<Hash>, deviceVar: ScriptValue<String>, value: ScriptValue<*>) {
     +Operation.BatchSave(type, deviceVar, value)
 }
 
