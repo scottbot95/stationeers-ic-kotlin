@@ -1,5 +1,6 @@
 package com.github.scottbot95.stationeers.ic.util
 
+import com.github.scottbot95.stationeers.ic.Device
 import com.github.scottbot95.stationeers.ic.Expression
 import com.github.scottbot95.stationeers.ic.dsl.ScriptValue
 import com.github.scottbot95.stationeers.ic.dsl.of
@@ -82,16 +83,16 @@ abstract class TrinomialConditional(
     protected abstract fun evaluate(a: Double, b: Double, c: Double): Boolean
 }
 
-class DeviceSet(a: ScriptValue<*>, b: ScriptValue<*>) : Conditional("dse", a, b) {
-    override val inverse: Conditional by lazy { DeviceNotSet(a, b) }
+class DeviceSet(device: ScriptValue<Device>) : Conditional("dse", device) {
+    override val inverse: Conditional by lazy { DeviceNotSet(device) }
 
     override fun evaluate(state: SimulationState): Boolean {
         TODO("Not yet implemented")
     }
 }
 
-class DeviceNotSet(a: ScriptValue<*>, b: ScriptValue<*>) : Conditional("dns", a, b) {
-    override val inverse: Conditional by lazy { DeviceSet(a, b) }
+class DeviceNotSet(device: ScriptValue<Device>) : Conditional("dns", device) {
+    override val inverse: Conditional by lazy { DeviceSet(device) }
 
     override fun evaluate(state: SimulationState): Boolean {
         TODO("Not yet implemented")

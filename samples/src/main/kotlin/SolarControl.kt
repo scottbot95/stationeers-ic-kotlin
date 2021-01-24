@@ -11,6 +11,7 @@ import com.github.scottbot95.stationeers.ic.dsl.of
 import com.github.scottbot95.stationeers.ic.dsl.readDevice
 import com.github.scottbot95.stationeers.ic.dsl.script
 import com.github.scottbot95.stationeers.ic.dsl.subtract
+import com.github.scottbot95.stationeers.ic.dsl.waitForDevices
 import com.github.scottbot95.stationeers.ic.dsl.writeBatchDevices
 import com.github.scottbot95.stationeers.ic.dsl.writeDevice
 
@@ -23,6 +24,8 @@ val solarControl = script {
 
     val horizSensor by device(::DaylightSensor)
     val vertSensor by device(::DaylightSensor)
+
+    waitForDevices(horizSensor, vertSensor)
 
     comment("Configure daylight sensors")
     writeDevice(horizSensor.Mode, ScriptValue.of(1.0)) // these might need flipped according to wiki

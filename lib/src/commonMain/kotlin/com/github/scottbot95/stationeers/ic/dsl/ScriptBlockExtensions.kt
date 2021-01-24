@@ -12,6 +12,7 @@ import com.github.scottbot95.stationeers.ic.util.AliasedScriptValueDelegateProvi
 import com.github.scottbot95.stationeers.ic.util.Conditional
 import com.github.scottbot95.stationeers.ic.util.ConstantReadOnlyProperty
 import com.github.scottbot95.stationeers.ic.util.DefaultAliasedScriptValueDelegateProvider
+import com.github.scottbot95.stationeers.ic.util.DeviceNotSet
 import com.github.scottbot95.stationeers.ic.util.LabelDelegateProvider
 import com.github.scottbot95.stationeers.ic.util.combine
 import kotlin.properties.ReadOnlyProperty
@@ -253,5 +254,16 @@ fun ScriptBlock.reference(label: String? = null, inject: Boolean = true): LineRe
         if (label != null) labels.add(it)
         if (inject) +it.inject
     }
+
+fun ScriptBlock.waitForDevices(vararg devices: ScriptValue<Device>, comment: String? = null) {
+    if (devices.isEmpty()) return
+
+    +block(comment) {
+        yield()
+        devices.forEach {
+            branch(DeviceNotSet(it), start)
+        }
+    }
+}
 
 //endregion
