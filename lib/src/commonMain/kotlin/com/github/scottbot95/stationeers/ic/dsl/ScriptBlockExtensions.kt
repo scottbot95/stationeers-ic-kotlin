@@ -1,6 +1,7 @@
 package com.github.scottbot95.stationeers.ic.dsl
 
 import com.github.scottbot95.stationeers.ic.Device
+import com.github.scottbot95.stationeers.ic.Hash
 import com.github.scottbot95.stationeers.ic.JumpType
 import com.github.scottbot95.stationeers.ic.Operation
 import com.github.scottbot95.stationeers.ic.Register
@@ -109,10 +110,15 @@ fun ScriptBlock.min(output: ScriptValue<Register>, a: ScriptValue<*>, b: ScriptV
 /**
  * Allocates a temporary register and reads [deviceVar]
  */
-fun ScriptBlock.readDevice(deviceVar: LogicDeviceVar): ScriptValue<Register> =
-    registers.newAliasedValue(null, null).also {
+fun ScriptBlock.readDevice(deviceVar: LogicDeviceVar): ScriptValue<Register> {
+    if (!deviceVar.canRead) {
+        throw IllegalArgumentException("Cannot read from ${deviceVar.name} on ${deviceVar.device.alias ?: deviceVar.device.value}")
+    }
+
+    return registers.newAliasedValue(null, null).also {
         +Operation.Load(it, deviceVar)
     }
+}
 
 fun ScriptBlock.readDevice(output: ScriptValue<Register>, deviceVar: LogicDeviceVar) {
     if (!deviceVar.canRead) {
@@ -127,6 +133,35 @@ fun ScriptBlock.writeDevice(deviceVar: LogicDeviceVar, value: ScriptValue<*>) {
     }
     +Operation.Save(deviceVar, value)
 }
+
+fun ScriptBlock.readBatchDevices(
+    type: ScriptValue<Hash>,
+    deviceVar: LogicDeviceVar,
+    batchMode: Operation.BatchLoad.BatchMode
+): ScriptValue<Register> = registers.newAliasedValue(null, null).also {
+    +Operation.BatchLoad(it, type, deviceVar, batchMode)
+}
+
+fun ScriptBlock.readBatchDevices(
+    output: ScriptValue<Register>,
+    type: ScriptValue<Hash>,
+    deviceVar: LogicDeviceVar,
+    batchMode: Operation.BatchLoad.BatchMode
+) {
+    if (!deviceVar.canRead) {
+        throw IllegalArgumentException("Cannot read from ${deviceVar.name} on ${deviceVar.device.alias ?: deviceVar.device.value}")
+    }
+    +Operation.BatchLoad(output, type, deviceVar, batchMode)
+}
+
+fun ScriptBlock.writeBatchDevices(type: ScriptValue<Hash>, deviceVar: LogicDeviceVar, value: ScriptValue<*>) {
+    if (!deviceVar.canWrite) {
+        throw IllegalArgumentException("Cannot write to ${deviceVar.name} on ${deviceVar.device.alias ?: deviceVar.device.value}")
+    }
+
+    +Operation.BatchSave(type, deviceVar, value)
+}
+
 
 fun ScriptBlock.jump(target: LineReference, function: Boolean = false) {
     +Operation.Jump(target, if (function) JumpType.FUNCTION else null)

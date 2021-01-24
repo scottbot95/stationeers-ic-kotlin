@@ -32,8 +32,4 @@ tasks {
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions.jvmTarget = "1.8"
     }
-
-    register<com.github.scottbot95.stationeers.ic.gradle.ExportScriptTask>("export") {
-        scriptName = "ElectricFurnaceControl"
-    }
 }

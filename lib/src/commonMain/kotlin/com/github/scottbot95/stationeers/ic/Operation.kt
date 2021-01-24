@@ -22,6 +22,8 @@ enum class JumpType : FlagEnum {
     RELATIVE,
 }
 
+typealias Hash = String
+
 private fun makeJump(state: SimulationState, target: LineReference, functionCall: Boolean): ISimulationResults {
     val nextIP = target.toFixed().value
     return SimulationResults(
@@ -83,6 +85,31 @@ sealed class Operation : Compilable, Statement {
         }
     }
 
+    data class BatchLoad(
+        val output: ScriptValue<Register>,
+        val type: ScriptValue<Hash>,
+        val deviceVar: LogicDeviceVar,
+        val batchMode: BatchMode
+    ) : SimpleOperation("lb", output, type, ScriptValue.of(deviceVar.name), ScriptValue.of(batchMode.ordinal.toDouble())) {
+        enum class BatchMode {
+            AVERAGE, SUM, MINIMUM, MAXIMUM
+        }
+
+        override fun invoke(state: SimulationState): ISimulationResults {
+            TODO("Not yet implemented")
+        }
+    }
+
+    data class BatchSave(
+        val type: ScriptValue<Hash>,
+        val deviceVar: LogicDeviceVar,
+        val value: ScriptValue<*>
+    ): SimpleOperation("sb", type, ScriptValue.of(deviceVar.name), value) {
+        override fun invoke(state: SimulationState): ISimulationResults {
+            TODO("Not yet implemented")
+        }
+    }
+
     data class Move(val output: ScriptValue<Register>, val value: ScriptValue<*>) :
         SimpleOperation("move", output, value) {
 
@@ -108,27 +135,123 @@ sealed class Operation : Compilable, Statement {
         }
     }
 
-    data class Subtract(val output: ScriptValue<Register>, val a: ScriptValue<*>, val b: ScriptValue<*>) :
-        SimpleOperation("sub", output, a, b) {
-
+    data class AbsoluteValue(val output: ScriptValue<Register>, val input: ScriptValue<*>): SimpleOperation("abs", output, input) {
         override fun invoke(state: SimulationState): ISimulationResults {
-            return SimulationResults(state.next(output.value, a.toDouble(state) - b.toDouble(state)))
+            TODO("Not yet implemented")
+        }
+    }
+
+    data class Arccos(val output: ScriptValue<Register>, val input: ScriptValue<*>): SimpleOperation("acos", output, input) {
+        override fun invoke(state: SimulationState): ISimulationResults {
+            TODO("Not yet implemented")
+        }
+    }
+
+    data class Arcsin(val output: ScriptValue<Register>, val input: ScriptValue<*>): SimpleOperation("asin", output, input){
+        override fun invoke(state: SimulationState): ISimulationResults {
+            TODO("Not yet implemented")
+        }
+    }
+
+    data class Ceil(val output: ScriptValue<Register>, val input: ScriptValue<*>): SimpleOperation("ceil", output, input) {
+        override fun invoke(state: SimulationState): ISimulationResults {
+            TODO("Not yet implemented")
+        }
+    }
+
+    data class Cos(val output: ScriptValue<Register>, val input: ScriptValue<*>): SimpleOperation("cos", output, input) {
+        override fun invoke(state: SimulationState): ISimulationResults {
+            TODO("Not yet implemented")
+        }
+    }
+
+    data class Divide(val output: ScriptValue<Register>, val a: ScriptValue<*>, val b: ScriptValue<*>): SimpleOperation("div", output, a,b) {
+        override fun invoke(state: SimulationState): ISimulationResults {
+            TODO("Not yet implemented")
+        }
+    }
+
+    data class Exp(val output: ScriptValue<Register>, val input: ScriptValue<*>): SimpleOperation("exp", output, input) {
+        override fun invoke(state: SimulationState): ISimulationResults {
+            TODO("Not yet implemented")
+        }
+    }
+
+    data class Floor(val output: ScriptValue<Register>, val input: ScriptValue<*>): SimpleOperation("floor", output, input) {
+        override fun invoke(state: SimulationState): ISimulationResults {
+            TODO("Not yet implemented")
+        }
+    }
+
+    data class Log(val output: ScriptValue<Register>, val input: ScriptValue<*>): SimpleOperation("log", output, input) {
+        override fun invoke(state: SimulationState): ISimulationResults {
+            TODO("Not yet implemented")
         }
     }
 
     data class Max(val output: ScriptValue<Register>, val a: ScriptValue<*>, val b: ScriptValue<*>) :
         SimpleOperation("max", output, a, b) {
-
         override fun invoke(state: SimulationState): ISimulationResults {
             return SimulationResults(state.next(output.value, max(a.toDouble(state), b.toDouble(state))))
         }
+
     }
 
     data class Min(val output: ScriptValue<Register>, val a: ScriptValue<*>, val b: ScriptValue<*>) :
         SimpleOperation("min", output, a, b) {
-
         override fun invoke(state: SimulationState): ISimulationResults {
             return SimulationResults(state.next(output.value, max(a.toDouble(state), b.toDouble(state))))
+        }
+
+    }
+
+    data class Modulus(val output: ScriptValue<Register>, val a: ScriptValue<*>, val b: ScriptValue<*>): SimpleOperation("mod", output, a , b) {
+        override fun invoke(state: SimulationState): ISimulationResults {
+            TODO("Not yet implemented")
+        }
+    }
+
+    data class Random(val output: ScriptValue<Register>): SimpleOperation("rand", output) {
+        override fun invoke(state: SimulationState): ISimulationResults {
+            TODO("Not yet implemented")
+        }
+    }
+
+    data class Round(val output: ScriptValue<Register>, val input: ScriptValue<*>): SimpleOperation("round", output, input) {
+        override fun invoke(state: SimulationState): ISimulationResults {
+            TODO("Not yet implemented")
+        }
+    }
+
+    data class Sin(val output: ScriptValue<Register>, val input: ScriptValue<*>): SimpleOperation("sin", output, input) {
+        override fun invoke(state: SimulationState): ISimulationResults {
+            TODO("Not yet implemented")
+        }
+    }
+
+    data class SquareRoot(val output: ScriptValue<Register>, val input: ScriptValue<*>): SimpleOperation("sqrt", output, input) {
+        override fun invoke(state: SimulationState): ISimulationResults {
+            TODO("Not yet implemented")
+        }
+    }
+
+    data class Tan(val output: ScriptValue<Register>, val input: ScriptValue<*>): SimpleOperation("tan", output, input) {
+        override fun invoke(state: SimulationState): ISimulationResults {
+            TODO("Not yet implemented")
+        }
+    }
+
+    data class Truncate(val output: ScriptValue<Register>, val input: ScriptValue<*>): SimpleOperation("trunc", output, input) {
+        override fun invoke(state: SimulationState): ISimulationResults {
+            TODO("Not yet implemented")
+        }
+    }
+
+    data class Subtract(val output: ScriptValue<Register>, val a: ScriptValue<*>, val b: ScriptValue<*>) :
+        SimpleOperation("sub", output, a, b) {
+
+        override fun invoke(state: SimulationState): ISimulationResults {
+            return SimulationResults(state.next(output.value, a.toDouble(state) - b.toDouble(state)))
         }
     }
 
@@ -185,6 +308,28 @@ sealed class Operation : Compilable, Statement {
 
     //endregion
 
+    //region Stack operations
+
+    data class Peek(val register: ScriptValue<Register>): SimpleOperation("peek") {
+        override fun invoke(state: SimulationState): ISimulationResults {
+            TODO("Not yet implemented")
+        }
+    }
+
+    data class Pop(val register: ScriptValue<Register>): SimpleOperation("pop") {
+        override fun invoke(state: SimulationState): ISimulationResults {
+            TODO("Not yet implemented")
+        }
+    }
+
+    data class Push(val register: ScriptValue<*>): SimpleOperation("push") {
+        override fun invoke(state: SimulationState): ISimulationResults {
+            TODO("Not yet implemented")
+        }
+    }
+
+    //endregion
+
     //region Misc Operations
 
     data class Alias(val alias: String, val target: Any) :
@@ -218,6 +363,12 @@ sealed class Operation : Compilable, Statement {
         }
 
         override fun invoke(state: SimulationState): ISimulationResults = SimulationResults(state.next())
+    }
+
+    class Halt(): SimpleOperation("hcf") {
+        override fun invoke(state: SimulationState): ISimulationResults {
+            TODO("Not yet implemented")
+        }
     }
 
     //endregion

@@ -22,6 +22,7 @@ data class MultiSimulationResults(
     val totalTime: Double
 ) : ISimulationResults by results.last()
 
+@ICSimulation
 @OptIn(ExperimentalTime::class)
 class CompiledScript(
     compileOptions: CompileOptions,
@@ -35,10 +36,12 @@ class CompiledScript(
         reset()
     }
 
+    @ICSimulation
     fun reset(initialState: SimulationState = SimulationState.Initial) {
         currState = initialState
     }
 
+    @ICSimulation
     fun step(): TimedSimulationResults {
         val results: ISimulationResults
         val time = measureTime {
@@ -48,6 +51,7 @@ class CompiledScript(
         return TimedSimulationResults(results, time.inMilliseconds)
     }
 
+    @ICSimulation
     fun run(): MultiSimulationResults {
         val totalResults = mutableListOf<TimedSimulationResults>()
 
@@ -63,6 +67,7 @@ class CompiledScript(
         return MultiSimulationResults(totalResults, totalTime.inMilliseconds)
     }
 
+    @ICSimulation
     fun runToEnd(): MultiSimulationResults {
         val totalResults = mutableListOf<TimedSimulationResults>()
 
