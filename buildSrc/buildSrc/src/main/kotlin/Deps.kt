@@ -31,8 +31,25 @@ object Deps {
         const val mockk = "io.mockk:mockk:$VERSION"
     }
 
+    object Pinterest {
+        object Ktlint {
+            private const val VERSION = "0.44"
+            private const val PLUGIN_VERSION = "10.2.1"
+            const val gradlePlugin = "org.jlleitschuh.gradle:ktlint-gradle:$PLUGIN_VERSION"
+        }
+    }
+
     object Slf4J {
         private const val VERSION = "1.7.36"
         const val slf4jSimple = "org.slf4j:slf4j-simple:$VERSION"
+    }
+
+    object Square {
+        object Okio {
+            private const val VERSION = "3.0.0"
+            const val okio = "com.squareup.okio:okio:$VERSION"
+            const val okioNodeFilesystem = "com.squareup.okio:okio-nodefilesystem:$VERSION"
+            const val okioFakeFilesystem = "com.squareup.okio:okio-fakefilesystem:$VERSION"
+        }
     }
 }

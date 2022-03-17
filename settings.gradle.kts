@@ -1,2 +1,5 @@
 rootProject.name = "stationeers-ic-kotlin"
-include(":lib:dsl")
+include(
+    ":lib:dsl",
+    ":lib:core",
+)

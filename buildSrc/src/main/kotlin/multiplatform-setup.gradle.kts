@@ -5,11 +5,12 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("kotlin-multiplatform")
     id("io.kotest.multiplatform")
+    id("org.jlleitschuh.gradle.ktlint")
 //    kotlin("plugin.serialization")
 }
 
 kotlin {
-    jvm("desktop")
+    jvm()
 
     js(IR) {
         nodejs()
@@ -36,7 +37,7 @@ kotlin {
             }
         }
 
-        named("desktopTest") {
+        named("jvmTest") {
             dependencies {
                 implementation(Deps.JetBrains.Kotlin.testJunit)
                 implementation(Deps.Kotest.kotestJUnit5Runner)
@@ -52,7 +53,7 @@ kotlin {
         }
     }
 
-    tasks.named<Test>("desktopTest") {
+    tasks.withType<Test>().configureEach {
         useJUnitPlatform()
 
         systemProperty("org.slf4j.simpleLogger.defaultLogLevel", "debug")

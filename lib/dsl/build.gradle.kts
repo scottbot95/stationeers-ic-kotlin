@@ -4,6 +4,10 @@ plugins {
 
 kotlin {
     sourceSets {
-
+        named("commonMain") {
+            dependencies {
+                api(project(":lib:core"))
+            }
+        }
     }
 }

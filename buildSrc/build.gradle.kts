@@ -11,6 +11,7 @@ repositories {
 dependencies {
     implementation(Deps.JetBrains.Kotlin.gradlePlugin)
     implementation(Deps.Kotest.gradlePlugin)
+    implementation(Deps.Pinterest.Ktlint.gradlePlugin)
 }
 
 kotlin {
