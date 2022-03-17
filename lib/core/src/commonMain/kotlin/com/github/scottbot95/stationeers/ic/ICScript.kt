@@ -2,6 +2,9 @@ package com.github.scottbot95.stationeers.ic
 
 import okio.FileSystem
 import okio.Path
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 data class ExportOptions(
     var minify: Boolean = false,
@@ -33,7 +36,13 @@ interface ICScript {
  *
  * @see ICScript.writeToString
  */
-fun ICScript.writeToString(init: ExportOptions.() -> Unit) = writeToString(ExportOptions().apply(init))
+@ExperimentalContracts
+fun ICScript.writeToString(init: ExportOptions.() -> Unit): String {
+    contract {
+        callsInPlace(init, InvocationKind.EXACTLY_ONCE)
+    }
+    return writeToString(ExportOptions().apply(init))
+}
 
 /**
  * Write this [ICScript] to a file
@@ -45,6 +54,10 @@ fun ICScript.writeToFile(file: Path, fileSystem: FileSystem, options: ExportOpti
     }
 }
 
+@ExperimentalContracts
 fun ICScript.writeToFile(file: Path, fileSystem: FileSystem, init: ExportOptions.() -> Unit) {
+    contract {
+        callsInPlace(init, InvocationKind.EXACTLY_ONCE)
+    }
     return writeToFile(file, fileSystem, ExportOptions().apply(init))
 }

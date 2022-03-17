@@ -1,7 +1,18 @@
 package com.github.scottbot95.stationeers.ic.dsl
 
 import com.github.scottbot95.stationeers.ic.ICScript
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
-fun script(init: ScriptScope.() -> Unit): ICScript = TODO()
+@ExperimentalContracts
+fun script(init: ScriptScope.() -> Unit): ICScript {
+    contract {
+        callsInPlace(init, InvocationKind.EXACTLY_ONCE)
+    }
 
+    TODO()
+}
+
+@ICDsl
 interface ScriptScope
