@@ -11,6 +11,10 @@ plugins {
 kotlin {
     jvm("desktop")
 
+    js(IR) {
+        nodejs()
+    }
+
     sourceSets {
         all {
             languageSettings.optIn("kotlin.RequiresOptIn")
