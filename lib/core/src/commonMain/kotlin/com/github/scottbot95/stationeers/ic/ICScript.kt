@@ -15,6 +15,12 @@ data class ExportOptions(
  * A compiled Stationeers IC script
  */
 interface ICScript {
+
+    /**
+     * The array of [ICScriptStatement] that compose this [ICScript]
+     */
+    val statements: Array<ICScriptStatement>
+
     /**
      * Create a [ICScriptInvocation] for this [ICScript]
      *
