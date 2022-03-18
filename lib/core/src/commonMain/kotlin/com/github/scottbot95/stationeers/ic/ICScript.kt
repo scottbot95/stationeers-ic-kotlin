@@ -1,5 +1,6 @@
 package com.github.scottbot95.stationeers.ic
 
+import com.github.scottbot95.stationeers.ic.simulation.ICScriptInvocation
 import okio.FileSystem
 import okio.Path
 import kotlin.contracts.ExperimentalContracts
@@ -15,11 +16,11 @@ data class ExportOptions(
  */
 interface ICScript {
     /**
-     * Simulate the [ICScript] to up [maxSteps] steps
+     * Create a [ICScriptInvocation] for this [ICScript]
      *
-     * @param maxSteps Max number of steps to simulate for or indefinitely if <code>null</code>
+     * @return A new [ICScriptInvocation]
      */
-    fun simulate(maxSteps: Int? = null)
+    fun simulate(): ICScriptInvocation
 
     /**
      * Write this [ICScript] to a string
