@@ -1,4 +1,4 @@
-package com.github.scottbot95.stationeers.ic.simulation
+package com.github.scottbot95.stationeers.ic
 
 sealed class Register(val index: Int) {
     object R0: Register(0)
@@ -19,6 +19,10 @@ sealed class Register(val index: Int) {
     object R15: Register(15)
     object SP: Register(16)
     object RA: Register(17)
+
+    val token = "r$index"
+
+    override fun toString() = token
 
     companion object {
         private val registers = arrayOf(

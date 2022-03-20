@@ -9,5 +9,8 @@ interface ICScriptBuilderEntry {
 }
 
 interface ICScriptBuilder {
+
+    fun appendEntry(entry: ICScriptBuilderEntry): ICScriptBuilder
+
     fun compile(options: CompileOptions): ICScript
 }

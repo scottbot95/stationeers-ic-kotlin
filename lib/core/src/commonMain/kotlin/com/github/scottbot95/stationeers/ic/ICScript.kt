@@ -7,10 +7,6 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
-data class ExportOptions(
-    var minify: Boolean = false,
-)
-
 /**
  * A compiled Stationeers IC script
  */
