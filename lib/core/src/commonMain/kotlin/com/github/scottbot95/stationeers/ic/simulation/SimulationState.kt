@@ -1,7 +1,6 @@
 package com.github.scottbot95.stationeers.ic.simulation
 
 import com.github.scottbot95.stationeers.ic.Register
-import com.github.scottbot95.stationeers.ic.SymbolTable
 import kotlin.random.Random
 
 interface RegisterStates {
@@ -42,6 +41,5 @@ data class SimulationState(
     val registers: RegisterStates,
     val devices: DeviceStates,
     val stack: ICStack,
-    val symbols: SymbolTable,
     val random: Random = Random.Default,
 )
