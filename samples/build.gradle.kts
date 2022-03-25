@@ -1,31 +1,28 @@
 plugins {
-    kotlin("jvm")
+    // TODO theoretically we should be able to use the pure-jvm plugin here instead
+    kotlin("multiplatform")
 }
 
-repositories {
-    maven {
-        name = "GithubPackages"
-        url = uri("https://maven.pkg.github.com/scottbot95/stationeers-ic-kotlin")
+kotlin {
+    jvm()
+
+    sourceSets {
+        named("jvmMain") {
+            dependencies {
+                implementation("com.github.scottbot95:stationeers-ic-core:2.0.0-SNAPSHOT")
+            }
+        }
+        named("jvmTest") {
+            dependencies {
+                implementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+                runtimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+            }
+        }
     }
-    mavenLocal()
-    jcenter()
-}
-
-dependencies {
-    implementation(kotlin("stdlib"))
-
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.3.1")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.3.1")
-
-    // Uncomment for real implementation
-    // implementation("com.github.scottbot95:stationeers-ic-jvm:0.1.0")
-
-    // Only used for sample project
-    implementation(project(":stationeers-ic"))
 }
 
 tasks {
-    test {
+    withType<Test>().configureEach {
         useJUnitPlatform()
     }
 
