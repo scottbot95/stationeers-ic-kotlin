@@ -1,6 +1,7 @@
 plugins {
     // TODO theoretically we should be able to use the pure-jvm plugin here instead
     kotlin("multiplatform")
+    id("io.kotest.multiplatform")
 }
 
 kotlin {
@@ -14,8 +15,9 @@ kotlin {
         }
         named("jvmTest") {
             dependencies {
-                implementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
-                runtimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+                implementation(Deps.Kotest.kotestFrameworkEngine)
+                implementation(Deps.Kotest.kotestAssertionsCore)
+                implementation(Deps.Kotest.kotestJUnit5Runner)
             }
         }
     }
