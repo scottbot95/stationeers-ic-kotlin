@@ -12,21 +12,27 @@ interface ICScript {
     /**
      * The array of [ICScriptStatement] that compose this [ICScript]
      */
-    val statements: Array<ICScriptStatement>
+    val statements: List<ICScriptStatement>
 
     /**
-     * Create a [ICScriptInvocation] for this [ICScript]
-     *
-     * @return A new [ICScriptInvocation]
+     * The [CompileContext] this [ICScript] was compiled with
      */
-    fun simulate(): ICScriptInvocation
+    val context: CompileContext
 
-    /**
-     * Write this [ICScript] to a string
-     *
-     */
-    fun writeToString(): String
+//    /**
+//     * Create a [ICScriptInvocation] for this [ICScript]
+//     *
+//     * @return A new [ICScriptInvocation]
+//     */
+//    fun simulate(): ICScriptInvocation
+
 }
+
+/**
+ * Write this [ICScript] to a string
+ *
+ */
+fun ICScript.writeToString(): String = statements.joinToString("\n") { it.render(context) }
 
 /**
  * Write this [ICScript] to a file

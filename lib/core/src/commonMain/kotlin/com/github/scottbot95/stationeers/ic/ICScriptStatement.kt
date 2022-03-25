@@ -2,7 +2,7 @@ package com.github.scottbot95.stationeers.ic
 
 interface ICScriptStatement {
 
-    override fun toString(): String
+    fun render(context: CompileContext): String
 
 //    /**
 //     * Invoke this [ICScriptStatement] against the given [SimulationState], returning the next simulation state

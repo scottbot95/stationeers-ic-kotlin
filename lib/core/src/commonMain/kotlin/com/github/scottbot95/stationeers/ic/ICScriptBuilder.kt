@@ -1,10 +1,8 @@
 package com.github.scottbot95.stationeers.ic
 
-//data class CompileOptions(
-//    val ignoreErrors: Boolean = false
-//)
+import com.github.scottbot95.stationeers.ic.instructions.Instruction
 
-interface ICScriptBuilderEntry {
+fun interface ICScriptBuilderEntry {
     fun compile(context: CompileContext): ICScriptStatement
 }
 
@@ -13,4 +11,28 @@ interface ICScriptBuilder {
     fun appendEntry(entry: ICScriptBuilderEntry): ICScriptBuilder
 
     fun compile(options: CompileOptions): ICScript
+
+    companion object {
+        fun standard(): ICScriptBuilder = object : ICScriptBuilder {
+            private val entries: MutableList<ICScriptBuilderEntry> = mutableListOf()
+
+            override fun appendEntry(entry: ICScriptBuilderEntry): ICScriptBuilder {
+                entries.add(entry)
+                return this
+            }
+
+            override fun compile(options: CompileOptions): ICScript {
+                val compileContext = CompileContext(options)
+                return object : ICScript {
+                    override val context: CompileContext = compileContext
+                    override val statements: List<ICScriptStatement> = entries.map { it.compile(context) }
+
+                }
+            }
+
+        }
+    }
 }
+
+fun ICScriptBuilder.appendInstruction(instruction: Instruction): ICScriptBuilder =
+    appendEntry { instruction }
