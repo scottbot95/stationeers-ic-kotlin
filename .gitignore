@@ -11,15 +11,6 @@ gradle-app.setting
 .gradletasknamecache
 
 # IntelliJ
-.idea/**/workspace.xml
-.idea/**/tasks.xml
-.idea/**/usage.statistics.xml
-.idea/**/dictionaries
-.idea/**/shelf
-.idea/artifacts
-.idea/compiler.xml
-.idea/jarRepositories.xml
-.idea/modules.xml
-.idea/modules
+.idea/
 *.iml
 *.ipr
