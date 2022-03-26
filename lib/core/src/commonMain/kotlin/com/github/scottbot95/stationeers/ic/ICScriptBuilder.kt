@@ -3,7 +3,7 @@ package com.github.scottbot95.stationeers.ic
 import com.github.scottbot95.stationeers.ic.instructions.Instruction
 
 fun interface ICScriptBuilderEntry {
-    fun compile(context: CompileContext): ICScriptStatement
+    fun compile(context: CompileContext): List<ICScriptStatement>
 }
 
 interface ICScriptBuilder {
@@ -25,8 +25,7 @@ interface ICScriptBuilder {
                 val compileContext = CompileContext(options)
                 return object : ICScript {
                     override val context: CompileContext = compileContext
-                    override val statements: List<ICScriptStatement> = entries.map { it.compile(context) }
-
+                    override val statements: List<ICScriptStatement> = entries.flatMap { it.compile(context) }
                 }
             }
 
@@ -34,5 +33,5 @@ interface ICScriptBuilder {
     }
 }
 
-fun ICScriptBuilder.appendInstruction(instruction: Instruction): ICScriptBuilder =
-    appendEntry { instruction }
+fun ICScriptBuilder.appendInstruction(vararg instructions: Instruction): ICScriptBuilder =
+    appendEntry { instructions.toList() }

@@ -100,8 +100,8 @@ class FloatRegisterSymbol(
 }
 
 // TODO this is maybe not needed
-data class StringValue(val value: String) : ScriptValue<String> {
-    override fun compile(context: CompileContext): CompiledScriptValue<StringValue> = render(value)
+data class StringLiteral(val value: String) : ScriptValue<String> {
+    override fun compile(context: CompileContext): CompiledScriptValue<StringLiteral> = render(value)
 }
 
 private fun <V : Any, SV : ScriptValue<V>> Symbol<V, SV>.renderSymbol(context: CompileContext): CompiledScriptValue<ScriptValue<V>> =
