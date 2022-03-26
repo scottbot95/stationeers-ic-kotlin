@@ -2,9 +2,9 @@ import com.github.scottbot95.stationeers.ic.Device
 import com.github.scottbot95.stationeers.ic.ICScriptBuilder
 import com.github.scottbot95.stationeers.ic.Register
 import com.github.scottbot95.stationeers.ic.appendInstruction
-import com.github.scottbot95.stationeers.ic.instructions.Branch.Jump
 import com.github.scottbot95.stationeers.ic.instructions.Device.BatchSave
 import com.github.scottbot95.stationeers.ic.instructions.Device.Load
+import com.github.scottbot95.stationeers.ic.instructions.Flow.Jump
 import com.github.scottbot95.stationeers.ic.instructions.Math.Divide
 import com.github.scottbot95.stationeers.ic.instructions.Math.Subtract
 import com.github.scottbot95.stationeers.ic.instructions.Misc.Yield
