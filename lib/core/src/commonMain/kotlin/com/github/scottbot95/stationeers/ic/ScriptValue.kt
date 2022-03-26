@@ -33,7 +33,6 @@ sealed interface NumberLiteral<V : Number> : ScriptValue.NumberValue<V> {
     sealed interface FloatValue : NumberLiteral<Float>
 }
 
-
 sealed interface RegisterLiteral<V : Number> : ScriptValue.RegisterValue<V>, ScriptValue.NumberValue<V> {
     override fun compile(context: CompileContext): CompiledScriptValue<ScriptValue<V>> = render(register.token)
 
@@ -52,7 +51,8 @@ data class Label(val name: String) : ScriptValue.JumpTarget<String> {
 data class IntLiteral(override val value: Int) : NumberLiteral.IntValue, ScriptValue.JumpTarget<Int>
 data class FloatLiteral(override val value: Float) : NumberLiteral.FloatValue
 
-data class IntRegister(override val register: Register) : RegisterLiteral.IntRegisterLiteral,
+data class IntRegister(override val register: Register) :
+    RegisterLiteral.IntRegisterLiteral,
     ScriptValue.JumpTarget<Int>
 
 data class FloatRegister(override val register: Register) : RegisterLiteral.FloatRegisterLiteral

@@ -1,6 +1,13 @@
 package com.github.scottbot95.stationeers.ic
 
-import com.github.scottbot95.stationeers.ic.instructions.Instruction
+data class CompileOptions(
+    val minify: Boolean = false,
+)
+
+data class CompileContext(
+    val options: CompileOptions,
+    val nextLineNum: Int,
+)
 
 interface CompiledICScriptBuilder {
     val context: CompileContext
@@ -13,20 +20,43 @@ interface CompiledICScriptBuilder {
     fun appendLine(): CompiledICScriptBuilder
 
     /**
-     * Add [string] to the exported script
+     * Add [statement] to the compiled [ICScript]
      *
-     * @param string The [String] to add to the script
+     * @param statement The [ICScriptStatement] to add to the script
      * @return <code>this</code>
      */
     fun appendLine(statement: ICScriptStatement): CompiledICScriptBuilder
 
     /**
-     * Append specified [Instruction] to the compiled script
+     * Build this script into an [ICScript] instance
      */
-    fun appendInstruction(instruction: Instruction): CompiledICScriptBuilder
+    fun build(): ICScript
+}
 
-    /**
-     * Final export to [String]
-     */
-    override fun toString(): String
+class StandardCompiledICScriptBuilder(private val options: CompileOptions) : CompiledICScriptBuilder {
+    override val context: CompileContext
+        get() = CompileContext(options, _statements.size + 1)
+
+    private val _statements: MutableList<ICScriptStatement> = mutableListOf()
+
+    override fun appendLine(): CompiledICScriptBuilder {
+        _statements.add(ICScriptStatement.EMPTY)
+        return this
+    }
+
+    override fun appendLine(statement: ICScriptStatement): CompiledICScriptBuilder {
+        _statements.add(statement)
+        return this
+    }
+
+    override fun build(): ICScript {
+        return object : ICScript {
+            override val statements: List<ICScriptStatement> = _statements
+        }
+    }
+}
+
+fun CompiledICScriptBuilder.appendLine(block: (CompileContext) -> ICScriptStatement): CompiledICScriptBuilder {
+    val statement = block(context)
+    return appendLine(statement)
 }
