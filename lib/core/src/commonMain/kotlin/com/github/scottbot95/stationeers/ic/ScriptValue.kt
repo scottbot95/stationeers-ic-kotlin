@@ -45,7 +45,7 @@ class LineReference(val label: String? = null) : ScriptValue.JumpTarget<Any> {
     }
 
     val mark = Compilable { builder ->
-        if (lineNum != null) throw IllegalStateException("Cannot attempt to compile this LineReference marker in more than one place")
+        if (lineNum != null) throw IllegalStateException("Cannot compile this LineReference marker in more than one place")
 
         lineNum = builder.context.nextLineNum
 
