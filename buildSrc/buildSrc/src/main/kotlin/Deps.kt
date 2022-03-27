@@ -15,6 +15,7 @@ object Deps {
         const val gradlePlugin = "io.kotest:kotest-framework-multiplatform-plugin-gradle:$VERSION"
         const val kotestFrameworkEngine = "io.kotest:kotest-framework-engine:$VERSION"
         const val kotestAssertionsCore = "io.kotest:kotest-assertions-core:$VERSION"
+        const val kotestProperty = "io.kotest:kotest-property:$VERSION"
         const val kotestJUnit5Runner = "io.kotest:kotest-runner-junit5-jvm:$VERSION"
     }
 

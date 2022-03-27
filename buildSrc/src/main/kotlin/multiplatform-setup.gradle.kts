@@ -33,6 +33,7 @@ kotlin {
                 implementation(Deps.JetBrains.Kotlin.testAnnotationsCommon)
                 implementation(Deps.Kotest.kotestFrameworkEngine)
                 implementation(Deps.Kotest.kotestAssertionsCore)
+                implementation(Deps.Kotest.kotestProperty)
                 implementation(Deps.Mockk.mockkCommon)
             }
         }

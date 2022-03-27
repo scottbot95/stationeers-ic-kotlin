@@ -6,6 +6,9 @@ data class CompileOptions(
 
 data class CompileContext(
     val options: CompileOptions,
+    /**
+     * Next line number in the script (starts at 0)
+     */
     val nextLineNum: Int,
 )
 
@@ -35,7 +38,7 @@ interface CompiledICScriptBuilder {
 
 class StandardCompiledICScriptBuilder(private val options: CompileOptions) : CompiledICScriptBuilder {
     override val context: CompileContext
-        get() = CompileContext(options, _statements.size + 1)
+        get() = CompileContext(options, _statements.size)
 
     private val _statements: MutableList<ICScriptStatement> = mutableListOf()
 

@@ -30,3 +30,6 @@ interface ICScriptBuilder {
 
 fun ICScriptBuilder.appendInstruction(vararg instructions: Instruction): ICScriptBuilder =
     appendEntry { builder -> instructions.forEach { it.compile(builder) } }
+
+// TODO add '_n' suffix for repeat labels
+fun ICScriptBuilder.newLineReference(label: String? = null): LineReference = LineReference(label)

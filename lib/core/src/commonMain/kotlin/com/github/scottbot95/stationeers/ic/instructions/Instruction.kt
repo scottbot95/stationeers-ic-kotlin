@@ -19,7 +19,7 @@ sealed class Instruction(
         override val instruction: Instruction = this@Instruction
 
         override fun toString(): String {
-            val argString = args.joinToString(" ") { it.compile(context).toString() }
+            val argString = args.joinToString(" ") { it.render(context.options) }
             return "$opCode $argString".trim()
         }
     }
