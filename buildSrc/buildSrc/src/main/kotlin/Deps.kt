@@ -26,12 +26,6 @@ object Deps {
         }
     }
 
-    object Mockk {
-        private const val VERSION = "1.12.3"
-        const val mockkCommon = "io.mockk:mockk-common:$VERSION"
-        const val mockk = "io.mockk:mockk:$VERSION"
-    }
-
     object Pinterest {
         object Ktlint {
             private const val VERSION = "0.44"

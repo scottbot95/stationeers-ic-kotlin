@@ -34,7 +34,6 @@ kotlin {
                 implementation(Deps.Kotest.kotestFrameworkEngine)
                 implementation(Deps.Kotest.kotestAssertionsCore)
                 implementation(Deps.Kotest.kotestProperty)
-                implementation(Deps.Mockk.mockkCommon)
             }
         }
 
@@ -42,7 +41,6 @@ kotlin {
             dependencies {
                 implementation(Deps.JetBrains.Kotlin.testJunit)
                 implementation(Deps.Kotest.kotestJUnit5Runner)
-                implementation(Deps.Mockk.mockk)
                 implementation(Deps.Slf4J.slf4jSimple)
             }
         }

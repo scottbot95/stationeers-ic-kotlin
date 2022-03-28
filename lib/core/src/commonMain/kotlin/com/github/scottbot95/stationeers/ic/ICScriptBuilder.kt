@@ -1,19 +1,23 @@
 package com.github.scottbot95.stationeers.ic
 
-interface ICScriptBuilder {
+open class StandardCodeBlockBuilder<T : CodeBlockBuilder<T>> : CodeBlockBuilder<T> {
+    val entries: MutableList<Compilable> = mutableListOf()
 
-    fun appendEntry(entry: Compilable): ICScriptBuilder
+    @Suppress("UNCHECKED_CAST")
+    override fun appendEntry(entry: Compilable): T {
+        entries.add(entry)
+        return this as T
+    }
+}
+
+interface ICScriptBuilder : CodeBlockBuilder<ICScriptBuilder> {
 
     fun compile(options: CompileOptions): ICScript
 
-    companion object {
-        fun standard(): ICScriptBuilder = object : ICScriptBuilder {
-            private val entries: MutableList<Compilable> = mutableListOf()
+    fun newCodeBlock(): CodeBlock
 
-            override fun appendEntry(entry: Compilable): ICScriptBuilder {
-                entries.add(entry)
-                return this
-            }
+    companion object {
+        fun standard(): ICScriptBuilder = object : StandardCodeBlockBuilder<ICScriptBuilder>(), ICScriptBuilder {
 
             override fun compile(options: CompileOptions): ICScript {
                 val compiledBuilder = StandardCompiledICScriptBuilder(options)
@@ -22,9 +26,15 @@ interface ICScriptBuilder {
                 }
                 return compiledBuilder.build()
             }
+
+            // Should this go somewhere else?
+            override fun newCodeBlock(): CodeBlock = object : StandardCodeBlockBuilder<CodeBlock>(), CodeBlock {
+                override fun compile(builder: CompiledICScriptBuilder) {
+                    entries.forEach {
+                        it.compile(builder)
+                    }
+                }
+            }
         }
     }
 }
-
-// TODO add '_n' suffix for repeat labels
-fun ICScriptBuilder.newLineReference(label: String? = null): LineReference = LineReference(label)

@@ -1,11 +1,7 @@
-package com.github.scottbot95.stationeers.ic.patterns
+package com.github.scottbot95.stationeers.ic
 
-import com.github.scottbot95.stationeers.ic.CompileOptions
-import com.github.scottbot95.stationeers.ic.ICScriptBuilder
-import com.github.scottbot95.stationeers.ic.LineReference
 import com.github.scottbot95.stationeers.ic.instructions.Flow
 import com.github.scottbot95.stationeers.ic.instructions.Misc
-import com.github.scottbot95.stationeers.ic.writeToString
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.WordSpec
 import io.kotest.matchers.shouldBe
