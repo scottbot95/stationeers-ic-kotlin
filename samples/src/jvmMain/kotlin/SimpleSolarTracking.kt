@@ -1,7 +1,6 @@
 import com.github.scottbot95.stationeers.ic.Device
 import com.github.scottbot95.stationeers.ic.ICScriptBuilder
 import com.github.scottbot95.stationeers.ic.Register
-import com.github.scottbot95.stationeers.ic.appendInstruction
 import com.github.scottbot95.stationeers.ic.instructions.Device.BatchSave
 import com.github.scottbot95.stationeers.ic.instructions.Device.Load
 import com.github.scottbot95.stationeers.ic.instructions.Flow.Jump
@@ -20,11 +19,11 @@ fun ICScriptBuilder.simpleSolarTracking() {
     val panelAngle = Register.R2.asFloatRegister()
     val vertDiff = Register.R3.asFloatRegister()
 
-    appendInstruction(Load(panelHash, solarPanel, "PrefabHash".toScriptValue()))
-    appendInstruction(Load(vertAngle, daySensor, "Vertical".toScriptValue()))
-    appendInstruction(Subtract(vertDiff, vertAngle, 15.toScriptValue()))
-    appendInstruction(Divide(panelAngle, vertDiff, 1.5f.toScriptValue()))
-    appendInstruction(BatchSave(panelHash, "Vertical".toScriptValue(), panelAngle))
-    appendInstruction(Yield)
-    appendInstruction(Jump(0.toScriptValue()))
+    appendEntry(Load(panelHash, solarPanel, "PrefabHash".toScriptValue()))
+    appendEntry(Load(vertAngle, daySensor, "Vertical".toScriptValue()))
+    appendEntry(Subtract(vertDiff, vertAngle, 15.toScriptValue()))
+    appendEntry(Divide(panelAngle, vertDiff, 1.5f.toScriptValue()))
+    appendEntry(BatchSave(panelHash, "Vertical".toScriptValue(), panelAngle))
+    appendEntry(Yield)
+    appendEntry(Jump(0.toScriptValue()))
 }
