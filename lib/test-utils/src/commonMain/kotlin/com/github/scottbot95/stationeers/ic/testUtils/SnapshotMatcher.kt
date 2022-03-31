@@ -27,11 +27,13 @@ typealias SnapshotMap = Map<String, List<Snapshot>>
 @Serializable
 value class Snapshot(@Contextual val value: String)
 
+private val json = Json { prettyPrint = true }
+
 private class SnapshotMatcher(
     private val fileSystem: FileSystem,
     private val testSuite: String,
 ) {
-    private val expectedSnapshots by lazy { loadSnapshots(fileSystem, Config.snapshotDir) }
+    private val expectedSnapshots by lazy { loadSnapshots(fileSystem, testSuite) }
 
     private val seenSnapshots = mutableMapOf<String, MutableList<Snapshot>>()
 
@@ -77,14 +79,16 @@ private class SnapshotMatcher(
                 }
             }
         }
-        val json = Json.encodeToString(jsonObject)
+        val jsonString = json.encodeToString(jsonObject)
         println("Updating snapshot file `$path`")
         fileSystem.createDirectories(Config.snapshotDir.toPath())
         fileSystem.write(path) {
-            writeUtf8(json)
+            writeUtf8(jsonString)
         }
     }
 }
+
+val TestScope.matchSnapshot get() = matchSnapshot()
 
 fun TestScope.matchSnapshot() = Matcher<String> { value ->
     val ids = testCase.descriptor.ids()
@@ -109,14 +113,9 @@ private fun getMatcher(testSuite: String): SnapshotMatcher = matchers.getOrPut(t
     SnapshotMatcher(Config.filesystem, testSuite)
 }
 
-private fun loadSnapshots(fileSystem: FileSystem, dir: String): SnapshotMap {
-    return fileSystem.listOrNull(dir.toPath())?.flatMap { path ->
-        if (path.name.endsWith(".snapshot")) {
-            Json.decodeFromString<Map<String, List<Snapshot>>>(fileSystem.read(path) {
-                readUtf8()
-            }).entries.map { it.key to it.value }
-        } else {
-            listOf()
-        }
-    }?.associate { it } ?: mapOf()
+private fun loadSnapshots(fileSystem: FileSystem, testSuite: String): SnapshotMap {
+    val path = Config.snapshotDir.toPath() / "$testSuite.snapshot"
+    return json.decodeFromString(fileSystem.read(path) {
+        readUtf8()
+    })
 }

@@ -1,12 +1,21 @@
 plugins {
-    id("multiplatform-setup")
+    `multiplatform-setup`
 }
+
+apply<SnapshotPlugin>()
 
 kotlin {
     sourceSets {
         named("commonMain") {
             dependencies {
                 implementation(Deps.Square.Okio.okio)
+                implementation(Deps.JetBrains.Kotlinx.ImmutableCollections.immutableCollections)
+            }
+        }
+
+        named("commonTest") {
+            dependencies {
+                implementation(project(":lib:test-utils"))
             }
         }
 

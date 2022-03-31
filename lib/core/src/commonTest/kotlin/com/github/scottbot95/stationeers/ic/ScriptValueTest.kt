@@ -2,12 +2,19 @@ package com.github.scottbot95.stationeers.ic
 
 import com.github.scottbot95.stationeers.ic.instructions.Flow
 import com.github.scottbot95.stationeers.ic.instructions.Misc
+import com.github.scottbot95.stationeers.ic.testUtils.finalizeSnapshots
+import com.github.scottbot95.stationeers.ic.testUtils.matchSnapshot
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.core.descriptors.toDescriptor
 import io.kotest.core.spec.style.WordSpec
+import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.throwable.shouldHaveMessage
 
 class ScriptValueTest : WordSpec({
+    afterSpec {
+        finalizeSnapshots(it::class.toDescriptor().id.value)
+    }
     "LineReference" should {
         "throw if not injected" {
             val script = ICScriptBuilder.standard()
@@ -40,10 +47,7 @@ class ScriptValueTest : WordSpec({
                 .appendEntry(Flow.Jump(lineRef))
                 .compile(CompileOptions())
 
-            script.writeToString() shouldBe """
-                MyLabel:
-                j MyLabel
-            """.trimIndent()
+            script.writeToString() shouldBe matchSnapshot
         }
 
         "render references properly before mark" {
@@ -55,11 +59,13 @@ class ScriptValueTest : WordSpec({
                 .appendEntry(lineRef.mark)
                 .compile(CompileOptions())
 
-            script.writeToString() shouldBe """
-                j 3
-                # Just some filler here
-                # Some more filler for fun!
-            """.trimIndent()
+//            script.writeToString() shouldBe """
+//                j 3
+//                # Just some filler here
+//                # Some more filler for fun!
+//            """.trimIndent()
+
+            script.writeToString() should matchSnapshot
         }
     }
 })

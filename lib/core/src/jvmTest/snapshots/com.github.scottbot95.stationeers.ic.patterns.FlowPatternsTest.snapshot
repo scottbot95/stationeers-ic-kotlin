@@ -1,0 +1,8 @@
+{
+    "`forever`.`produce expected output`": [
+        "myLabel:\n# Inside the loop\nj myLabel"
+    ],
+    "`loop`.`produce expected output`": [
+        "myLoop:\nblt 0 1 myLoop_end\n# I'm inside the loop!\nj myLoop\nmyLoop_end:"
+    ]
+}

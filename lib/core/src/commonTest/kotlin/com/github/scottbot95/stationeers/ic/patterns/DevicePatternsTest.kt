@@ -3,63 +3,41 @@ package com.github.scottbot95.stationeers.ic.patterns
 import com.github.scottbot95.stationeers.ic.CompileOptions
 import com.github.scottbot95.stationeers.ic.Device
 import com.github.scottbot95.stationeers.ic.ICScriptBuilder
+import com.github.scottbot95.stationeers.ic.testUtils.finalizeSnapshots
+import com.github.scottbot95.stationeers.ic.testUtils.matchSnapshot
 import com.github.scottbot95.stationeers.ic.util.toScriptValue
 import com.github.scottbot95.stationeers.ic.writeToString
+import io.kotest.core.descriptors.toDescriptor
 import io.kotest.core.spec.style.WordSpec
-import io.kotest.matchers.shouldBe
+import io.kotest.matchers.should
 import io.kotest.property.Exhaustive
 import io.kotest.property.checkAll
 import io.kotest.property.exhaustive.of
 
 class DevicePatternsTest : WordSpec({
+    afterSpec {
+        finalizeSnapshots(it::class.toDescriptor().id.value)
+    }
     "waitTillConnected" should {
         "compile to expected code" {
-            data class Args(val compileOptions: CompileOptions, val functionCall: Boolean, val expected: String)
+            data class Args(val compileOptions: CompileOptions, val functionCall: Boolean)
 
             val tests = Exhaustive.of(
                 Args(
                     CompileOptions(),
                     false,
-                    """
-                        WaitTillConnected:
-                        yield
-                        bdns d0 WaitTillConnected
-                        bdns d1 WaitTillConnected
-                        bdns d2 WaitTillConnected
-                    """.trimIndent()
                 ),
                 Args(
                     CompileOptions(true),
                     false,
-                    """
-                        yield
-                        bdns d0 0
-                        bdns d1 0
-                        bdns d2 0
-                    """.trimIndent()
                 ),
                 Args(
                     CompileOptions(),
                     true,
-                    """
-                        WaitTillConnected:
-                        yield
-                        bdns d0 WaitTillConnected
-                        bdns d1 WaitTillConnected
-                        bdns d2 WaitTillConnected
-                        j ra
-                    """.trimIndent()
                 ),
                 Args(
                     CompileOptions(true),
                     true,
-                    """
-                        yield
-                        bdns d0 0
-                        bdns d1 0
-                        bdns d2 0
-                        j ra
-                    """.trimIndent()
                 ),
             )
 
@@ -74,7 +52,7 @@ class DevicePatternsTest : WordSpec({
 
                 val scriptString = script.writeToString()
 
-                scriptString shouldBe args.expected
+                scriptString should matchSnapshot
             }
         }
     }

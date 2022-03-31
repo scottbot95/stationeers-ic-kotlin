@@ -29,12 +29,3 @@ kotlin {
         }
     }
 }
-
-tasks.register("foo") {
-    doLast {
-        tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinTest>().forEach {
-            println(it::class.qualifiedName)
-        }
-        println(kotlin.sourceSets.names)
-    }
-}

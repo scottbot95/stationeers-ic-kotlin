@@ -11,6 +11,4 @@ interface CodeBlockBuilder<out T : CodeBlockBuilder<T>> {
     fun newLineReference(label: String? = null) = LineReference(label)
 }
 
-interface CodeBlock : CodeBlockBuilder<CodeBlock>, Compilable {
-
-}
+interface CodeBlock : CodeBlockBuilder<CodeBlock>, Compilable
