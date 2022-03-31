@@ -11,7 +11,7 @@ configure(subprojects.filter { it.name == "samples" }) {
     configurations.all {
         resolutionStrategy.dependencySubstitution {
             substitute(module("com.github.scottbot95:stationeers-ic-core"))
-                .using(project(":lib:core")).because("we work we unreleased development version")
+                .using(project(":lib:core")).because("we work with unreleased development version")
         }
     }
 }
