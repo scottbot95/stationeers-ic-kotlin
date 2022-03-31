@@ -1,12 +1,25 @@
 object Deps {
     object JetBrains {
         object Kotlin {
-            private const val VERSION = "1.6.10"
+            const val VERSION = "1.6.10"
             const val gradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$VERSION"
             const val testCommon = "org.jetbrains.kotlin:kotlin-test-common:$VERSION"
             const val testJunit = "org.jetbrains.kotlin:kotlin-test-junit:$VERSION"
             const val testJs = "org.jetbrains.kotlin:kotlin-test-js:$VERSION"
             const val testAnnotationsCommon = "org.jetbrains.kotlin:kotlin-test-annotations-common:$VERSION"
+        }
+
+        object Kotlinx {
+            object ImmutableCollections {
+                private const val VERSION = "0.3.5"
+                const val immutableCollections = "org.jetbrains.kotlinx:kotlinx-collections-immutable:$VERSION"
+            }
+
+            object Serialization {
+                private const val VERSION = "1.3.2"
+                const val gradlePlugin = "org.jetbrains.kotlin:kotlin-serialization:${Kotlin.VERSION}"
+                const val jsonSerializer = "org.jetbrains.kotlinx:kotlinx-serialization-json:$VERSION"
+            }
         }
     }
 
