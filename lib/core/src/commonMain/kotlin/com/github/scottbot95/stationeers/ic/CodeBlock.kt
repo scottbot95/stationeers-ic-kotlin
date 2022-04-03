@@ -12,3 +12,6 @@ interface CodeBlockBuilder<out T : CodeBlockBuilder<T>> {
 }
 
 interface CodeBlock : CodeBlockBuilder<CodeBlock>, Compilable
+
+fun <T : CodeBlockBuilder<T>> T.appendLineReference(label: String? = null) =
+    newLineReference(label).also { appendEntry(it.mark) }

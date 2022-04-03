@@ -21,6 +21,7 @@ class SnapshotPlugin : Plugin<Project> {
             val jvmTest = getByName<Test>("jvmTest")
 
             register<Test>("updateSnapshots") {
+                group = "verification"
                 useJUnitPlatform()
                 systemProperty("snapshots.dir", snapshotsDir)
                 systemProperty("snapshots.update", true)

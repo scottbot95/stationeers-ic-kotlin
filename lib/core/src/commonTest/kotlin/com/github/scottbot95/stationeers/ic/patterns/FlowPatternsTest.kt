@@ -44,4 +44,34 @@ class FlowPatternsTest : WordSpec({
             scriptString should matchSnapshot
         }
     }
+
+    "cond" should {
+        "produce expected output" {
+            val script = ICScriptBuilder.standard().apply {
+                cond(
+                    ConditionalBlock(
+                        Flow.Conditional.EqualToZero(1.toScriptValue()),
+                        newCodeBlock().appendEntry(Misc.Comment("Block 1")),
+                        "case1"
+                    ),
+                    ConditionalBlock(
+                        Flow.Conditional.EqualToZero(2.toScriptValue()),
+                        newCodeBlock().appendEntry(Misc.Comment("Block 2")),
+                        "case2"
+                    ),
+                    ConditionalBlock(
+                        Flow.Conditional.EqualToZero(3.toScriptValue()),
+                        newCodeBlock().appendEntry(Misc.Comment("Block 3")),
+                        "case3"
+                    ),
+                    default = newCodeBlock().appendEntry(Misc.Comment("default")),
+                    labelPrefix = "myCond",
+                )
+            }.compile(CompileOptions())
+
+            val scriptString = script.writeToString()
+
+            scriptString should matchSnapshot
+        }
+    }
 })

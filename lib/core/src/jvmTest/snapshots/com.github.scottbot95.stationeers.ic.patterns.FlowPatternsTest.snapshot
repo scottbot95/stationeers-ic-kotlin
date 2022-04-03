@@ -4,5 +4,8 @@
     ],
     "`loop`.`produce expected output`": [
         "myLoop:\nblt 0 1 myLoop_end\n# I'm inside the loop!\nj myLoop\nmyLoop_end:"
+    ],
+    "`cond`.`produce expected output`": [
+        "beqz 1 myCondcase1\nbeqz 2 myCondcase2\nbeqz 3 myCondcase3\nj myCondDefault\nmyCondcase1:\n# Block 1\nj myCondEnd\nmyCondcase2:\n# Block 2\nj myCondEnd\nmyCondcase3:\n# Block 3\nj myCondEnd\nmyCondDefault:\n# default\nmyCondEnd:"
     ]
 }

@@ -35,17 +35,21 @@ sealed interface RegisterLiteral<V : Number> : ScriptValue.RegisterValue<V>, Scr
     sealed interface FloatRegisterLiteral : RegisterLiteral<Float>
 }
 
-class LineReference(val label: String? = null) : ScriptValue.JumpTarget<Any> {
+data class LineReference(val label: String? = null) : ScriptValue.JumpTarget<Any> {
     private var lineNum: Int? = null
 
-    override fun render(options: CompileOptions): String = if (options.minify || label == null) {
-        lineNum?.toString() ?: throw IllegalStateException("LineReference mark was not compiled")
-    } else {
-        label
+    override fun render(options: CompileOptions): String {
+        if (lineNum == null) throw IllegalStateException("Mark for $this was not compiled")
+
+        return if (options.minify || label == null) {
+            "$lineNum"
+        } else {
+            label
+        }
     }
 
     val mark = Compilable { builder ->
-        if (lineNum != null) throw IllegalStateException("Cannot compile this LineReference marker in more than one place")
+        if (lineNum != null) throw IllegalStateException("Cannot compile marker for $this in more than once")
 
         lineNum = builder.context.nextLineNum
 

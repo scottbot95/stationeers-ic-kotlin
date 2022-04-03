@@ -24,7 +24,7 @@ class ScriptValueTest : WordSpec({
                 script.writeToString()
             }
 
-            ex shouldHaveMessage "LineReference mark was not compiled"
+            ex shouldHaveMessage "Mark for LineReference(label=null) was not compiled"
         }
 
         "throw if injected more than once" {
@@ -37,7 +37,7 @@ class ScriptValueTest : WordSpec({
                 scriptBuilder.compile(CompileOptions())
             }
 
-            ex shouldHaveMessage "Cannot compile this LineReference marker in more than one place"
+            ex shouldHaveMessage "Cannot compile marker for LineReference(label=null) in more than once"
         }
 
         "render label properly" {
