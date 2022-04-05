@@ -1,8 +1,10 @@
 {
     "`LineReference`.`render label properly`": [
-        "MyLabel:\nj MyLabel"
+        "# Some filler\nj 1",
+        "# Some filler\nMyLabel:\nj MyLabel"
     ],
     "`LineReference`.`render references properly before mark`": [
+        "j 3\n# Just some filler here\n# Some more filler for fun!",
         "j 3\n# Just some filler here\n# Some more filler for fun!"
     ]
 }

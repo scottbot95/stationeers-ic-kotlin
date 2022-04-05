@@ -1,7 +1,7 @@
 package com.github.scottbot95.stationeers.ic.patterns
 
-import com.github.scottbot95.stationeers.ic.CompileOptions
 import com.github.scottbot95.stationeers.ic.ICScriptBuilder
+import com.github.scottbot95.stationeers.ic.compileOptionsExhaustive
 import com.github.scottbot95.stationeers.ic.instructions.Flow
 import com.github.scottbot95.stationeers.ic.instructions.Misc
 import com.github.scottbot95.stationeers.ic.testUtils.finalizeSnapshots
@@ -11,6 +11,7 @@ import com.github.scottbot95.stationeers.ic.writeToString
 import io.kotest.core.descriptors.toDescriptor
 import io.kotest.core.spec.style.WordSpec
 import io.kotest.matchers.should
+import io.kotest.property.checkAll
 
 class FlowPatternsTest : WordSpec({
     afterSpec {
@@ -18,60 +19,68 @@ class FlowPatternsTest : WordSpec({
     }
     "forever" should {
         "produce expected output" {
-            val builder = ICScriptBuilder.standard()
-            val block = builder.newCodeBlock()
-                .appendEntry(Misc.Comment("Inside the loop"))
-            builder.forever(block, "myLabel")
+            checkAll(compileOptionsExhaustive) { options ->
 
-            val script = builder.compile(CompileOptions())
-            val scriptString = script.writeToString()
+                val builder = ICScriptBuilder.standard()
+                val block = builder.newCodeBlock()
+                    .appendEntry(Misc.Comment("Inside the loop"))
+                builder.forever(block, "myLabel")
 
-            scriptString should matchSnapshot
+                val script = builder.compile(options)
+                val scriptString = script.writeToString()
+
+                scriptString should matchSnapshot
+            }
         }
     }
 
     "loop" should {
         // TODO add more tests here
         "produce expected output" {
-            val script = ICScriptBuilder.standard().apply {
-                val block = newCodeBlock()
-                    .appendEntry(Misc.Comment("I'm inside the loop!"))
-                loop(block, Flow.Conditional.LessThan(0.toScriptValue(), 1.toScriptValue()), "myLoop")
-            }.compile(CompileOptions())
+            checkAll(compileOptionsExhaustive) { options ->
 
-            val scriptString = script.writeToString()
+                val script = ICScriptBuilder.standard().apply {
+                    val block = newCodeBlock()
+                        .appendEntry(Misc.Comment("I'm inside the loop!"))
+                    loop(block, Flow.Conditional.LessThan(0.toScriptValue(), 1.toScriptValue()), "myLoop")
+                }.compile(options)
 
-            scriptString should matchSnapshot
+                val scriptString = script.writeToString()
+
+                scriptString should matchSnapshot
+            }
         }
     }
 
     "cond" should {
         "produce expected output" {
-            val script = ICScriptBuilder.standard().apply {
-                cond(
-                    ConditionalBlock(
-                        Flow.Conditional.EqualToZero(1.toScriptValue()),
-                        newCodeBlock().appendEntry(Misc.Comment("Block 1")),
-                        "case1"
-                    ),
-                    ConditionalBlock(
-                        Flow.Conditional.EqualToZero(2.toScriptValue()),
-                        newCodeBlock().appendEntry(Misc.Comment("Block 2")),
-                        "case2"
-                    ),
-                    ConditionalBlock(
-                        Flow.Conditional.EqualToZero(3.toScriptValue()),
-                        newCodeBlock().appendEntry(Misc.Comment("Block 3")),
-                        "case3"
-                    ),
-                    default = newCodeBlock().appendEntry(Misc.Comment("default")),
-                    labelPrefix = "myCond",
-                )
-            }.compile(CompileOptions())
+            checkAll(compileOptionsExhaustive) { options ->
+                val script = ICScriptBuilder.standard().apply {
+                    cond(
+                        ConditionalBlock(
+                            Flow.Conditional.EqualToZero(1.toScriptValue()),
+                            newCodeBlock().appendEntry(Misc.Comment("Block 1")),
+                            "case1"
+                        ),
+                        ConditionalBlock(
+                            Flow.Conditional.EqualToZero(2.toScriptValue()),
+                            newCodeBlock().appendEntry(Misc.Comment("Block 2")),
+                            "case2"
+                        ),
+                        ConditionalBlock(
+                            Flow.Conditional.EqualToZero(3.toScriptValue()),
+                            newCodeBlock().appendEntry(Misc.Comment("Block 3")),
+                            "case3"
+                        ),
+                        default = newCodeBlock().appendEntry(Misc.Comment("default")),
+                        labelPrefix = "myCond",
+                    )
+                }.compile(options)
 
-            val scriptString = script.writeToString()
+                val scriptString = script.writeToString()
 
-            scriptString should matchSnapshot
+                scriptString should matchSnapshot
+            }
         }
     }
 })

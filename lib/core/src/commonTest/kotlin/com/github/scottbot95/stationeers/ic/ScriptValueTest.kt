@@ -8,8 +8,8 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.descriptors.toDescriptor
 import io.kotest.core.spec.style.WordSpec
 import io.kotest.matchers.should
-import io.kotest.matchers.shouldBe
 import io.kotest.matchers.throwable.shouldHaveMessage
+import io.kotest.property.checkAll
 
 class ScriptValueTest : WordSpec({
     afterSpec {
@@ -17,55 +17,58 @@ class ScriptValueTest : WordSpec({
     }
     "LineReference" should {
         "throw if not injected" {
-            val script = ICScriptBuilder.standard()
-                .appendEntry(Flow.Jump(LineReference()))
-                .compile(CompileOptions())
-            val ex = shouldThrow<IllegalStateException> {
-                script.writeToString()
-            }
+            checkAll(compileOptionsExhaustive) { options ->
+                val script = ICScriptBuilder.standard()
+                    .appendEntry(Flow.Jump(LineReference()))
+                    .compile(options)
+                val ex = shouldThrow<IllegalStateException> {
+                    script.writeToString()
+                }
 
-            ex shouldHaveMessage "Mark for LineReference(label=null) was not compiled"
+                ex shouldHaveMessage "Mark for LineReference(label=null) was not compiled"
+            }
         }
 
         "throw if injected more than once" {
-            val lineRef = LineReference()
-            val scriptBuilder = ICScriptBuilder.standard()
-                .appendEntry(lineRef.mark)
-                .appendEntry(lineRef.mark)
+            checkAll(compileOptionsExhaustive) { options ->
+                val lineRef = LineReference()
+                val scriptBuilder = ICScriptBuilder.standard()
+                    .appendEntry(lineRef.mark)
+                    .appendEntry(lineRef.mark)
 
-            val ex = shouldThrow<IllegalStateException> {
-                scriptBuilder.compile(CompileOptions())
+                val ex = shouldThrow<IllegalStateException> {
+                    scriptBuilder.compile(options)
+                }
+
+                ex shouldHaveMessage "Cannot compile marker for LineReference(label=null) in more than once"
             }
-
-            ex shouldHaveMessage "Cannot compile marker for LineReference(label=null) in more than once"
         }
 
         "render label properly" {
-            val lineRef = LineReference("MyLabel")
-            val script = ICScriptBuilder.standard()
-                .appendEntry(lineRef.mark)
-                .appendEntry(Flow.Jump(lineRef))
-                .compile(CompileOptions())
+            checkAll(compileOptionsExhaustive) { options ->
+                val lineRef = LineReference("MyLabel")
+                val script = ICScriptBuilder.standard()
+                    .appendEntry(Misc.Comment("Some filler"))
+                    .appendEntry(lineRef.mark)
+                    .appendEntry(Flow.Jump(lineRef))
+                    .compile(options)
 
-            script.writeToString() shouldBe matchSnapshot
+                script.writeToString() should matchSnapshot
+            }
         }
 
         "render references properly before mark" {
-            val lineRef = LineReference()
-            val script = ICScriptBuilder.standard()
-                .appendEntry(Flow.Jump(lineRef))
-                .appendEntry(Misc.Comment("Just some filler here"))
-                .appendEntry(Misc.Comment("Some more filler for fun!"))
-                .appendEntry(lineRef.mark)
-                .compile(CompileOptions())
+            checkAll(compileOptionsExhaustive) { options ->
+                val lineRef = LineReference()
+                val script = ICScriptBuilder.standard()
+                    .appendEntry(Flow.Jump(lineRef))
+                    .appendEntry(Misc.Comment("Just some filler here"))
+                    .appendEntry(Misc.Comment("Some more filler for fun!"))
+                    .appendEntry(lineRef.mark)
+                    .compile(options)
 
-//            script.writeToString() shouldBe """
-//                j 3
-//                # Just some filler here
-//                # Some more filler for fun!
-//            """.trimIndent()
-
-            script.writeToString() should matchSnapshot
+                script.writeToString() should matchSnapshot
+            }
         }
     }
 })
