@@ -1,7 +1,7 @@
 object Deps {
     object JetBrains {
         object Kotlin {
-            const val VERSION = "1.6.10"
+            const val VERSION = "1.6.20"
             const val gradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$VERSION"
             const val testCommon = "org.jetbrains.kotlin:kotlin-test-common:$VERSION"
             const val testJunit = "org.jetbrains.kotlin:kotlin-test-junit:$VERSION"
