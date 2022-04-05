@@ -41,7 +41,7 @@ private class SnapshotMatcher(
         val testCaseSnapshots = seenSnapshots.getOrPut(testName) { mutableListOf() }
 
         val snapshotNumber = testCaseSnapshots.size
-        val expected = expectedSnapshots[testName]?.get(snapshotNumber)
+        val expected = expectedSnapshots[testName]?.getOrNull(snapshotNumber)
 
         val newSnapshot = Snapshot(value)
         testCaseSnapshots += newSnapshot
