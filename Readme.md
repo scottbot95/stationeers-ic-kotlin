@@ -4,6 +4,7 @@
 
 - Script type contains raw operations (not necessarily 1:1 with MIPS)
 - Device/register types contain more abstract tasks
+- Scripts should be able to be compiled more than once with different options each time
 
 ## Examples
 

@@ -9,6 +9,7 @@ import io.kotest.core.descriptors.toDescriptor
 import io.kotest.core.spec.style.WordSpec
 import io.kotest.matchers.should
 import io.kotest.matchers.throwable.shouldHaveMessage
+import io.kotest.property.Exhaustive
 import io.kotest.property.checkAll
 
 class ScriptValueTest : WordSpec({
@@ -17,7 +18,7 @@ class ScriptValueTest : WordSpec({
     }
     "LineReference" should {
         "throw if not injected" {
-            checkAll(compileOptionsExhaustive) { options ->
+            checkAll(Exhaustive.compileOptions()) { options ->
                 val script = ICScriptBuilder.standard()
                     .appendEntry(Flow.Jump(LineReference()))
                     .compile(options)
@@ -30,7 +31,7 @@ class ScriptValueTest : WordSpec({
         }
 
         "throw if injected more than once" {
-            checkAll(compileOptionsExhaustive) { options ->
+            checkAll(Exhaustive.compileOptions()) { options ->
                 val lineRef = LineReference()
                 val scriptBuilder = ICScriptBuilder.standard()
                     .appendEntry(lineRef.mark)
@@ -45,7 +46,7 @@ class ScriptValueTest : WordSpec({
         }
 
         "render label properly" {
-            checkAll(compileOptionsExhaustive) { options ->
+            checkAll(Exhaustive.compileOptions()) { options ->
                 val lineRef = LineReference("MyLabel")
                 val script = ICScriptBuilder.standard()
                     .appendEntry(Misc.Comment("Some filler"))
@@ -58,7 +59,7 @@ class ScriptValueTest : WordSpec({
         }
 
         "render references properly before mark" {
-            checkAll(compileOptionsExhaustive) { options ->
+            checkAll(Exhaustive.compileOptions()) { options ->
                 val lineRef = LineReference()
                 val script = ICScriptBuilder.standard()
                     .appendEntry(Flow.Jump(lineRef))

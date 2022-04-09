@@ -2,7 +2,8 @@ package com.github.scottbot95.stationeers.ic.patterns
 
 import com.github.scottbot95.stationeers.ic.Device
 import com.github.scottbot95.stationeers.ic.ICScriptBuilder
-import com.github.scottbot95.stationeers.ic.compileOptionsExhaustive
+import com.github.scottbot95.stationeers.ic.compileOptions
+
 import com.github.scottbot95.stationeers.ic.testUtils.finalizeSnapshots
 import com.github.scottbot95.stationeers.ic.testUtils.matchSnapshot
 import com.github.scottbot95.stationeers.ic.util.toScriptValue
@@ -21,7 +22,7 @@ class DevicePatternsTest : WordSpec({
     }
     "waitTillConnected" should {
         "compile to expected code" {
-            val gen = compileOptionsExhaustive.cartesianPairs(Exhaustive.boolean())
+            val gen = Exhaustive.compileOptions().cartesianPairs(Exhaustive.boolean())
             checkAll(gen) { (compileOptions, functionCall) ->
                 val devices = listOf(Device.D0, Device.D1, Device.D2)
                     .map { it.toScriptValue() }

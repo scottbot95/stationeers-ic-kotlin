@@ -1,7 +1,7 @@
 package com.github.scottbot95.stationeers.ic.patterns
 
 import com.github.scottbot95.stationeers.ic.ICScriptBuilder
-import com.github.scottbot95.stationeers.ic.compileOptionsExhaustive
+import com.github.scottbot95.stationeers.ic.compileOptions
 import com.github.scottbot95.stationeers.ic.instructions.Flow
 import com.github.scottbot95.stationeers.ic.instructions.Misc
 import com.github.scottbot95.stationeers.ic.testUtils.finalizeSnapshots
@@ -11,6 +11,7 @@ import com.github.scottbot95.stationeers.ic.writeToString
 import io.kotest.core.descriptors.toDescriptor
 import io.kotest.core.spec.style.WordSpec
 import io.kotest.matchers.should
+import io.kotest.property.Exhaustive
 import io.kotest.property.checkAll
 
 class FlowPatternsTest : WordSpec({
@@ -19,7 +20,7 @@ class FlowPatternsTest : WordSpec({
     }
     "forever" should {
         "produce expected output" {
-            checkAll(compileOptionsExhaustive) { options ->
+            checkAll(Exhaustive.compileOptions()) { options ->
 
                 val builder = ICScriptBuilder.standard()
                 val block = builder.newCodeBlock()
@@ -37,7 +38,7 @@ class FlowPatternsTest : WordSpec({
     "loop" should {
         // TODO add more tests here
         "produce expected output" {
-            checkAll(compileOptionsExhaustive) { options ->
+            checkAll(Exhaustive.compileOptions()) { options ->
 
                 val script = ICScriptBuilder.standard().apply {
                     val block = newCodeBlock()
@@ -54,7 +55,7 @@ class FlowPatternsTest : WordSpec({
 
     "cond" should {
         "produce expected output" {
-            checkAll(compileOptionsExhaustive) { options ->
+            checkAll(Exhaustive.compileOptions()) { options ->
                 val script = ICScriptBuilder.standard().apply {
                     cond(
                         ConditionalBlock(
