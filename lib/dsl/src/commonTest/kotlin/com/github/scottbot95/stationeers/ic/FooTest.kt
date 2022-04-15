@@ -21,7 +21,7 @@ class FooTest : WordSpec({
                 var i by int()
                 i = 10.toExpr()
                 loop(i) {
-                    sum += i
+                    sum += i + i
                     i -= 1.toExpr()
                 }
             }.optimize()

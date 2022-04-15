@@ -1,5 +1,6 @@
 package com.github.scottbot95.stationeers.ic.highlevel
 
+import com.github.scottbot95.stationeers.ic.highlevel.optimization.Optimizer
 import com.github.scottbot95.stationeers.ic.util.depthFirst
 
 data class ICScriptTopLevel(val functions: List<ICFunction>, val code: Expression, val globals: Set<Identifier>)

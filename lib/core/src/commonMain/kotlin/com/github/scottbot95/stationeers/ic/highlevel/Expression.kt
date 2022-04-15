@@ -17,6 +17,10 @@ sealed class Expression(label: String, children: List<Expression>) : TreeNode<Ex
     // Most things are pure so default to pure
     open fun isPure(context: ICScriptContext): Boolean = true
 
+    object NoOp : Expression("nop") {
+        override fun copy(children: List<Expression>, label: String): Expression = NoOp
+    }
+
     sealed class NumberLiteral<T : Number>(label: String) : Expression(label) {
         abstract val value: T
     }
@@ -48,9 +52,10 @@ sealed class Expression(label: String, children: List<Expression>) : TreeNode<Ex
         override fun copy(children: List<Expression>, label: String): Expression = Equals(children[0], children[1])
     }
 
-    data class Or(val left: Expression, val right: Expression) : Expression("or", left, right) {
-        override fun copy(children: List<Expression>, label: String): Expression = Or(children[0], children[1])
+    data class Or(val expressions: List<Expression>) : Expression("or", expressions) {
+        constructor(vararg expressions: Expression) : this(expressions.toList())
 
+        override fun copy(children: List<Expression>, label: String): Expression = Or(children)
     }
 
     data class And(val expressions: List<Expression>) : Expression("and", expressions) {
