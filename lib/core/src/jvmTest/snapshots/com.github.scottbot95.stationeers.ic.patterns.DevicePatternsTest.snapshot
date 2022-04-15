@@ -1,8 +1,0 @@
-{
-    "`waitTillConnected`.`compile to expected code`": [
-        "yield\nbdns d0 0\nbdns d1 0\nbdns d2 0\nj ra",
-        "yield\nbdns d0 0\nbdns d1 0\nbdns d2 0",
-        "WaitTillConnected:\nyield\nbdns d0 WaitTillConnected\nbdns d1 WaitTillConnected\nbdns d2 WaitTillConnected\nj ra",
-        "WaitTillConnected:\nyield\nbdns d0 WaitTillConnected\nbdns d1 WaitTillConnected\nbdns d2 WaitTillConnected"
-    ]
-}

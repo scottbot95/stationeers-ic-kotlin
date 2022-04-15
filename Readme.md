@@ -2,39 +2,38 @@
 
 ## Core Principals
 
-- Script type contains raw operations (not necessarily 1:1 with MIPS)
-- Device/register types contain more abstract tasks
+- Kotlin code is a high-level abstraction that gets compiled to MIPS
+- High-level code gets optimized and optionally minified (aliases/labels stripped)
 - Scripts should be able to be compiled more than once with different options each time
 
 ## Examples
 
 **script.kt**
+
 ```kotlin
 val myScript = script {
     val lightSwitch: LogicSwitch by device(Devices.D0) // name inferred by delegate
     val light: Light by device(Devices.D1, "Light") // specify alias explicitly (null for none)
-    val loopCount by register
-    
+    val loopCount by int()
+
     comment("Loop forever")
     forever("loop") {
         // Will implicitly create a temp register to store the value
         val switchSetting = readDevice(lightSwitch, "Setting")
         writeDevice(light, "On", switchSetting)
-        inc(loopCount) // TODO use inc operator?
+        loopCount++
     }
-    
+
     +"# You can add text directly as well"
 }
 
-val results = myScript.compile {
-    /* TODO configure compile options */
+val compiledScript = myScript.compile {
+    minify = true
 }
 
 /* Do something with the results directly */
 
-myScript.export {
-    /* TODO configure export options */
-}
+println(compiledScript)
 ```
 
 **script.out**
