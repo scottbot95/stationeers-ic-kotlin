@@ -23,5 +23,9 @@ internal class ICScriptTopLevelContainer(scriptContext: ICScriptContext) :
         functions += this
     }
 
-    fun toTopLevel(): ICScriptTopLevel = ICScriptTopLevel(functions, Statement.CompoundStatement(statements).expression)
+    fun toTopLevel(): ICScriptTopLevel = ICScriptTopLevel(
+        functions,
+        Statement.CompoundStatement(statements).expression,
+        context.scriptContext.scopes.first().values.toSet()
+    )
 }

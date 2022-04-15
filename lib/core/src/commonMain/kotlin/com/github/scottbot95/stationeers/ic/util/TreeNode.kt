@@ -10,23 +10,26 @@ abstract class TreeNode<T : TreeNode<T>>(val children: List<T>, val label: Strin
     abstract fun copy(children: List<T> = this.children, label: String = this.label): T
 }
 
-fun <T : TreeNode<T>> T.forEachDepthFirst(childrenFirst: Boolean = true, block: (T) -> Unit) {
-    if (!childrenFirst) block(this)
-    children.forEach {
-        it.forEachDepthFirst(childrenFirst, block)
+fun <T : TreeNode<T>> T.depthFirst(childrenFirst: Boolean = true): Sequence<T> = sequence {
+    val node = this@depthFirst
+    if (!childrenFirst) yield(node)
+    node.children.forEach {
+        yieldAll(it.depthFirst())
     }
-    if (childrenFirst) block(this)
+    if (childrenFirst) yield(node)
 }
+
+fun <T : TreeNode<T>> T.forEachDepthFirst(childrenFirst: Boolean = true, block: (T) -> Unit) =
+    depthFirst(childrenFirst).forEach(block)
 
 fun <T : TreeNode<T>> T.mapDepthFirst(block: (T) -> T): T {
     val newChildren = children.map {
         it.mapDepthFirst(block)
     }
 
-    val nodeWithNewChildren = if (newChildren deepEquals children) this else copy(newChildren)
-    val newNode = block(nodeWithNewChildren)
+    val newNode = if (newChildren deepEquals children) this else copy(newChildren)
 
-    return newNode
+    return block(newNode)
 }
 
 fun TreeNode<*>.toTreeString(): String {
