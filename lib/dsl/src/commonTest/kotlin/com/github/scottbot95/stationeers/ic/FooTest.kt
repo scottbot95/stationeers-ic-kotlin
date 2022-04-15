@@ -1,6 +1,7 @@
 package com.github.scottbot95.stationeers.ic
 
 import com.github.scottbot95.stationeers.ic.dsl.icScript
+import com.github.scottbot95.stationeers.ic.highlevel.optimize
 import com.github.scottbot95.stationeers.ic.highlevel.toExpr
 import com.github.scottbot95.stationeers.ic.testUtils.finalizeSnapshots
 import com.github.scottbot95.stationeers.ic.testUtils.matchSnapshot
@@ -23,7 +24,7 @@ class FooTest : WordSpec({
                     sum += i
                     i -= 1.toExpr()
                 }
-            }
+            }.optimize()
 
             val treeString = script.code.toTreeString()
             println(treeString)
