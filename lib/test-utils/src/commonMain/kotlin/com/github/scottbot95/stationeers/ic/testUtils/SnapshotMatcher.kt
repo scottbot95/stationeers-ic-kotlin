@@ -112,6 +112,7 @@ private fun getMatcher(testSuite: String): SnapshotMatcher = matchers.getOrPut(t
 
 private fun loadSnapshots(fileSystem: FileSystem, testSuite: String): SnapshotMap {
     val path = Config.snapshotDir.toPath() / "$testSuite.snapshot"
+    if (!fileSystem.exists(path)) return mapOf()
     return try {
         json.decodeFromString(fileSystem.read(path) {
             readUtf8()
