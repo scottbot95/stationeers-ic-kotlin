@@ -18,7 +18,7 @@ import com.github.scottbot95.stationeers.ic.highlevel.Expression.Return
 import com.github.scottbot95.stationeers.ic.highlevel.ICFunction
 import com.github.scottbot95.stationeers.ic.highlevel.ICScriptContext
 import com.github.scottbot95.stationeers.ic.highlevel.ICScriptTopLevel
-import com.github.scottbot95.stationeers.ic.highlevel.NumberType
+import com.github.scottbot95.stationeers.ic.highlevel.Types
 import com.github.scottbot95.stationeers.ic.highlevel.temp
 import com.github.scottbot95.stationeers.ic.highlevel.toExpr
 import com.github.scottbot95.stationeers.ic.highlevel.updatePureFunctions
@@ -29,6 +29,7 @@ import com.github.scottbot95.stationeers.ic.util.mapDepthFirst
 private val allOptimizations = listOf(
     Flattening,
     AssignmentLifting,
+    CompoundHoisting,
     ConstantFolding,
     ShortCircuiting,
     DeadCodeElimination,
@@ -120,25 +121,21 @@ object ConstantFolding : Optimization {
                 FloatLiteral(literalChildren.sumOf { it.value.toDouble() }.toFloat())
             }
 
-            val otherChildren = expr.children
-                .filter { it !is NumberLiteral<*> }
-                .flatMap { child ->
-                    when {
-                        // Adopt children of negate
-                        child is Negate && child.expr is Add -> child.expr.children.map {
-                            Negate(it)
-                        }
-                        else -> listOf(child)
+            val otherChildren = expr.children.filter { it !is NumberLiteral<*> }.flatMap { child ->
+                when {
+                    // Adopt children of negate
+                    child is Negate && child.expr is Add -> child.expr.children.map {
+                        Negate(it)
                     }
+                    else -> listOf(child)
                 }
+            }
 
             val newChildren = otherChildren + if (literalSum.value.toFloat() != 0f) listOf(literalSum) else emptyList()
 
             // if greater than half are inverted, flip the inversion and invert sum
             if (otherChildren.count { it is Negate } > otherChildren.size / 2) {
-                Negate(expr.copy(
-                    children = newChildren.map { Negate(it) }
-                ))
+                Negate(expr.copy(children = newChildren.map { Negate(it) }))
             } else {
                 expr.copy(
                     children = newChildren
@@ -211,14 +208,14 @@ object DeadCodeElimination : Optimization {
         is CompoundExpression -> {
             // strip all code after a return or infinite loop
             var hasReturned = false
-            val liveChildren = expr.children
-                .filterIndexed { i, child -> i == expr.children.size - 1 || !child.isPure(context) }
-                .takeWhile { child ->
-                    !hasReturned.also {
-                        hasReturned = child is Return ||
-                                (child is Loop && child.condition is NumberLiteral<*> && child.condition.value.isTruthy)
+            val liveChildren =
+                expr.children.filterIndexed { i, child -> i == expr.children.size - 1 || !child.isPure(context) }
+                    .takeWhile { child ->
+                        !hasReturned.also {
+                            hasReturned =
+                                child is Return || (child is Loop && child.condition is NumberLiteral<*> && child.condition.value.isTruthy)
+                        }
                     }
-                }
 
             // Adopt members of any sub-expression where the result is not needed
             val flattenedChildren = liveChildren.flatMapIndexed { i, child ->
@@ -272,12 +269,14 @@ object OperatorPruning : Optimization {
     }
 }
 
-// If an assign operator is used as a parameter to any expression other than a CompoundExpression,
-// create a CompoundExpression eg: x + 3 +(y=4) => x + 3 + (y=4, 4).
-// if the RHS of the assign has side effects, use a temporary
-// x + (y = f()) => x + (temp=f(), y=temp, temp)
-// This helps bring out the RHS in to the outer levels of optimizations.
-// For loops, on the condition will be inspected
+/**
+ * If an assign operator is used as a parameter to any expression other than a CompoundExpression,
+ * create a CompoundExpression eg: x + 3 +(y=4) => x + 3 + (y=4, 4).
+ * if the RHS of the assign has side effects, use a temporary
+ * x + (y = f()) => x + (temp=f(), y=temp, temp)
+ * This helps bring out the RHS in to the outer levels of optimizations.
+ * For loops, on the condition will be inspected
+ */
 object AssignmentLifting : Optimization {
     override fun optimize(expr: Expression, context: ICScriptContext): Expression =
         if (expr !is CompoundExpression && expr.children.isNotEmpty()) {
@@ -291,16 +290,12 @@ object AssignmentLifting : Optimization {
                 if (child is Copy) {
                     if (child.source.isPure(context)) {
                         CompoundExpression(
-                            child,
-                            child.source
+                            child, child.source
                         )
                     } else {
-                        // just make a float temp since all values are technically floats
-                        val tmp = Expression.Ident(context.temp(NumberType.FLOAT))
+                        val tmp = context.temp(Types.Any)
                         CompoundExpression(
-                            Copy(child.source, tmp),
-                            Copy(tmp, child.destination),
-                            tmp
+                            Copy(child.source, tmp), Copy(tmp, child.destination), tmp
                         )
                     }
                 } else {
@@ -314,4 +309,71 @@ object AssignmentLifting : Optimization {
         } else {
             expr
         }
+}
+
+
+/**
+ * If expr has multiple children and any of those children are compound expressions,
+ * keep only the last value in each compound expression.
+ *
+ * eg:   func((a,b,c), (d,e,f), (g,h,i))
+ * --> (a,b, temp=c, d,e, temp2=f, g,h, func(temp,temp2,i))
+ *
+ * This way expr itself becomes a compound expression providing the same optimization opportunity to the parent expression.
+ *
+ * Care must be taken to preserve execution order
+ */
+object CompoundHoisting : Optimization {
+    override fun optimize(expr: Expression, context: ICScriptContext): Expression {
+        // For conditional execution, only the first parameter is operated on, because
+        // the rest of them are only executed depending on the value of the first.
+        val endIndex = if (expr is And || expr is Or || expr is Loop) {
+            if (expr.children.first() is CompoundExpression) 0 else -1
+        } else {
+            expr.children.indexOfLast { it is CompoundExpression }
+        }
+
+        val searchChildren = expr.children.take(endIndex + 1)
+
+        val hoistedExprs = mutableListOf<Expression>()
+        val newChildren = mutableListOf<Expression>()
+        searchChildren.forEach { child ->
+            fun hoistChildren() {
+                if (child is CompoundExpression && child.children.isNotEmpty()) {
+                    hoistedExprs += child.children.dropLast(1)
+                    // It's "more" correct to leave as a compound with single child, but we're short-circuiting that hoist as well
+                    newChildren += child.children.last()
+                }
+            }
+
+            if (child == searchChildren.last()) {
+                hoistChildren()
+            } else if (!child.isCompileTimeExpr) {
+                val tmp = context.temp(Types.Float)
+                hoistChildren()
+                hoistedExprs += Copy(child, tmp)
+                newChildren += tmp
+            } else {
+                newChildren += child
+            }
+        }
+
+        return if (hoistedExprs.isNotEmpty()) {
+            // If the condition to a "loop" statement is a comma expression, replicate
+            // the expression to make it better optimizable:
+            //           while(a,b,c) { code }
+            // --> a; b; while(c)     { code; a; b; }
+            val thisExpr = if (expr is Loop) {
+                expr.copy(
+                    condition = newChildren.first(),
+                    body = CompoundExpression(listOf(expr.body) + hoistedExprs),
+                )
+            } else expr.copy(children = newChildren + expr.children.drop(endIndex + 1))
+
+            CompoundExpression(hoistedExprs + thisExpr)
+        } else {
+            expr
+        }
+    }
+
 }
