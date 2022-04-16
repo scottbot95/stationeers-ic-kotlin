@@ -1,5 +1,5 @@
 plugins {
-    id("multiplatform-setup")
+    `multiplatform-setup`
 }
 
 apply<SnapshotPlugin>()

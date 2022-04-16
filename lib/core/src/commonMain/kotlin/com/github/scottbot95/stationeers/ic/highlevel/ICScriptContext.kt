@@ -10,27 +10,27 @@ data class ICScriptContext(
 
 inline val ICScriptContext.curScope get() = scopes.last()
 
-private fun <T : Identifier> ICScriptContext.define(ident: T): T {
+private fun ICScriptContext.define(ident: Identifier): Expression.Ident {
     val curScope = curScope
-    if (curScope.contains(ident.name)) throw SyntaxException("Duplicate definition <${ident.name}>")
+    if (curScope.contains(ident.name)) throw SyntaxException("Duplicate definition for <${ident.name}>. Already defined as ${curScope[ident.name]}")
     curScope[ident.name] = ident
-    return ident
+    return Expression.Ident(ident)
 }
 
-fun ICScriptContext.defVar(name: String, type: NumberType) =
+fun ICScriptContext.defVar(name: String, type: Types.Any) =
     define(Identifier.Variable(name, curScope.count { it.value is Identifier.Variable }, type))
 
-fun ICScriptContext.defParam(name: String, type: NumberType) =
+fun ICScriptContext.defParam(name: String, type: Types.Any) =
     define(Identifier.Parameter(name, curScope.count { it.value is Identifier.Parameter }, type))
 
-fun ICScriptContext.defFunc(name: String, returnType: NumberType?) =
+fun ICScriptContext.defFunc(name: String, returnType: Types.Any) =
     define(Identifier.Function(name, functions.size, returnType))
 
-fun ICScriptContext.temp(type: NumberType) = defVar("\$${type.name.first()}${tempCounter++}", type)
+fun ICScriptContext.temp(type: Types.Any) = defVar("\$${"$type".first()}${tempCounter++}", type)
 
 fun ICScriptContext.use(name: String) = scopes.firstNotNullOfOrNull { it[name] }
 
-fun ICScriptContext.addFunction(name: String, paramTypes: List<NumberType>, code: () -> Expression) {
+fun ICScriptContext.addFunction(name: String, paramTypes: List<Types.Any>, code: () -> Expression) {
     scopes.add(mutableMapOf())
     val func = ICFunction(name, code(), paramTypes)
     scopes.removeLast()

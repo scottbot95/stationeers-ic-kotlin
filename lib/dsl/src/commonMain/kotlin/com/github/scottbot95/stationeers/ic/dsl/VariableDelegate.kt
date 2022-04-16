@@ -1,7 +1,7 @@
 package com.github.scottbot95.stationeers.ic.dsl
 
 import com.github.scottbot95.stationeers.ic.highlevel.Expression
-import com.github.scottbot95.stationeers.ic.highlevel.NumberType
+import com.github.scottbot95.stationeers.ic.highlevel.Types
 import com.github.scottbot95.stationeers.ic.highlevel.defVar
 import kotlin.reflect.KProperty
 
@@ -21,7 +21,7 @@ class VariableDelegate(
 class VariableDelegateProvider(
     private val scope: ICScriptBlockScope,
     private val name: String?,
-    private val varType: NumberType,
+    private val varType: Types.Any,
     private val defaultValue: Expression?,
 ) {
     operator fun provideDelegate(thisRef: Any?, property: KProperty<*>): VariableDelegate {

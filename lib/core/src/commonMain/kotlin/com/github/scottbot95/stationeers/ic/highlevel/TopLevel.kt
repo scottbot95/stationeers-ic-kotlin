@@ -70,10 +70,24 @@ sealed interface TopLevelEntry
 data class ICFunction(
     val name: String,
     val code: Expression,
-    val paramTypes: List<NumberType>,
+    val paramTypes: List<Types.Any>,
     var pure: Boolean? = null, // TODO ew gross mutable properties!
 ) : TopLevelEntry
 
-enum class NumberType {
-    INT, FLOAT
+// TODO these names all collide with base kotlin types. Should we avoid that? Prefix all with IC?
+abstract class Types {
+    override fun toString(): String = ""
+
+    abstract class Any : Types() {
+        companion object : Any()
+    }
+
+    object Unit : Any()
+
+    abstract class Number : Any() {
+        companion object : Number()
+    }
+
+    object Int : Number()
+    object Float : Number()
 }

@@ -2,8 +2,8 @@ package com.github.scottbot95.stationeers.ic.dsl
 
 import com.github.scottbot95.stationeers.ic.highlevel.Expression
 import com.github.scottbot95.stationeers.ic.highlevel.ICScriptContext
-import com.github.scottbot95.stationeers.ic.highlevel.NumberType
 import com.github.scottbot95.stationeers.ic.highlevel.Statement
+import com.github.scottbot95.stationeers.ic.highlevel.Types
 import com.github.scottbot95.stationeers.ic.highlevel.toExpr
 import com.github.scottbot95.stationeers.ic.sourceLocation
 
@@ -29,8 +29,20 @@ interface ICScriptBlockScope {
     operator fun Expression.minus(other: Expression): Expression = this + Expression.Negate(other)
     operator fun Expression.unaryMinus(): Expression = Expression.Negate(this)
 
-    // TODO For some reason kotlin doesn't like these method signatures
-    // ++/-- have weird implications as well since it is non-trivial to detect pre-increment vs post increment
+    // These are not possible if we want to be able to use setValue on delegates.
+//    operator fun Expression.plusAssign(other: Expression) {
+//        requireIdent(this)
+//        +assign(this + other)
+//    }
+
+//    operator fun Expression.minusAssign(other: Expression) {
+//        requireIdent(this)
+//        +assign(this - other)
+//    }
+
+
+    // inc/dec operators don't work inside a class https://youtrack.jetbrains.com/issue/KT-24800
+    // There are also annoying implications with use the kotlin operators instead doing it manually
 //    operator fun Expression.dec(): Expression = Expression.NoOp
 //    operator fun Expression.inc(): Expression = Expression.NoOp
 
@@ -44,7 +56,7 @@ interface ICScriptBlockScope {
     fun Expression.Ident.assign(value: Expression): Expression = Expression.Copy(value, this)
 
     fun int(defaultValue: Int? = null, name: String? = null) =
-        VariableDelegateProvider(this, name, NumberType.INT, defaultValue?.toExpr())
+        VariableDelegateProvider(this, name, Types.Int, defaultValue?.toExpr())
 }
 
 internal open class ICScriptBlockContainer(
