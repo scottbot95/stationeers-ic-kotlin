@@ -20,7 +20,7 @@ class FooTest : WordSpec({
                 var sum by int()
                 var i by int()
                 i = 10.toExpr()
-                loop(i) {
+                loop(i.and(1.toExpr())) {
                     sum += i + i
                     i -= 1.toExpr()
                 }

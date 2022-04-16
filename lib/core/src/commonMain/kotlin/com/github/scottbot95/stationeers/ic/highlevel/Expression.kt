@@ -7,7 +7,7 @@ sealed class Expression(label: String, children: List<Expression>) : TreeNode<Ex
 
     val isCompileTimeExpr: Boolean by lazy {
         children.all { it.isCompileTimeExpr } && when (this) {
-            is NumberLiteral<*>, is Add, is Negate, is And, is Or, is CompoundExpression -> true
+            is NumberLiteral<*>, is Add, is Negate, is And, is Or, is CompoundExpression, is NoOp -> true
             is Ident -> ident is Identifier.Function
             else -> false
         }
