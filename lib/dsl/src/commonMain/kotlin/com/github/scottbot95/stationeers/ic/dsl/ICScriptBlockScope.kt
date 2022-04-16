@@ -41,6 +41,8 @@ interface ICScriptBlockScope {
     fun Expression.or(other: Expression): Expression = Expression.Or(this, other)
     fun Expression.and(other: Expression): Expression = Expression.And(this, other)
 
+    fun Expression.Ident.assign(value: Expression): Expression = Expression.Copy(value, this)
+
     fun int(name: String? = null) = VariableDelegateProvider(this, name, NumberType.INT)
 }
 

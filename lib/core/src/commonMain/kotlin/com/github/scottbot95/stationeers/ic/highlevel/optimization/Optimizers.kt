@@ -18,6 +18,8 @@ import com.github.scottbot95.stationeers.ic.highlevel.Expression.Return
 import com.github.scottbot95.stationeers.ic.highlevel.ICFunction
 import com.github.scottbot95.stationeers.ic.highlevel.ICScriptContext
 import com.github.scottbot95.stationeers.ic.highlevel.ICScriptTopLevel
+import com.github.scottbot95.stationeers.ic.highlevel.NumberType
+import com.github.scottbot95.stationeers.ic.highlevel.temp
 import com.github.scottbot95.stationeers.ic.highlevel.toExpr
 import com.github.scottbot95.stationeers.ic.highlevel.updatePureFunctions
 import com.github.scottbot95.stationeers.ic.util.isFalsy
@@ -25,7 +27,8 @@ import com.github.scottbot95.stationeers.ic.util.isTruthy
 import com.github.scottbot95.stationeers.ic.util.mapDepthFirst
 
 private val allOptimizations = listOf(
-    OperatorCompression,
+    Flattening,
+    AssignmentLifting,
     ConstantFolding,
     ShortCircuiting,
     DeadCodeElimination,
@@ -82,7 +85,7 @@ interface Optimization {
     fun optimize(expr: Expression, context: ICScriptContext): Expression
 }
 
-object OperatorCompression : Optimization {
+object Flattening : Optimization {
     override fun optimize(expr: Expression, context: ICScriptContext): Expression = when (expr) {
         is Add, is CompoundExpression, is Or, is And -> {
             // Adopt all children of same type
@@ -252,9 +255,8 @@ object DeadCodeElimination : Optimization {
     }
 }
 
+// If type is or, and, or add and there remains only one operand, replace with operand
 object OperatorPruning : Optimization {
-
-    // If type is or, and, or add and there remains only one operand, replace with operand
     override fun optimize(expr: Expression, context: ICScriptContext): Expression = when {
         expr.children.size == 1 -> when (expr) {
             is Or, is And, is Add, is CompoundExpression -> expr.children.first()
@@ -268,4 +270,48 @@ object OperatorPruning : Optimization {
         }
         else -> expr
     }
+}
+
+// If an assign operator is used as a parameter to any expression other than a CompoundExpression,
+// create a CompoundExpression eg: x + 3 +(y=4) => x + 3 + (y=4, 4).
+// if the RHS of the assign has side effects, use a temporary
+// x + (y = f()) => x + (temp=f(), y=temp, temp)
+// This helps bring out the RHS in to the outer levels of optimizations.
+// For loops, on the condition will be inspected
+object AssignmentLifting : Optimization {
+    override fun optimize(expr: Expression, context: ICScriptContext): Expression =
+        if (expr !is CompoundExpression && expr.children.isNotEmpty()) {
+            val children = if (expr is Loop) {
+                listOf(expr.condition)
+            } else {
+                expr.children
+            }
+
+            val liftedChildren = children.map { child ->
+                if (child is Copy) {
+                    if (child.source.isPure(context)) {
+                        CompoundExpression(
+                            child,
+                            child.source
+                        )
+                    } else {
+                        // just make a float temp since all values are technically floats
+                        val tmp = Expression.Ident(context.temp(NumberType.FLOAT))
+                        CompoundExpression(
+                            Copy(child.source, tmp),
+                            Copy(tmp, child.destination),
+                            tmp
+                        )
+                    }
+                } else {
+                    child
+                }
+            }
+
+            expr.copy(
+                children = if (expr is Loop) liftedChildren + expr.body else liftedChildren
+            )
+        } else {
+            expr
+        }
 }
