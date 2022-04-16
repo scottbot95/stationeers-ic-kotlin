@@ -5,6 +5,8 @@ import io.kotest.assertions.Expected
 import io.kotest.assertions.failure
 import io.kotest.assertions.intellijFormatError
 import io.kotest.assertions.print.print
+import io.kotest.core.descriptors.toDescriptor
+import io.kotest.core.spec.Spec
 import io.kotest.core.test.TestScope
 import io.kotest.matchers.Matcher
 import io.kotest.matchers.MatcherResult
@@ -87,7 +89,15 @@ private class SnapshotMatcher(
 
 val TestScope.matchSnapshot get() = matchSnapshot()
 
+private val seenSpecs = mutableSetOf<Spec>()
 fun TestScope.matchSnapshot() = Matcher<Any> { value ->
+    if (testCase.spec !in seenSpecs) {
+        testCase.spec.afterSpec {
+            finalizeSnapshots(it::class.toDescriptor().id.value)
+        }
+        seenSpecs += testCase.spec
+    }
+
     val ids = testCase.descriptor.ids()
     val matcher = getMatcher(ids.first().value)
 
