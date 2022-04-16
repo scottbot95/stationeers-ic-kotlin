@@ -43,7 +43,8 @@ interface ICScriptBlockScope {
 
     fun Expression.Ident.assign(value: Expression): Expression = Expression.Copy(value, this)
 
-    fun int(name: String? = null) = VariableDelegateProvider(this, name, NumberType.INT)
+    fun int(defaultValue: Int? = null, name: String? = null) =
+        VariableDelegateProvider(this, name, NumberType.INT, defaultValue?.toExpr())
 }
 
 internal open class ICScriptBlockContainer(

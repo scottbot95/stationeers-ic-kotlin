@@ -21,11 +21,16 @@ class VariableDelegate(
 class VariableDelegateProvider(
     private val scope: ICScriptBlockScope,
     private val name: String?,
-    private val varType: NumberType
+    private val varType: NumberType,
+    private val defaultValue: Expression?,
 ) {
     operator fun provideDelegate(thisRef: Any?, property: KProperty<*>): VariableDelegate {
         val varName = name ?: property.name
         val ident = scope.context.scriptContext.defVar(varName, varType)
-        return VariableDelegate(scope, Expression.Ident(ident))
+        val delegate = VariableDelegate(scope, ident)
+        if (defaultValue != null) {
+            delegate.setValue(null, property, defaultValue)
+        }
+        return delegate
     }
 }

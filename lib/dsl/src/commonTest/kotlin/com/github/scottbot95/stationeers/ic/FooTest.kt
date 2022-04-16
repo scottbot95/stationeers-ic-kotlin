@@ -13,8 +13,7 @@ class FooTest : WordSpec({
         "compile correctly" {
             val script = icScript {
                 var sum by int()
-                var i by int()
-                i = 10.toExpr()
+                var i by int(10)
                 loop(i.and(1.toExpr())) {
                     sum += i + i
                     i -= 1.toExpr()
