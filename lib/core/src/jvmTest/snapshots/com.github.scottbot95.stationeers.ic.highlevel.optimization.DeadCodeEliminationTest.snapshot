@@ -1,5 +1,20 @@
 {
-    "`DeadCodeElimination`.`optimizes correctly`": [
+    "`DeadCodeElimination`.`eliminate useless pure expressions`": [
         "function pure_function:\nret\n└── 0\n\nfunction has_side_effects_function:\nseq\n├── copy\n│   ├── 1\n│   └── a\n└── ret\n    └── 0\n\ntop level:\nseq\n├── copy\n│   ├── 2\n│   └── b\n├── fcall\n│   └── has_side_effects_function\n└── ret\n    └── c\n"
+    ],
+    "`DeadCodeElimination`.`simple copy`": [
+        "ret\n└── 0\n"
+    ],
+    "`DeadCodeElimination`.`copy in return`": [
+        "ret\n└── x\n"
+    ],
+    "`DeadCodeElimination`.`complex copy`": [
+        ""
+    ],
+    "`DeadCodeElimination`.`remove unreachable code`": [
+        "seq\n├── copy\n│   ├── -4\n│   └── x\n├── loop\n│   ├── equals\n│   │   ├── equals\n│   │   │   ├── x\n│   │   │   └── 0\n│   │   └── 0\n│   └── copy\n│       ├── add\n│       │   ├── x\n│       │   └── 1\n│       └── x\n└── ret\n    └── 100\n"
+    ],
+    "`DeadCodeElimination`.`detect useless and infinite loops`": [
+        "seq\n├── copy\n│   ├── 0\n│   └── x\n└── loop\n    ├── 1\n    └── copy\n        ├── add\n        │   ├── x\n        │   └── 1\n        └── x\n"
     ]
 }

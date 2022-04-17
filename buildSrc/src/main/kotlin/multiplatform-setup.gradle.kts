@@ -32,6 +32,7 @@ kotlin {
                 implementation(Deps.Kotest.kotestFrameworkEngine)
                 implementation(Deps.Kotest.kotestAssertionsCore)
                 implementation(Deps.Kotest.kotestProperty)
+                implementation(Deps.Kotest.kotestDatset)
             }
         }
 

@@ -29,6 +29,7 @@ object Deps {
         const val kotestFrameworkEngine = "io.kotest:kotest-framework-engine:$VERSION"
         const val kotestAssertionsCore = "io.kotest:kotest-assertions-core:$VERSION"
         const val kotestProperty = "io.kotest:kotest-property:$VERSION"
+        const val kotestDatset = "io.kotest:kotest-framework-datatest:$VERSION"
         const val kotestJUnit5Runner = "io.kotest:kotest-runner-junit5-jvm:$VERSION"
     }
 
