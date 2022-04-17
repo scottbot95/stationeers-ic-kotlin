@@ -221,7 +221,7 @@ object DeadCodeElimination : Optimization {
                 if (i == liveChildren.size - 1) listOf(child)
                 else when (child) {
                     is FunctionCall, is Add, is Negate, is Equals, is CompoundExpression -> {
-                        if (child is FunctionCall && context.functions[child.function.ident.index].pure != true) {
+                        if (child is FunctionCall && context.functions[child.function.id.index].pure != true) {
                             listOf(child)
                         } else {
                             // adopt grand-children

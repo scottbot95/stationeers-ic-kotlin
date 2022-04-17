@@ -8,7 +8,7 @@ sealed class Expression(label: String, children: List<Expression>) : TreeNode<Ex
     val isCompileTimeExpr: Boolean by lazy {
         children.all { it.isCompileTimeExpr } && when (this) {
             is NumberLiteral<*>, is Add, is Negate, is And, is Or, is CompoundExpression, is NoOp -> true
-            is Ident -> ident is Identifier.Function
+            is Ident -> id is Identifier.Function
             else -> false
         }
     }
@@ -19,6 +19,7 @@ sealed class Expression(label: String, children: List<Expression>) : TreeNode<Ex
 
     object NoOp : Expression("nop") {
         override fun copy(children: List<Expression>, label: String): Expression = NoOp
+        override fun toString(): String = "NoOp"
     }
 
     sealed class NumberLiteral<T : Number>(label: String) : Expression(label) {
@@ -34,8 +35,8 @@ sealed class Expression(label: String, children: List<Expression>) : TreeNode<Ex
 
     }
 
-    data class Ident(val ident: Identifier) : Expression(ident.name) {
-        override fun copy(children: List<Expression>, label: String): Expression = Ident(ident)
+    data class Ident(val id: Identifier) : Expression(id.name) {
+        override fun copy(children: List<Expression>, label: String): Expression = Ident(id)
     }
 
     data class Add(val expressions: List<Expression>) : Expression("add", expressions) {
@@ -78,15 +79,15 @@ sealed class Expression(label: String, children: List<Expression>) : TreeNode<Ex
         constructor(function: Ident, vararg params: Expression) : this(function, params.toList())
 
         override fun copy(children: List<Expression>, label: String): Expression =
-            FunctionCall(children[0] as Ident, children[1])
+            FunctionCall(children[0] as Ident, children.drop(1))
 
         override fun isPure(context: ICScriptContext): Boolean {
-            val icFunction = context.functions.getOrNull(function.ident.index)
-            if (icFunction?.name == function.ident.name) {
+            val icFunction = context.functions.getOrNull(function.id.index)
+            if (icFunction?.name == function.id.name) {
                 return icFunction.pure == true
             }
 
-            return false
+            throw IllegalStateException("found function name does not match expected name. Found: ${icFunction?.name} Expected: ${function.id.name}")
         }
     }
 

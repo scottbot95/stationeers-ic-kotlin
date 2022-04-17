@@ -4,6 +4,7 @@ import com.github.scottbot95.stationeers.ic.highlevel.Expression.Add
 import com.github.scottbot95.stationeers.ic.highlevel.Expression.Negate
 import com.github.scottbot95.stationeers.ic.highlevel.Types
 import com.github.scottbot95.stationeers.ic.highlevel.defVar
+import com.github.scottbot95.stationeers.ic.highlevel.safeUse
 import com.github.scottbot95.stationeers.ic.highlevel.toExpr
 import com.github.scottbot95.stationeers.ic.highlevel.use
 import com.github.scottbot95.stationeers.ic.testUtils.matchSnapshot
@@ -101,7 +102,7 @@ class ArithmeticOptimizations : OptimizationTest(
 
                 val optimized = optimizeExpr(expr)
 
-                optimized shouldBe context.use("x")
+                optimized shouldBe context.safeUse("x")
             }
 
             "reduce odd nested negations" {
@@ -115,7 +116,7 @@ class ArithmeticOptimizations : OptimizationTest(
 
                 val optimized = optimizeExpr(expr)
 
-                optimized shouldBe context.use("x")?.let { Negate(it) }
+                optimized shouldBe Negate(context.use("x"))
             }
         }
     })

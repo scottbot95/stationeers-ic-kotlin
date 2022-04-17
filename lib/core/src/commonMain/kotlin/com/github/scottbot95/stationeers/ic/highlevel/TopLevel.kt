@@ -2,8 +2,30 @@ package com.github.scottbot95.stationeers.ic.highlevel
 
 import com.github.scottbot95.stationeers.ic.highlevel.optimization.Optimizer
 import com.github.scottbot95.stationeers.ic.util.depthFirst
+import com.github.scottbot95.stationeers.ic.util.toTreeString
 
-data class ICScriptTopLevel(val functions: List<ICFunction>, val code: Expression, val globals: Set<Identifier>)
+sealed interface TopLevelEntry
+
+data class ICScriptTopLevel(val functions: List<ICFunction>, val code: Expression, val globals: Set<Identifier>) {
+    constructor(context: ICScriptContext, code: () -> Expression = { Expression.NoOp }) : this(
+        context.functions,
+        code(),
+        context.scopes.first().values.toSet()
+    )
+}
+
+fun ICScriptTopLevel.toTreeString(): String {
+    val sb = StringBuilder()
+    functions.forEach {
+        sb.appendLine("function ${it.name}:")
+        sb.appendLine(it.code.toTreeString())
+    }
+
+    sb.appendLine("top level:")
+    sb.append(code.toTreeString())
+
+    return "$sb"
+}
 
 fun ICScriptTopLevel.optimize(): ICScriptTopLevel {
     val optimizer = Optimizer()
@@ -34,11 +56,11 @@ internal fun ICScriptTopLevel.updatePureFunctions(): ICScriptTopLevel {
                 val hasSideEffects = func.code.depthFirst().any { expr ->
                     when (expr) {
                         is Expression.Copy -> expr.destination.depthFirst()
-                            .any { it is Expression.Ident && it.ident in globals }
+                            .any { it is Expression.Ident && it.id in globals }
                         is Expression.FunctionCall -> when {
                             !expr.function.isCompileTimeExpr -> true
                             else -> {
-                                val function = functions[expr.function.ident.index]
+                                val function = functions[expr.function.id.index]
                                 if (function.pure == false) {
                                     true
                                 } else {
@@ -62,34 +84,4 @@ internal fun ICScriptTopLevel.updatePureFunctions(): ICScriptTopLevel {
     }
 
     return this
-}
-
-
-sealed interface TopLevelEntry
-
-data class ICFunction(
-    val name: String,
-    val code: Expression,
-    val paramTypes: List<Types.Any>,
-    var pure: Boolean? = null, // TODO ew gross mutable properties!
-) : TopLevelEntry
-
-// TODO these names all collide with base kotlin types. Should we avoid that? Prefix all with IC?
-abstract class Types {
-    override fun toString(): String = this::class.simpleName ?: "<?>"
-
-    abstract class Any : Types() {
-        companion object : Any()
-    }
-
-    object Unit : Any() {
-        fun toExpr() = 0.toExpr()
-    }
-
-    abstract class Number : Any() {
-        companion object : Number()
-    }
-
-    object Int : Number()
-    object Float : Number()
 }

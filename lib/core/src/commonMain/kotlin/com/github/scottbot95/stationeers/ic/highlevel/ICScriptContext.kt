@@ -2,8 +2,10 @@ package com.github.scottbot95.stationeers.ic.highlevel
 
 import com.github.scottbot95.stationeers.ic.SyntaxException
 
+typealias ScopesList = MutableList<MutableMap<String, Identifier>>
+
 data class ICScriptContext(
-    val scopes: MutableList<MutableMap<String, Identifier>> = mutableListOf(mutableMapOf()),
+    val scopes: ScopesList = mutableListOf(mutableMapOf()),
     val functions: MutableList<ICFunction> = mutableListOf(),
     var tempCounter: UInt = 0U
 )
@@ -24,19 +26,19 @@ fun ICScriptContext.defParam(name: String, type: Types.Any) =
     define(Identifier.Parameter(name, curScope.count { it.value is Identifier.Parameter }, type))
 
 fun ICScriptContext.defFunc(name: String, returnType: Types.Any) =
-    define(Identifier.Function(name, functions.size, returnType))
+    define(Identifier.Function(name, scopes.first().count { it.value is Identifier.Function }, returnType))
 
 fun ICScriptContext.temp(type: Types.Any) = defVar("\$${"$type".first()}${tempCounter++}", type)
 
-fun ICScriptContext.use(name: String) = scopes.firstNotNullOfOrNull { it[name] }?.let { Expression.Ident(it) }
+fun ICScriptContext.safeUse(name: String) = scopes.firstNotNullOfOrNull { it[name] }?.let { Expression.Ident(it) }
+fun ICScriptContext.use(name: String) = safeUse(name) ?: throw IllegalArgumentException("Ident not defined <$name>")
 
-fun ICScriptContext.addFunction(name: String, paramTypes: List<Types.Any>, code: () -> Expression) {
-    scopes.add(mutableMapOf())
-    val funcCode = Expression.CompoundExpression(code(), Expression.Return(Types.Unit.toExpr()))
-    val func = ICFunction(name, funcCode, paramTypes)
-    scopes.removeLast()
-    functions += func
-}
+fun ICScriptContext.addFunction(ident: Expression.Ident, paramTypes: List<Types.Any>, code: () -> Expression) =
+    scopes.withScope {
+        val funcCode = Expression.CompoundExpression(code(), Expression.Return(Types.Unit.toExpr()))
+        val func = ICFunction(ident.id.name, funcCode, paramTypes)
+        functions += func
+    }
 
 operator fun ICScriptContext.inc(): ICScriptContext {
     scopes.add(mutableMapOf())
@@ -46,4 +48,11 @@ operator fun ICScriptContext.inc(): ICScriptContext {
 operator fun ICScriptContext.dec(): ICScriptContext {
     scopes.removeLast()
     return this
+}
+
+
+private inline fun <R> ScopesList.withScope(block: () -> R) {
+    add(mutableMapOf())
+    block()
+    removeLast()
 }
