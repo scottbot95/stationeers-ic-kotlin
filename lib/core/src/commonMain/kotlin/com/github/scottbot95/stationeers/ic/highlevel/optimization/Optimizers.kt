@@ -26,19 +26,10 @@ import com.github.scottbot95.stationeers.ic.util.isFalsy
 import com.github.scottbot95.stationeers.ic.util.isTruthy
 import com.github.scottbot95.stationeers.ic.util.mapDepthFirst
 
-private val allOptimizations = listOf(
-    Flattening,
-    AssignmentLifting,
-    CompoundHoisting,
-    ConstantFolding,
-    ShortCircuiting,
-    DeadCodeElimination,
-    OperatorPruning,
-)
 
 class Optimizer(
-    private val optimizations: List<Optimization> = allOptimizations,
-    private val maxAttempts: Int = 100,
+    private val optimizations: List<Optimization> = Optimization.all,
+    val maxAttempts: Int = 100,
 ) {
     fun optimizeTopLevel(topLevel: ICScriptTopLevel): ICScriptTopLevel {
         fun optimizeExpr(expr: Expression, functions: List<ICFunction>): Expression {
@@ -84,25 +75,33 @@ class Optimizer(
 
 interface Optimization {
     fun optimize(expr: Expression, context: ICScriptContext): Expression
+
+    companion object {
+        val all = listOf(
+            Flattening,
+            AssignmentLifting,
+            CompoundHoisting,
+            ConstantFolding,
+            ShortCircuiting,
+            DeadCodeElimination,
+            OperatorPruning,
+        )
+    }
 }
 
 object Flattening : Optimization {
     override fun optimize(expr: Expression, context: ICScriptContext): Expression = when (expr) {
         is Add, is CompoundExpression, is Or, is And -> {
             // Adopt all children of same type
-            val addedChildren = expr.children.flatMap { child ->
+            val newChildren = expr.children.flatMap { child ->
                 if (expr::class.isInstance(child)) {
                     child.children
                 } else {
-                    emptyList()
+                    listOf(child)
                 }
             }
 
-            if (addedChildren.isNotEmpty()) {
-                expr.copy(children = expr.children.filter { !expr::class.isInstance(it) } + addedChildren)
-            } else {
-                expr
-            }
+            expr.copy(children = newChildren)
         }
         else -> expr
     }

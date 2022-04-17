@@ -76,13 +76,15 @@ data class ICFunction(
 
 // TODO these names all collide with base kotlin types. Should we avoid that? Prefix all with IC?
 abstract class Types {
-    override fun toString(): String = ""
+    override fun toString(): String = this::class.simpleName ?: "<?>"
 
     abstract class Any : Types() {
         companion object : Any()
     }
 
-    object Unit : Any()
+    object Unit : Any() {
+        fun toExpr() = 0.toExpr()
+    }
 
     abstract class Number : Any() {
         companion object : Number()

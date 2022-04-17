@@ -5,17 +5,12 @@ import com.github.scottbot95.stationeers.ic.highlevel.ICScriptContext
 import com.github.scottbot95.stationeers.ic.highlevel.Types
 import com.github.scottbot95.stationeers.ic.highlevel.defVar
 import com.github.scottbot95.stationeers.ic.highlevel.toExpr
-import com.github.scottbot95.stationeers.ic.testUtils.finalizeSnapshots
 import com.github.scottbot95.stationeers.ic.testUtils.matchSnapshot
 import com.github.scottbot95.stationeers.ic.util.toTreeString
-import io.kotest.core.descriptors.toDescriptor
 import io.kotest.core.spec.style.WordSpec
 import io.kotest.matchers.should
 
-class OptimizationTests : WordSpec({
-    afterSpec {
-        finalizeSnapshots(it::class.toDescriptor().id.value)
-    }
+class AssignmentLiftingTest : WordSpec({
     "AssignmentLifting" should {
         "lift pure assignments" {
             val context = ICScriptContext()

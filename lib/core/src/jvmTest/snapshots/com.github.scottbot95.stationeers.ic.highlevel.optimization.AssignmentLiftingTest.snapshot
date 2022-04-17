@@ -3,6 +3,6 @@
         "add\n├── x\n├── 3\n└── seq\n    ├── copy\n    │   ├── 4\n    │   └── Y\n    └── 4\n"
     ],
     "`AssignmentLifting`.`lift impure assignments`": [
-        "add\n├── x\n├── 3\n└── seq\n    ├── copy\n    │   ├── ret\n    │   │   └── 4\n    │   └── $F0\n    ├── copy\n    │   ├── $F0\n    │   └── Y\n    └── $F0\n"
+        "add\n├── x\n├── 3\n└── seq\n    ├── copy\n    │   ├── ret\n    │   │   └── 4\n    │   └── $C0\n    ├── copy\n    │   ├── $C0\n    │   └── Y\n    └── $C0\n"
     ]
 }

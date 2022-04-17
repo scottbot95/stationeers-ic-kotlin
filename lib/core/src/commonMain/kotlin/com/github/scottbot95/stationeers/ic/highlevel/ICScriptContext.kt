@@ -28,11 +28,12 @@ fun ICScriptContext.defFunc(name: String, returnType: Types.Any) =
 
 fun ICScriptContext.temp(type: Types.Any) = defVar("\$${"$type".first()}${tempCounter++}", type)
 
-fun ICScriptContext.use(name: String) = scopes.firstNotNullOfOrNull { it[name] }
+fun ICScriptContext.use(name: String) = scopes.firstNotNullOfOrNull { it[name] }?.let { Expression.Ident(it) }
 
 fun ICScriptContext.addFunction(name: String, paramTypes: List<Types.Any>, code: () -> Expression) {
     scopes.add(mutableMapOf())
-    val func = ICFunction(name, code(), paramTypes)
+    val funcCode = Expression.CompoundExpression(code(), Expression.Return(Types.Unit.toExpr()))
+    val func = ICFunction(name, funcCode, paramTypes)
     scopes.removeLast()
     functions += func
 }
