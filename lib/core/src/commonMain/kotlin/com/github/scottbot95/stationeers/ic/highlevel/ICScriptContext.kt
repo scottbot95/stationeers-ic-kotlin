@@ -50,7 +50,6 @@ operator fun ICScriptContext.dec(): ICScriptContext {
     return this
 }
 
-
 private inline fun <R> ScopesList.withScope(block: () -> R) {
     add(mutableMapOf())
     block()

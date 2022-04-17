@@ -33,5 +33,4 @@ sealed interface Statement : TopLevelEntry {
         override val expression: Expression,
         override val location: Location? = null
     ) : Statement
-
 }

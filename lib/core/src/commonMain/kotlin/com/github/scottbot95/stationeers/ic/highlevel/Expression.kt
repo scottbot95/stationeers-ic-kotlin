@@ -32,7 +32,6 @@ sealed class Expression(label: String, children: List<Expression>) : TreeNode<Ex
 
     data class FloatLiteral(override val value: Float) : NumberLiteral<Float>("$value") {
         override fun copy(children: List<Expression>, label: String): Expression = FloatLiteral(value)
-
     }
 
     data class Ident(val id: Identifier) : Expression(id.name) {
@@ -63,7 +62,6 @@ sealed class Expression(label: String, children: List<Expression>) : TreeNode<Ex
         constructor(vararg expressions: Expression) : this(expressions.toList())
 
         override fun copy(children: List<Expression>, label: String): Expression = And(children)
-
     }
 
     data class Loop(val condition: Expression, val body: Expression) : Expression("loop", condition, body) {

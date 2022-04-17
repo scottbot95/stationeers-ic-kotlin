@@ -34,7 +34,6 @@ class ArithmeticOptimizations : OptimizationTest(
                     Add(b, c)
                 )
 
-
                 val optimized = optimizeExpr(expr)
 
                 optimized.toTreeString() should matchSnapshot
@@ -58,7 +57,6 @@ class ArithmeticOptimizations : OptimizationTest(
                     ),
                     Add(b, c)
                 )
-
 
                 val optimized = optimizeExpr(expr)
 
@@ -119,4 +117,5 @@ class ArithmeticOptimizations : OptimizationTest(
                 optimized shouldBe Negate(context.use("x"))
             }
         }
-    })
+    }
+)

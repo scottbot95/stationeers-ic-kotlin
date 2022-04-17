@@ -26,7 +26,6 @@ import com.github.scottbot95.stationeers.ic.util.isFalsy
 import com.github.scottbot95.stationeers.ic.util.isTruthy
 import com.github.scottbot95.stationeers.ic.util.mapDepthFirst
 
-
 class Optimizer(
     private val optimizations: List<Optimization> = Optimization.all,
     val maxAttempts: Int = 100,
@@ -105,7 +104,6 @@ object Flattening : Optimization {
         }
         else -> expr
     }
-
 }
 
 object ConstantFolding : Optimization {
@@ -178,7 +176,6 @@ object ConstantFolding : Optimization {
         }
         else -> expr
     }
-
 }
 
 object ShortCircuiting : Optimization {
@@ -192,14 +189,12 @@ object ShortCircuiting : Optimization {
                     expr.copy(children = expr.children.take(terminatingIndex).dropLastWhile { it.isPure(context) }),
                     if (expr is And) 0.toExpr() else 1.toExpr()
                 )
-
             } else {
                 expr
             }
         }
         else -> expr
     }
-
 }
 
 object DeadCodeElimination : Optimization {
@@ -310,7 +305,6 @@ object AssignmentLifting : Optimization {
         }
 }
 
-
 /**
  * If expr has multiple children and any of those children are compound expressions,
  * keep only the last value in each compound expression.
@@ -374,5 +368,4 @@ object CompoundHoisting : Optimization {
             expr
         }
     }
-
 }

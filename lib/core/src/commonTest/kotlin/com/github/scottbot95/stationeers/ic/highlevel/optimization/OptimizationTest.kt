@@ -32,5 +32,4 @@ abstract class OptimizationTest(
 
         return oldExpr
     }
-
 }

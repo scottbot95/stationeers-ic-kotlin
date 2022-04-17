@@ -40,7 +40,6 @@ interface ICScriptBlockScope {
 //        +assign(this - other)
 //    }
 
-
     // inc/dec operators don't work inside a class https://youtrack.jetbrains.com/issue/KT-24800
     // There are also annoying implications with use the kotlin operators instead doing it manually
 //    operator fun Expression.dec(): Expression = Expression.NoOp
