@@ -1,0 +1,5 @@
+{
+    "`DeadCodeElimination`.`optimizes correctly`": [
+        "function pure_function:\nret\n└── 0\n\nfunction has_side_effects_function:\nseq\n├── copy\n│   ├── 1\n│   └── a\n└── ret\n    └── 0\n\ntop level:\nseq\n├── copy\n│   ├── 2\n│   └── b\n├── fcall\n│   └── has_side_effects_function\n└── ret\n    └── c\n"
+    ]
+}
