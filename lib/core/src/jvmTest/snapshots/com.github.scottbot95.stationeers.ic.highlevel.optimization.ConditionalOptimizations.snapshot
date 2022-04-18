@@ -1,0 +1,8 @@
+{
+    "`Conditional Optimizations`.`simplify nested and expressions`": [
+        "seq\n├── and\n│   ├── a\n│   ├── b\n│   └── seq\n│       ├── copy\n│       │   ├── x\n│       │   └── c\n│       └── x\n└── ret\n    └── x\n"
+    ],
+    "`Conditional Optimizations`.`simplify nested or expression`": [
+        "seq\n├── or\n│   ├── a\n│   ├── b\n│   └── seq\n│       ├── copy\n│       │   ├── x\n│       │   └── c\n│       └── x\n├── copy\n│   ├── 1\n│   └── x\n└── ret\n    └── x\n"
+    ]
+}

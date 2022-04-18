@@ -1,7 +1,5 @@
 package com.github.scottbot95.stationeers.ic.highlevel
 
-import com.github.scottbot95.stationeers.ic.SyntaxException
-
 typealias ScopesList = MutableList<MutableMap<String, Identifier>>
 
 data class ICScriptContext(
@@ -14,7 +12,7 @@ inline val ICScriptContext.curScope get() = scopes.last()
 
 private fun ICScriptContext.define(ident: Identifier): Expression.Ident {
     val curScope = curScope
-    if (curScope.contains(ident.name)) throw SyntaxException("Duplicate definition for <${ident.name}>. Already defined as ${curScope[ident.name]}")
+    if (curScope.contains(ident.name)) throw IllegalArgumentException("Duplicate definition for <${ident.name}>. Already defined as ${curScope[ident.name]}")
     curScope[ident.name] = ident
     return Expression.Ident(ident)
 }

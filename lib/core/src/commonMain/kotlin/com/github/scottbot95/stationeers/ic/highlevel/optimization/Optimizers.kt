@@ -177,7 +177,26 @@ object ConstantFolding : Optimization {
         is Copy -> when {
             // If an assign statement assigns to itself and the expression has no side effects, replace with LHS
             expr.source == expr.destination && expr.source.isPure(context) -> expr.source
-            else -> expr
+            else -> {
+                // If the dest expression of the assign is also used in the source expression,
+                // replace the dest child reference with a temporary variable.
+                // A new temp var is created for each repeated reference in case the expression is impure
+                val extraChildren = mutableListOf<Expression>()
+                var newSource = expr.source
+                expr.source.forEachDepthFirst {
+                    if (it == expr.destination) {
+                        val tmp = context.temp(Types.Any)
+                        newSource = tmp
+                        extraChildren += Copy(expr.source, tmp)
+                    }
+                }
+
+                if (extraChildren.isNotEmpty()) {
+                    CompoundExpression(extraChildren + expr.copy(source = newSource))
+                } else {
+                    expr
+                }
+            }
         }
         is Loop -> when {
             expr.condition is NumberLiteral<*> && expr.condition.value.isFalsy -> NoOp

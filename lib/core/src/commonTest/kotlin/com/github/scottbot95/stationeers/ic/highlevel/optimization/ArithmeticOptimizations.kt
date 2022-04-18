@@ -1,5 +1,6 @@
 package com.github.scottbot95.stationeers.ic.highlevel.optimization
 
+import com.github.scottbot95.stationeers.ic.highlevel.Expression
 import com.github.scottbot95.stationeers.ic.highlevel.Expression.Add
 import com.github.scottbot95.stationeers.ic.highlevel.Expression.Negate
 import com.github.scottbot95.stationeers.ic.highlevel.Types
@@ -35,7 +36,6 @@ class ArithmeticOptimizations : OptimizationTest(
                 )
 
                 val optimized = optimizeExpr(expr)
-
                 optimized.toTreeString() should matchSnapshot
             }
 
@@ -59,7 +59,6 @@ class ArithmeticOptimizations : OptimizationTest(
                 )
 
                 val optimized = optimizeExpr(expr)
-
                 optimized.toTreeString() should matchSnapshot
             }
 
@@ -87,7 +86,6 @@ class ArithmeticOptimizations : OptimizationTest(
                 )
 
                 val optimized = optimizeExpr(expr)
-
                 optimized.toTreeString() should matchSnapshot
             }
 
@@ -99,7 +97,6 @@ class ArithmeticOptimizations : OptimizationTest(
                 )
 
                 val optimized = optimizeExpr(expr)
-
                 optimized shouldBe context.safeUse("x")
             }
 
@@ -113,8 +110,21 @@ class ArithmeticOptimizations : OptimizationTest(
                 )
 
                 val optimized = optimizeExpr(expr)
-
                 optimized shouldBe Negate(context.use("x"))
+            }
+
+            "extract addition with assignments" {
+                val expr = Expression.CompoundExpression(
+                    Expression.Return(
+                        Add(
+                            Add(context.defVar("x", Types.Int), 3.toExpr()),
+                            Expression.Copy(4.toExpr(), context.defVar("y", Types.Int))
+                        )
+                    )
+                )
+
+                val optimized = optimizeExpr(expr)
+                optimized.toTreeString() shouldBe matchSnapshot
             }
         }
     }

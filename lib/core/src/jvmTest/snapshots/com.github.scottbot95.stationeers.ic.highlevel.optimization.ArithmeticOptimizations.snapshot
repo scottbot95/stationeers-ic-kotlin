@@ -7,5 +7,8 @@
     ],
     "`Arithmetic Optimizations`.`sum negations`": [
         "neg\n└── add\n    ├── neg\n    │   └── a\n    ├── neg\n    │   └── b\n    ├── c\n    ├── d\n    ├── neg\n    │   └── e\n    ├── f\n    └── g\n"
+    ],
+    "`Arithmetic Optimizations`.`extract addition with assignments`": [
+        "seq\n├── copy\n│   ├── x\n│   └── $F0\n├── copy\n│   ├── 4\n│   └── y\n└── ret\n    └── add\n        ├── $F0\n        └── 7\n"
     ]
 }

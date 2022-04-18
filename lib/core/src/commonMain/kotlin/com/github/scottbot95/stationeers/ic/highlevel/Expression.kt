@@ -15,7 +15,7 @@ sealed class Expression(label: String, children: List<Expression>) : TreeNode<Ex
 
     // TODO only need context arg for funcs. Can we be more clever to remove this and make it a simple property?
     // Most things are pure so default to pure
-    open fun isPure(context: ICScriptContext): Boolean = true
+    open fun isPure(context: ICScriptContext): Boolean = children.all { it.isPure(context) }
 
     object NoOp : Expression("nop") {
         override fun copy(children: List<Expression>, label: String): Expression = NoOp
@@ -82,7 +82,7 @@ sealed class Expression(label: String, children: List<Expression>) : TreeNode<Ex
         override fun isPure(context: ICScriptContext): Boolean {
             val icFunction = context.functions.getOrNull(function.id.index)
             if (icFunction?.name == function.id.name) {
-                return icFunction.pure == true
+                return super.isPure(context) && icFunction.pure == true
             }
 
             throw IllegalStateException("found function name does not match expected name. Found: ${icFunction?.name} Expected: ${function.id.name}")

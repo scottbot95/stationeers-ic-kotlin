@@ -1,5 +1,5 @@
 {
     "`script`.`compile correctly`": [
-        "seq\n├── copy\n│   ├── 10\n│   └── i\n└── loop\n    ├── i\n    └── seq\n        ├── copy\n        │   ├── add\n        │   │   ├── sum\n        │   │   ├── i\n        │   │   └── i\n        │   └── sum\n        └── copy\n            ├── add\n            │   ├── i\n            │   └── -1\n            └── i\n"
+        "seq\n├── copy\n│   ├── 10\n│   └── i\n└── loop\n    ├── i\n    └── seq\n        ├── copy\n        │   ├── add\n        │   │   ├── sum\n        │   │   ├── i\n        │   │   └── i\n        │   └── $C0\n        ├── copy\n        │   ├── $C0\n        │   └── sum\n        ├── copy\n        │   ├── add\n        │   │   ├── i\n        │   │   └── -1\n        │   └── $C1\n        └── copy\n            ├── $C1\n            └── i\n"
     ]
 }
