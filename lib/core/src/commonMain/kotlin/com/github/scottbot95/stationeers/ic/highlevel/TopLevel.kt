@@ -1,6 +1,7 @@
 package com.github.scottbot95.stationeers.ic.highlevel
 
 import com.github.scottbot95.stationeers.ic.highlevel.optimization.Optimizer
+import com.github.scottbot95.stationeers.ic.util.compareWith
 import com.github.scottbot95.stationeers.ic.util.depthFirst
 import com.github.scottbot95.stationeers.ic.util.toTreeString
 
@@ -25,6 +26,23 @@ fun ICScriptTopLevel.toTreeString(): String {
     sb.append(code.toTreeString())
 
     return "$sb"
+}
+
+fun ICScriptTopLevel.compareTreeStrings(other: ICScriptTopLevel): String {
+    return toTreeString().compareWith(other.toTreeString())
+//    val sb = StringBuilder()
+//    functions.forEachIndexed { i, func ->
+//        val thisTree = func.code.toTreeString()
+//        val otherTree = other.functions[i].code.toTreeString()
+//        sb.append(thisTree.compareWith(
+//            otherTree,
+//            header = "function: ${func.name}:",
+//            separator = " | "
+//        ))
+//    }
+//
+//
+//    return "$sb"
 }
 
 fun ICScriptTopLevel.optimize(): ICScriptTopLevel {

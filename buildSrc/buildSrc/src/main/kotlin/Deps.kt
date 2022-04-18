@@ -37,6 +37,8 @@ object Deps {
         object KotlinLogging {
             private const val VERSION = "2.1.21"
             const val kotlinLogging = "io.github.microutils:kotlin-logging:$VERSION"
+            const val kotlinLoggingJs = "io.github.microutils:kotlin-logging-js:$VERSION"
+            const val kotlinLoggingJvm = "io.github.microutils:kotlin-logging-jvm:$VERSION"
         }
     }
 

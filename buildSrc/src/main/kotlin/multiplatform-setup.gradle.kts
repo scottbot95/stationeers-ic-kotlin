@@ -22,6 +22,7 @@ kotlin {
         named("commonMain") {
             dependencies {
 //                implementation(Deps.JetBrains.Kotlinx.Coroutines.coroutines)
+                implementation(Deps.Microutils.KotlinLogging.kotlinLogging)
             }
         }
 
@@ -41,6 +42,18 @@ kotlin {
                 implementation(Deps.JetBrains.Kotlin.testJunit)
                 implementation(Deps.Kotest.kotestJUnit5Runner)
                 implementation(Deps.Slf4J.slf4jSimple)
+            }
+        }
+
+        named("jvmMain") {
+            dependencies {
+                implementation(Deps.Microutils.KotlinLogging.kotlinLoggingJvm)
+            }
+        }
+
+        named("jsMain") {
+            dependencies {
+                implementation(Deps.Microutils.KotlinLogging.kotlinLoggingJs)
             }
         }
     }

@@ -19,17 +19,22 @@ import com.github.scottbot95.stationeers.ic.highlevel.ICFunction
 import com.github.scottbot95.stationeers.ic.highlevel.ICScriptContext
 import com.github.scottbot95.stationeers.ic.highlevel.ICScriptTopLevel
 import com.github.scottbot95.stationeers.ic.highlevel.Types
+import com.github.scottbot95.stationeers.ic.highlevel.compareTreeStrings
 import com.github.scottbot95.stationeers.ic.highlevel.temp
 import com.github.scottbot95.stationeers.ic.highlevel.toExpr
 import com.github.scottbot95.stationeers.ic.highlevel.updatePureFunctions
+import com.github.scottbot95.stationeers.ic.util.forEachDepthFirst
 import com.github.scottbot95.stationeers.ic.util.isFalsy
 import com.github.scottbot95.stationeers.ic.util.isTruthy
 import com.github.scottbot95.stationeers.ic.util.mapDepthFirst
+import mu.KotlinLogging
 
 class Optimizer(
     private val optimizations: List<Optimization> = Optimization.all,
     val maxAttempts: Int = 100,
 ) {
+    private val logger = KotlinLogging.logger { }
+
     fun optimizeTopLevel(topLevel: ICScriptTopLevel): ICScriptTopLevel {
         fun optimizeExpr(expr: Expression, functions: List<ICFunction>): Expression {
             topLevel.updatePureFunctions()
@@ -50,7 +55,11 @@ class Optimizer(
                 code = optimizedCode,
             )
 
+            logger.debug { oldTopLevel.compareTreeStrings(newTopLevel) }
+
             if (newTopLevel == oldTopLevel) {
+                logger.debug { "Original -> Optimized" }
+                logger.debug { topLevel.compareTreeStrings(newTopLevel) }
                 return newTopLevel
             } else {
                 oldTopLevel = newTopLevel

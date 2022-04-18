@@ -2,7 +2,12 @@ package com.github.scottbot95.stationeers.ic.highlevel.optimization
 
 import com.github.scottbot95.stationeers.ic.highlevel.Expression
 import com.github.scottbot95.stationeers.ic.highlevel.ICScriptContext
+import com.github.scottbot95.stationeers.ic.util.compareWith
+import com.github.scottbot95.stationeers.ic.util.toTreeString
 import io.kotest.core.spec.style.WordSpec
+import mu.KotlinLogging
+
+val logger = KotlinLogging.logger { }
 
 abstract class OptimizationTest(
     optimizations: List<Optimization> = Optimization.all,
@@ -26,6 +31,7 @@ abstract class OptimizationTest(
         var oldExpr = expr
         repeat(optimizer.maxAttempts) {
             val optimized = optimizer.optimizeTree(oldExpr, context)
+            logger.debug { oldExpr.toTreeString().compareWith(optimized.toTreeString()) }
             if (optimized == oldExpr) return oldExpr
             oldExpr = optimized
         }
