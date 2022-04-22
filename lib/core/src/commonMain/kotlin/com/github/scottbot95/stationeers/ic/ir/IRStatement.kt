@@ -92,3 +92,8 @@ sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
 }
 
 inline val IRStatement.cond: IRStatement? get() = (this as? IRStatement.ConditionalStatement)?.cond
+
+/**
+ * Only guaranteed to work on un-optimized code as all branches are guaranteed to merge back to a nop at some point
+ */
+val IRStatement.end: IRStatement get() = next?.end ?: this

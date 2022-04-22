@@ -2,7 +2,6 @@ package com.github.scottbot95.stationeers.ic.ir
 
 import kotlin.reflect.KMutableProperty0
 
-
 data class IRCompileContext(
     var regCount: UInt = 0U,
     val variables: MutableMap<Int, IRRegister> = mutableMapOf(),

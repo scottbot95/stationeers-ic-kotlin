@@ -30,19 +30,6 @@ fun ICScriptTopLevel.toTreeString(): String {
 
 fun ICScriptTopLevel.compareTreeStrings(other: ICScriptTopLevel): String {
     return toTreeString().compareWith(other.toTreeString())
-//    val sb = StringBuilder()
-//    functions.forEachIndexed { i, func ->
-//        val thisTree = func.code.toTreeString()
-//        val otherTree = other.functions[i].code.toTreeString()
-//        sb.append(thisTree.compareWith(
-//            otherTree,
-//            header = "function: ${func.name}:",
-//            separator = " | "
-//        ))
-//    }
-//
-//
-//    return "$sb"
 }
 
 fun ICScriptTopLevel.optimize(): ICScriptTopLevel {
