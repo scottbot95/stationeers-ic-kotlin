@@ -3,15 +3,33 @@ package com.github.scottbot95.stationeers.ic.ir
 sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
     constructor(opCode: String, vararg params: IRRegister) : this(opCode, params.toList())
 
+    sealed class ConditionalStatement(
+        opCode: String,
+        val check: IRRegister,
+        var jumpLabel: String? = null, // TODO should this really be a var???
+        vararg params: IRRegister
+    ) : IRStatement(opCode, check, *params) {
+        /**
+         * Reference to the next statement when a branch statement is true
+         */
+        var cond: IRStatement? = null
+
+        override fun toString(): String = "$opCode $check $jumpLabel"
+    }
+
+    /**
+     * Reference to the next statement after this one in the "false" case of branches (default)
+     */
     var next: IRStatement? = null
-    var cond: IRStatement? = null
+
+    private val prev: MutableList<IRStatement> = mutableListOf()
 
 //    abstract val next: IRStatement?
 
     override fun toString(): String = params.joinToString(" ", prefix = "$opCode ").trimEnd()
 
     class Nop : IRStatement("nop")
-    data class Init(
+    class Init(
         val reg: IRRegister,
         val ident: String?,
         val value: Number, // TODO should IR maintain types? probably....
@@ -20,36 +38,39 @@ sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
         override fun toString(): String = "$opCode $reg $ident $value"
     }
 
-    data class Add(
+    class Add(
         val dest: IRRegister,
         val a: IRRegister,
         val b: IRRegister,
     ) : IRStatement("add", dest, a, b)
 
-    data class Negate(
+    class Negate(
         val dest: IRRegister,
         val src: IRRegister,
     ) : IRStatement("neg", dest, src)
 
-    data class Copy(
+    class Copy(
         val dest: IRRegister,
         val src: IRRegister,
     ) : IRStatement("copy", dest, src)
 
-    data class Equals(
+    class Equals(
         val dest: IRRegister,
         val a: IRRegister,
         val b: IRRegister,
     ) : IRStatement("eq", dest, a, b)
 
-    data class IfNotZero(
-        val check: IRRegister,
-        val label: String? = null,
-    ) : IRStatement("ifnz", check) {
-        override fun toString(): String = "$opCode $check $label"
-    }
+    class IfNotZero(
+        check: IRRegister,
+        label: String? = null,
+    ) : ConditionalStatement("ifnz", check, label)
 
-    data class FunctionCall(
+    class IfZero(
+        check: IRRegister,
+        label: String? = null,
+    ) : ConditionalStatement("ifz", check, label)
+
+    class FunctionCall(
         val result: IRRegister,
         val func: IRRegister,
         val parameters: List<IRRegister>,
@@ -61,5 +82,13 @@ sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
         ) : this(result, func, parameters.toList())
     }
 
-    data class Return(val result: IRRegister) : IRStatement("ret", result)
+    class Return(val result: IRRegister) : IRStatement("ret", result)
+
+    class Jump(val label: String) : IRStatement("jmp $label")
+
+    class Label(val label: String) : IRStatement("$label:")
+
+    class Halt : IRStatement("hcf")
 }
+
+inline val IRStatement.cond: IRStatement? get() = (this as? IRStatement.ConditionalStatement)?.cond

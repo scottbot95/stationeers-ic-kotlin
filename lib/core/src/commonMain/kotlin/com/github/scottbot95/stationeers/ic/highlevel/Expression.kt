@@ -4,6 +4,7 @@ import com.github.scottbot95.stationeers.ic.ir.IRCompileContext
 import com.github.scottbot95.stationeers.ic.ir.IRRegister
 import com.github.scottbot95.stationeers.ic.ir.IRStatement
 import com.github.scottbot95.stationeers.ic.ir.makeReg
+import com.github.scottbot95.stationeers.ic.ir.plusAssign
 import com.github.scottbot95.stationeers.ic.ir.withReg
 import com.github.scottbot95.stationeers.ic.util.TreeNode
 
@@ -85,98 +86,73 @@ sealed class Expression(label: String, children: List<Expression>) : TreeNode<Ex
 
     data class Equals(val a: Expression, val b: Expression) : Expression("equals", a, b) {
         override fun compile(context: IRCompileContext): IRRegister = context.withReg { dest ->
-            IRStatement.Equals(dest, a.compile(context), b.compile(context))
+            context += IRStatement.Equals(dest, a.compile(context), b.compile(context))
         }
 
         override fun copy(children: List<Expression>, label: String): Expression = Equals(children[0], children[1])
     }
 
-    // TODO we probably could consolidate the compile code for Or, And, and Loop, but I can't be bothered
-
-    data class Or(val expressions: List<Expression>) : Expression("or", expressions) {
-        constructor(vararg expressions: Expression) : this(expressions.toList())
-
+    sealed class ConditionalExpression(
+        label: String,
+        private val conditions: List<Expression>,
+        private val body: Expression? = null,
+        private val isAnd: Boolean = true, // also counts loops. Maybe needs better name
+    ) : Expression(label, conditions + listOfNotNull(body)) {
         override fun compile(context: IRCompileContext): IRRegister = context.withReg { finalResult ->
-            val thenBranch = IRStatement.Init(finalResult, "", 0)
-            val elseBranch = IRStatement.Init(finalResult, "", 1)
+            val thenBranch = IRStatement.Init(finalResult, "", if (isAnd) 1 else 0)
+            val elseBranch = IRStatement.Init(finalResult, "", if (isAnd) 0 else 1)
             val end = IRStatement.Nop().apply {
                 thenBranch.next = this
                 elseBranch.next = this
             }
-            expressions.forEach { expr ->
+            val begin = context.next
+
+            conditions.forEach { expr ->
                 val result = expr.compile(context)
-                context += IRStatement.IfNotZero(result).apply {
+                val branch = if (isAnd) {
+                    IRStatement.IfZero(result)
+                } else {
+                    IRStatement.IfNotZero(result)
+                }.apply {
                     cond = elseBranch
                 }
+
+                context += branch
             }
 
-            // append the then clause to set our result register
-            context += thenBranch
+            if (body != null) {
+                body.compile(context)
+                context.next.set(begin.get())
+            } else {
+                // append the then clause to set our result register
+                context += thenBranch
+            }
 
             // make sure end statement is set in context
-            context.lastStatement = end
+            context.next = end::next
         }
+    }
+
+    data class Or(val expressions: List<Expression>) : ConditionalExpression("or", expressions, isAnd = false) {
+
+        constructor(vararg expressions: Expression) : this(expressions.toList())
 
         override fun copy(children: List<Expression>, label: String): Expression = Or(children)
     }
 
-    data class And(val expressions: List<Expression>) : Expression("and", expressions) {
+    data class And(val expressions: List<Expression>) : ConditionalExpression("and", expressions) {
         constructor(vararg expressions: Expression) : this(expressions.toList())
-
-        override fun compile(context: IRCompileContext): IRRegister = context.withReg { finalResult ->
-            val thenBranch = IRStatement.Init(finalResult, "", 1)
-            val elseBranch = IRStatement.Init(finalResult, "", 0)
-            val end = IRStatement.Nop().apply {
-                thenBranch.next = this
-                elseBranch.next = this
-            }
-            expressions.forEach { expr ->
-                val result = expr.compile(context)
-                val then = IRStatement.Nop()
-                context += IRStatement.IfNotZero(result).apply {
-                    next = elseBranch // "normal" execution of and is the cond case
-                    cond = then
-                }
-                context.lastStatement = then
-            }
-
-            // append the then clause to set our result register
-            context += thenBranch
-
-            // make sure end statement is set in context
-            context.lastStatement = end
-        }
 
         override fun copy(children: List<Expression>, label: String): Expression = And(children)
     }
 
-    data class Loop(val condition: Expression, val body: Expression) : Expression("loop", condition, body) {
+    data class Loop(val condition: Expression, val body: Expression) :
+        ConditionalExpression("loop", listOf(condition), body) {
         override fun copy(children: List<Expression>, label: String): Expression = Loop(children[0], children[1])
 
         // Loops are not pure, because they may be infinite,
         // in which case deleting the loop would alter the program behavior.
         override fun isPure(context: ICScriptContext): Boolean = false
-        override fun compile(context: IRCompileContext): IRRegister = context.withReg { finalResult ->
-            val elseBranch = IRStatement.Init(finalResult, "", 0)
-            val end = IRStatement.Nop().apply {
-                elseBranch.next = this
-            }
-            val begin = context.lastStatement!! // TODO is this fine? Type check this better?
-            val then = IRStatement.Nop()
-            context += IRStatement.IfNotZero(condition.compile(context)).apply {
-                next = elseBranch
-                cond = then
-            }
-            context.lastStatement = then
-
-            body.compile(context) // don't care about result (for now), just need to compile for any impure effects
-
-            // append the then clause to set our result register
-            context += begin
-
-            // make sure end statement is set in context
-            context.lastStatement = end
-        }
     }
 
     data class FunctionCall(val function: Ident, val params: List<Expression>) :
@@ -237,13 +213,3 @@ sealed class Expression(label: String, children: List<Expression>) : TreeNode<Ex
         }
     }
 }
-
-
-private operator fun IRCompileContext.plusAssign(statement: IRStatement) {
-    lastStatement?.next = statement
-    lastStatement = statement
-}
-
-//private operator fun IRCompileContext.plusAssign(values: Pair<IRStatement, IRStatement>) {
-//    statements.append(values.first, values.second)
-//}
