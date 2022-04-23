@@ -4,7 +4,8 @@ import kotlin.reflect.KMutableProperty0
 
 data class IRCompileContext(
     var regCount: UInt = 0U,
-    val variables: MutableMap<Int, IRRegister> = mutableMapOf(),
+    val variables: MutableMap<String, IRRegister> = mutableMapOf(),
+    val globals: Map<String, IRRegister> = emptyMap(),
     val allStatements: MutableSet<IRStatement> = mutableSetOf(),
     /**
      * Reference to set the next statement in the "default" flow case (continuing chain of && and || and going inside a loop)

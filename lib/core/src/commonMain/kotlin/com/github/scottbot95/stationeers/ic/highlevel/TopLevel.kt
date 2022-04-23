@@ -1,18 +1,61 @@
 package com.github.scottbot95.stationeers.ic.highlevel
 
 import com.github.scottbot95.stationeers.ic.highlevel.optimization.Optimizer
+import com.github.scottbot95.stationeers.ic.ir.IRCompilation
+import com.github.scottbot95.stationeers.ic.ir.IRCompileContext
+import com.github.scottbot95.stationeers.ic.ir.IRFunction
+import com.github.scottbot95.stationeers.ic.ir.IRStatement
+import com.github.scottbot95.stationeers.ic.ir.plusAssign
 import com.github.scottbot95.stationeers.ic.util.compareWith
 import com.github.scottbot95.stationeers.ic.util.depthFirst
 import com.github.scottbot95.stationeers.ic.util.toTreeString
 
 sealed interface TopLevelEntry
 
-data class ICScriptTopLevel(val functions: List<ICFunction>, val code: Expression, val globals: Set<Identifier>) {
+data class ICScriptTopLevel(
+    val functions: List<ICFunction>,
+    val code: Expression,
+    val globals: Set<Identifier>
+) {
     constructor(context: ICScriptContext, code: () -> Expression = { Expression.NoOp }) : this(
         context.functions,
         code(),
         context.scopes.first().values.toSet()
     )
+
+    fun compile(): IRCompilation {
+        val allStatements: MutableSet<IRStatement> = mutableSetOf()
+
+        val topLevelEntry = IRStatement.Label("start").apply {
+            allStatements += this
+        }
+        val topLevelContext = IRCompileContext(
+            regCount = 0U,
+            allStatements = allStatements,
+            next = topLevelEntry::next
+        )
+        code.compile(topLevelContext)
+        // slap a halt at the end of the top level to prevent overrun into the function code
+        // Will be optimized away if unnecessary (eg: user already added a halt or inifite loop)
+        topLevelContext += IRStatement.Halt()
+
+        val functions = functions.associate {
+            val numParams = it.paramTypes.size
+            val entrypoint = IRStatement.Label(it.name).apply {
+                allStatements += this
+            }
+            val context = IRCompileContext(
+                regCount = (topLevelContext.variables.size + numParams).toUInt(),
+                globals = topLevelContext.variables, // top-level vars are effectively globals
+                allStatements = allStatements,
+                next = entrypoint::next
+            )
+            it.code.compile(context)
+            it.name to IRFunction(it.name, entrypoint, numParams)
+        }
+
+        return IRCompilation(functions, topLevelEntry, allStatements.toList())
+    }
 }
 
 fun ICScriptTopLevel.toTreeString(): String {

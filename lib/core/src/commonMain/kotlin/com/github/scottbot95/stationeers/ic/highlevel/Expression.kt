@@ -55,8 +55,8 @@ sealed class Expression(label: String, children: List<Expression>) : TreeNode<Ex
     data class Ident(val id: Identifier) : Expression(id.name) {
         override fun compile(context: IRCompileContext): IRRegister = when (id) {
             is Identifier.Function -> context.withReg { IRStatement.Init(it, id.name, 0) }
-            is Identifier.Parameter -> IRRegister(id.index.toUInt())
-            is Identifier.Variable -> context.variables.getOrPut(id.index) { context.makeReg() }
+            is Identifier.Parameter -> IRRegister((context.globals.size + id.index).toUInt())
+            is Identifier.Variable -> context.variables.getOrPut(id.name) { context.makeReg() }
         }
 
         override fun copy(children: List<Expression>, label: String): Expression = Ident(id)

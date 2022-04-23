@@ -2,6 +2,7 @@ package com.github.scottbot95.stationeers.ic.ir
 
 import com.github.scottbot95.stationeers.ic.highlevel.Expression
 import com.github.scottbot95.stationeers.ic.highlevel.ICFunction
+import com.github.scottbot95.stationeers.ic.highlevel.ICScriptContext
 import com.github.scottbot95.stationeers.ic.highlevel.ICScriptTopLevel
 import com.github.scottbot95.stationeers.ic.highlevel.Identifier
 import com.github.scottbot95.stationeers.ic.highlevel.Types
@@ -46,11 +47,14 @@ class IRCompilerTest : WordSpec({
                 )
             )
 
-            val topLevel = ICScriptTopLevel(functions, Expression.NoOp, emptySet())
+            val topLevel = ICScriptTopLevel(ICScriptContext(functions = functions.toMutableList())) {
+                Expression.Ident(Identifier.Variable("g_x", 0, Types.Int))
+            }
 
-            val compilation = IRCompiler.compile(topLevel)
+            val compilation = topLevel.compile()
 
             val dump = compilation.joinToString("\n")
+            println(dump)
             dump should matchSnapshot
         }
     }
