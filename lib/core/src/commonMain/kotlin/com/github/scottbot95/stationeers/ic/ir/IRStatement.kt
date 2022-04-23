@@ -117,3 +117,26 @@ inline val IRStatement.cond: IRStatement? get() = (this as? IRStatement.Conditio
  * Only guaranteed to work on un-optimized code as all branches are guaranteed to merge back to a nop at some point
  */
 val IRStatement.end: IRStatement get() = next?.end ?: this
+
+/**
+ * Create an [Iterator] that marches through the [IRStatement.next] chain of this [IRStatement]
+ *
+ * @param dedupe Whether to quit when duplicates are shown. Can produce an infinite sequence if set to `false`
+ */
+fun IRStatement.followNext(dedupe: Boolean = true): Iterator<IRStatement> = if (dedupe) {
+    iterator {
+        val seen = mutableSetOf<IRStatement>()
+        var i: IRStatement? = this@followNext
+        while (i != null) {
+            if (i in seen) break
+            yield(i)
+            seen += i
+            i = i.next
+        }
+    }
+} else {
+    iterator {
+        yield(this@followNext)
+        next?.let { yieldAll(it.followNext(dedupe)) }
+    }
+}

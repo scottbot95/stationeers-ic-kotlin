@@ -47,7 +47,7 @@ class IRStatementTest : WordSpec({
             val compilation = topLevel.compile()
             compilation.forEach { statement ->
                 statement.prev.forEach {
-                    (it.next == statement || it.cond == statement) shouldBe true
+                    it.get() shouldBe statement
                 }
                 println("Prev correct for `$statement`")
             }

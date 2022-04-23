@@ -11,7 +11,7 @@ data class IRFunction(
 data class IRCompilation(
     val functions: Map<String, IRFunction>,
     val topLevel: IRStatement,
-    private val allStatements: List<IRStatement>,
+    val allStatements: List<IRStatement>,
 ) : Iterable<IRStatement> {
     override operator fun iterator(): Iterator<IRStatement> = iterator {
         var labelCount = 0
@@ -61,10 +61,9 @@ data class IRCompilation(
 
         // process queue
         while (remainingStatements.isNotEmpty()) {
-            var statement: IRStatement? = remainingStatements.removeFirst()
             var needsJump = false
             // follow this chain until the end
-            while (statement != null) {
+            for (statement in remainingStatements.removeFirst().followNext(false)) {
                 val stats = statistics[statement]!!
                 if (stats.done) {
                     if (needsJump) {
@@ -88,7 +87,6 @@ data class IRCompilation(
                     }
                 }
 
-                statement = statement.next
                 needsJump = true
             }
         }
