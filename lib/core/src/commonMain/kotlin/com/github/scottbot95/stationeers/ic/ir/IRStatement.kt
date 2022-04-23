@@ -100,7 +100,7 @@ sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
     class Halt : IRStatement("hcf")
 }
 
-fun IRStatement.updateReference(
+private fun updateReference(
     new: IRStatement?,
     old: IRStatement?,
     self: KMutableProperty0<IRStatement?>
@@ -127,25 +127,26 @@ inline var IRStatement.cond: IRStatement?
 val IRStatement.end: IRStatement get() = next?.end ?: this
 
 /**
+ * @see [followChain]
+ */
+fun IRStatement.followNext(dedupe: Boolean = true): Iterable<IRStatement> = followChain(dedupe, followCond = false)
+
+/**
  * Create an [Iterator] that marches through the [IRStatement.next] chain of this [IRStatement]
  *
  * @param dedupe Whether to quit when duplicates are shown. Can produce an infinite sequence if set to `false`
  */
-fun IRStatement.followNext(dedupe: Boolean = true): Iterator<IRStatement> = if (dedupe) {
+fun IRStatement.followChain(dedupe: Boolean = true, followCond: Boolean = true): Iterable<IRStatement> = Iterable {
+    val seen = mutableSetOf<IRStatement>()
     iterator {
-        val seen = mutableSetOf<IRStatement>()
-        var i: IRStatement? = this@followNext
-        while (i != null) {
-            if (i in seen) break
-            yield(i)
-            seen += i
-            i = i.next
+        suspend fun SequenceScope<IRStatement>.visit(statement: IRStatement) {
+            if (dedupe && statement in seen) return
+            yield(statement)
+            seen += statement
+            statement.next?.let { visit(it) }
+            if (followCond) statement.cond?.let { visit(it) }
         }
-    }
-} else {
-    iterator {
-        yield(this@followNext)
-        next?.let { yieldAll(it.followNext(dedupe)) }
+        visit(this@followChain)
     }
 }
 
@@ -165,7 +166,8 @@ fun IRStatement.replace(other: IRStatement?): Boolean {
     }
 
     // update next/cond pointers of previous statements
-    prev.forEach {
+    // make a copy before iterating since this will change while we iterate
+    (prev.toList()).forEach {
         it.set(other)
     }
     if (prev.isNotEmpty()) throw IllegalStateException("Deleting old references failed!")

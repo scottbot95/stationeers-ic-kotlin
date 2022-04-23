@@ -35,3 +35,5 @@ fun String.compareWith(other: String, header: String? = null, separator: String 
         left.padEnd(leftWidth) + separator + lines2[i]
     }.joinToString("\n")
 }
+
+fun Boolean.toInt(): Int = if (this) 1 else 0

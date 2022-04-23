@@ -11,7 +11,7 @@ data class IRFunction(
 data class IRCompilation(
     val functions: Map<String, IRFunction>,
     val topLevel: IRStatement,
-    val allStatements: List<IRStatement>,
+    val allStatements: MutableList<IRStatement>,
 ) : Iterable<IRStatement> {
     override operator fun iterator(): Iterator<IRStatement> = iterator {
         var labelCount = 0
@@ -27,6 +27,9 @@ data class IRCompilation(
 
         val statistics: MutableMap<IRStatement, Data> = mutableMapOf()
         val remainingStatements: MutableList<IRStatement> = mutableListOf()
+
+        allEntrypoints.forEach {
+        }
 
         remainingStatements += topLevel
         statistics[topLevel] = Data(labelOverride = "start").apply {
@@ -92,3 +95,5 @@ data class IRCompilation(
         }
     }
 }
+
+val IRCompilation.allEntrypoints: List<IRStatement> get() = listOf(topLevel) + functions.values.map { it.entrypoint }
