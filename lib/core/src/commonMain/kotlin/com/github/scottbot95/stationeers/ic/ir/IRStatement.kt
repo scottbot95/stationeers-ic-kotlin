@@ -1,5 +1,8 @@
 package com.github.scottbot95.stationeers.ic.ir
 
+import com.github.scottbot95.stationeers.ic.ir.IRStatement.ConditionalStatement
+import kotlin.reflect.KMutableProperty0
+
 sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
     constructor(opCode: String, vararg params: IRRegister) : this(opCode, params.toList())
 
@@ -14,7 +17,7 @@ sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
          */
         var cond: IRStatement? = null
             set(value) {
-                updateReference(value, field)
+                updateReference(value, field, ::cond)
                 field = value
             }
 
@@ -26,11 +29,11 @@ sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
      */
     var next: IRStatement? = null
         set(value) {
-            updateReference(value, field)
+            updateReference(value, field, ::next)
             field = value
         }
 
-    internal val prev: MutableList<IRStatement> = mutableListOf()
+    internal val prev: MutableList<KMutableProperty0<IRStatement?>> = mutableListOf()
 
     override fun toString(): String = params.joinToString(" ", prefix = "$opCode ").trimEnd()
 
@@ -99,19 +102,24 @@ sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
 
 fun IRStatement.updateReference(
     new: IRStatement?,
-    old: IRStatement?
+    old: IRStatement?,
+    self: KMutableProperty0<IRStatement?>
 ) {
     // This used to point to something, but now it doesn't. Delete the old prev reference
     old?.let {
-        it.prev -= this
+        it.prev -= self
     }
     if (new != null) {
         // Add this to next statements prev references
-        new.prev += this
+        new.prev += self
     }
 }
 
-inline val IRStatement.cond: IRStatement? get() = (this as? IRStatement.ConditionalStatement)?.cond
+inline var IRStatement.cond: IRStatement?
+    get() = (this as? ConditionalStatement)?.cond
+    set(value) {
+        (this as? ConditionalStatement)?.cond = value
+    }
 
 /**
  * Only guaranteed to work on un-optimized code as all branches are guaranteed to merge back to a nop at some point
@@ -139,4 +147,32 @@ fun IRStatement.followNext(dedupe: Boolean = true): Iterator<IRStatement> = if (
         yield(this@followNext)
         next?.let { yieldAll(it.followNext(dedupe)) }
     }
+}
+
+/**
+ * Replace this [IRStatement] with another, ensuring all nodes pointing to [this] now point to [other].
+ *
+ * Does **NOT** effect the [IRStatement.next] or [IRStatement.cond] pointers of [other].
+ * This means if [other] is `null` this will effectively terminate the chain.
+ *
+ * @return True if node was successfully replaced or false otherwise (ie you tried to replace a node with itself
+ */
+fun IRStatement.replace(other: IRStatement?): Boolean {
+    // Replace with a nop if we try to replace ourselves, or delete a node that points to itself
+    if (other == this || (other == null && next == this)) {
+        replace(IRStatement.Nop())
+        return false // Don't count this as a change
+    }
+
+    // update next/cond pointers of previous statements
+    prev.forEach {
+        it.set(other)
+    }
+    if (prev.isNotEmpty()) throw IllegalStateException("Deleting old references failed!")
+
+    // remove next/cond pointers for this statement
+    next = null
+    cond = null
+
+    return true
 }
