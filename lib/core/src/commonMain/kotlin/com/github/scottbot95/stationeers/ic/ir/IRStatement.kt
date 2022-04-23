@@ -13,6 +13,10 @@ sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
          * Reference to the next statement when a branch statement is true
          */
         var cond: IRStatement? = null
+            set(value) {
+                updateReference(value, field)
+                field = value
+            }
 
         override fun toString(): String = "$opCode $check $jumpLabel"
     }
@@ -21,10 +25,12 @@ sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
      * Reference to the next statement after this one in the "false" case of branches (default)
      */
     var next: IRStatement? = null
+        set(value) {
+            updateReference(value, field)
+            field = value
+        }
 
-    private val prev: MutableList<IRStatement> = mutableListOf()
-
-//    abstract val next: IRStatement?
+    internal val prev: MutableList<IRStatement> = mutableListOf()
 
     override fun toString(): String = params.joinToString(" ", prefix = "$opCode ").trimEnd()
 
@@ -89,6 +95,20 @@ sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
     class Label(val label: String) : IRStatement("$label:")
 
     class Halt : IRStatement("hcf")
+}
+
+fun IRStatement.updateReference(
+    new: IRStatement?,
+    old: IRStatement?
+) {
+    // This used to point to something, but now it doesn't. Delete the old prev reference
+    old?.let {
+        it.prev -= this
+    }
+    if (new != null) {
+        // Add this to next statements prev references
+        new.prev += this
+    }
 }
 
 inline val IRStatement.cond: IRStatement? get() = (this as? IRStatement.ConditionalStatement)?.cond

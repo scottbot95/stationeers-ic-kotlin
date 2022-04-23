@@ -34,7 +34,7 @@ class IRCompilerTest : WordSpec({
                     "test_and",
                     Expression.CompoundExpression(
                         Expression.Copy(
-                            Expression.Or(
+                            Expression.And(
                                 Expression.Ident(Identifier.Parameter("x", 0, Types.Int)),
                                 Expression.Ident(Identifier.Parameter("y", 1, Types.Int)),
                                 Expression.Ident(Identifier.Parameter("z", 2, Types.Int)),
