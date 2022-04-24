@@ -11,7 +11,6 @@ data class IRFunction(
 data class IRCompilation(
     val functions: Map<String, IRFunction>,
     val topLevel: IRStatement,
-    val allStatements: MutableList<IRStatement>,
 ) : Iterable<IRStatement> {
     override operator fun iterator(): Iterator<IRStatement> = iterator {
         var labelCount = 0
@@ -22,14 +21,15 @@ data class IRCompilation(
             var done: Boolean = false
             var referred: Boolean = false
             var needsLabel: Boolean = false
+                set(value) {
+                    field = value
+                    label // eager init to reserve label count early
+                }
             val label by lazy { labelOverride ?: "L${labelCount++}" }
         }
 
         val statistics: MutableMap<IRStatement, Data> = mutableMapOf()
         val remainingStatements: MutableList<IRStatement> = mutableListOf()
-
-        allEntrypoints.forEach {
-        }
 
         remainingStatements += topLevel
         statistics[topLevel] = Data(labelOverride = "start").apply {
@@ -45,7 +45,7 @@ data class IRCompilation(
         }
 
         // create labels for any line we will potentially need to jump to
-        allStatements.forEach {
+        allEntrypoints.flatMap { it.followChain() }.forEach {
             it.next?.let { next ->
                 val data = statistics.getOrPut(next) { Data() }
                 if (data.referred) {
@@ -62,11 +62,16 @@ data class IRCompilation(
             }
         }
 
+        val visitedStatements = mutableListOf<IRStatement>()
+
         // process queue
         while (remainingStatements.isNotEmpty()) {
             var needsJump = false
             // follow this chain until the end
             for (statement in remainingStatements.removeFirst().followNext(false)) {
+                visitedStatements += statement
+                // Create stats for references statements
+
                 val stats = statistics[statement]!!
                 if (stats.done) {
                     if (needsJump) {
@@ -96,4 +101,10 @@ data class IRCompilation(
     }
 }
 
-val IRCompilation.allEntrypoints: List<IRStatement> get() = listOf(topLevel) + functions.values.map { it.entrypoint }
+val IRCompilation.allEntrypoints: Iterable<IRStatement>
+    get() = Iterable {
+        iterator {
+            yield(topLevel)
+            yieldAll(functions.values.map { it.entrypoint })
+        }
+    }

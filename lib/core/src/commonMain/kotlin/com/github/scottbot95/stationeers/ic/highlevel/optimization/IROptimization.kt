@@ -11,6 +11,9 @@ fun interface IROptimization {
     fun optimize(compilation: IRCompilation): Boolean
 
     companion object {
-        val all: List<IROptimization> = listOf(TrimNoOps, GarbageCollect)
+        val all: List<IROptimization> = listOf(
+            TrimNoOps,
+//            JumpThreading,
+        )
     }
 }

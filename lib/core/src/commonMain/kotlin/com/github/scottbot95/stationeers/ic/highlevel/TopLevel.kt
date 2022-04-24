@@ -54,7 +54,7 @@ data class ICScriptTopLevel(
             it.name to IRFunction(it.name, entrypoint, numParams)
         }
 
-        return IRCompilation(functions, topLevelEntry, allStatements.toMutableList())
+        return IRCompilation(functions, topLevelEntry)
     }
 }
 

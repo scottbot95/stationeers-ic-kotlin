@@ -12,13 +12,9 @@ object TrimNoOps : IROptimization {
     private val logger = KotlinLogging.logger { }
 
     override fun optimize(compilation: IRCompilation): Boolean {
-        // Delete the next pointer on any return statements
-        compilation.allStatements.forEach {
-            if (it is IRStatement.Return && it.next != null) it.next = null
-        }
-//        val elisions = reduceNopChain(compilation.topLevel).compareTo(false) +
-//                compilation.functions.values.sumOf { reduceNopChain(it.entrypoint).compareTo(false) }
         val elisions = compilation.allEntrypoints.asSequence().flatMap { it.followChain() }.sumOf {
+            // Delete the next pointer on any return statements
+            if (it is IRStatement.Return && it.next != null) it.next = null
             reduceNopChain(it).toInt()
         }
 
@@ -37,6 +33,6 @@ object TrimNoOps : IROptimization {
     }
 
     private fun isNop(statement: IRStatement): Boolean = (statement is IRStatement.Nop) ||
-            (statement is IRStatement.ConditionalStatement && (statement.next == statement.cond || statement.cond == null)) ||
-            (statement is IRStatement.Copy && statement.src == statement.dest)
+        (statement is IRStatement.ConditionalStatement && (statement.next == statement.cond || statement.cond == null)) ||
+        (statement is IRStatement.Copy && statement.src == statement.dest)
 }
