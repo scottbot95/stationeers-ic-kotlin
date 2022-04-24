@@ -21,7 +21,7 @@ sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
                 field = value
             }
 
-        override fun toString(): String = "$opCode $check $jumpLabel"
+        override fun toString(): String = "$opCode $check, JMP $jumpLabel"
 
         /**
          * @return Whether the constant [value] matches this [ConditionalStatement]
