@@ -2,8 +2,7 @@ package com.github.scottbot95.stationeers.ic.ir.optimization
 
 import com.github.scottbot95.stationeers.ic.ir.IRCompilation
 import com.github.scottbot95.stationeers.ic.ir.IRStatement
-import com.github.scottbot95.stationeers.ic.ir.allEntrypoints
-import com.github.scottbot95.stationeers.ic.ir.followChain
+import com.github.scottbot95.stationeers.ic.ir.allStatements
 import com.github.scottbot95.stationeers.ic.ir.replace
 import com.github.scottbot95.stationeers.ic.util.toInt
 import mu.KotlinLogging
@@ -12,7 +11,7 @@ object TrimNoOps : IROptimization {
     private val logger = KotlinLogging.logger { }
 
     override fun optimize(compilation: IRCompilation): Boolean {
-        val elisions = compilation.allEntrypoints.asSequence().flatMap { it.followChain() }.sumOf {
+        val elisions = compilation.allStatements.sumOf {
             // Delete the next pointer on any return statements
             if (it is IRStatement.Return && it.next != null) it.next = null
             reduceNopChain(it).toInt()

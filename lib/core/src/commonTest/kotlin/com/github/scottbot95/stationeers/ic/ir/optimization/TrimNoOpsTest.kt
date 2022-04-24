@@ -7,7 +7,7 @@ import io.kotest.core.spec.style.WordSpec
 import io.kotest.matchers.shouldBe
 
 class TrimNoOpsTest : WordSpec({
-    val optimizer = IROptimizer()
+    val optimizer = IROptimizer(listOf(TrimNoOps))
     "TrimNoOps" should {
         "safely handle infinite Nop loops" {
             val nop1 = IRStatement.Nop()

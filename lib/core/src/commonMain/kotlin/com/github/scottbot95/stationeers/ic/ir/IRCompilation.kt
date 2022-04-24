@@ -45,7 +45,7 @@ data class IRCompilation(
         }
 
         // create labels for any line we will potentially need to jump to
-        allEntrypoints.flatMap { it.followChain() }.forEach {
+        allStatements.forEach {
             it.next?.let { next ->
                 val data = statistics.getOrPut(next) { Data() }
                 if (data.referred) {
@@ -108,3 +108,6 @@ val IRCompilation.allEntrypoints: Iterable<IRStatement>
             yieldAll(functions.values.map { it.entrypoint })
         }
     }
+
+val IRCompilation.allStatements: Sequence<IRStatement>
+    get() = allEntrypoints.asSequence().flatMap { it.followChain() }
