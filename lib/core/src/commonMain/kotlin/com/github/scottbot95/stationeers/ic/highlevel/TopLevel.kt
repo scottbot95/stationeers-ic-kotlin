@@ -31,7 +31,6 @@ data class ICScriptTopLevel(
         }
         val topLevelContext = IRCompileContext(
             regCount = 0U,
-            allStatements = allStatements,
             next = topLevelEntry::next
         )
         code.compile(topLevelContext)
@@ -47,7 +46,6 @@ data class ICScriptTopLevel(
             val context = IRCompileContext(
                 regCount = (topLevelContext.variables.size + numParams).toUInt(),
                 globals = topLevelContext.variables, // top-level vars are effectively globals
-                allStatements = allStatements,
                 next = entrypoint::next
             )
             it.code.compile(context)
