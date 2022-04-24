@@ -1,4 +1,4 @@
-package com.github.scottbot95.stationeers.ic.highlevel.optimization
+package com.github.scottbot95.stationeers.ic.ir.optimization
 
 import com.github.scottbot95.stationeers.ic.ir.IRCompilation
 

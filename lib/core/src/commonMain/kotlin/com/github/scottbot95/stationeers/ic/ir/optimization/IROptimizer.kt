@@ -1,6 +1,5 @@
 package com.github.scottbot95.stationeers.ic.ir.optimization
 
-import com.github.scottbot95.stationeers.ic.highlevel.optimization.IROptimization
 import com.github.scottbot95.stationeers.ic.ir.IRCompilation
 import mu.KotlinLogging
 
