@@ -22,6 +22,11 @@ sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
             }
 
         override fun toString(): String = "$opCode $check $jumpLabel"
+
+        /**
+         * @return Whether the constant [value] matches this [ConditionalStatement]
+         */
+        abstract fun matches(value: Number): Boolean
     }
 
     /**
@@ -72,12 +77,16 @@ sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
     class IfNotZero(
         check: IRRegister,
         label: String? = null,
-    ) : ConditionalStatement("ifnz", check, label)
+    ) : ConditionalStatement("ifnz", check, label) {
+        override fun matches(value: Number): Boolean = value.toFloat() != 0f
+    }
 
     class IfZero(
         check: IRRegister,
         label: String? = null,
-    ) : ConditionalStatement("ifz", check, label)
+    ) : ConditionalStatement("ifz", check, label) {
+        override fun matches(value: Number): Boolean = value.toFloat() == 0f
+    }
 
     class FunctionCall(
         val result: IRRegister,

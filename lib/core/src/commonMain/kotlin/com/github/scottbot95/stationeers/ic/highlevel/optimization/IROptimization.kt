@@ -13,7 +13,7 @@ fun interface IROptimization {
     companion object {
         val all: List<IROptimization> = listOf(
             TrimNoOps,
-//            JumpThreading,
+            JumpThreading,
         )
     }
 }
