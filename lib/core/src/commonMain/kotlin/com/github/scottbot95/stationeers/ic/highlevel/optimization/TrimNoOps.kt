@@ -24,7 +24,7 @@ object TrimNoOps : IROptimization {
     }
 
     private fun reduceNopChain(statement: IRStatement): Boolean {
-        if (isNop(statement)) {
+        if (isNop(statement) && statement.prev.isNotEmpty()) {
             statement.replace(statement.next)
             return true
         }

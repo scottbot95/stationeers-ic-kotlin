@@ -161,6 +161,7 @@ fun IRStatement.followChain(dedupe: Boolean = true, followCond: Boolean = true):
 fun IRStatement.replace(other: IRStatement?): Boolean {
     // Replace with a nop if we try to replace ourselves, or delete a node that points to itself
     if (other == this || (other == null && next == this)) {
+        TODO("How did you even get here? $other $next $this")
         replace(IRStatement.Nop())
         return false // Don't count this as a change
     }
