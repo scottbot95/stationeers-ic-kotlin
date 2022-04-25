@@ -99,7 +99,6 @@ val IRCompilation.allEntrypoints: Iterable<IRStatement>
 val IRCompilation.allStatements: Sequence<IRStatement>
     get() = allEntrypoints.asSequence().flatMap { it.followChain() }
 
-
 /**
  * Calculate some stats describing this compilation.
  *
