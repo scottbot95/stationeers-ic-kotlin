@@ -31,7 +31,7 @@ sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
     /**
      * Reference to the next statement after this one in the "false" case of branches (default)
      */
-    var next: IRStatement? = null
+    open var next: IRStatement? = null
         set(value) {
             updateReference(value, field)
             field = value
@@ -101,11 +101,15 @@ sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
 
     class Return(val result: IRRegister) : IRStatement("ret", result)
 
-    class Jump(val label: String) : IRStatement("jmp $label")
-
-    class Label(val label: String) : IRStatement("$label:")
-
     class Halt : IRStatement("hcf")
+
+    // The following are "fake" statements that are not really included in statement graph
+    class Jump(val label: String) : IRStatement("jmp $label")
+    class Label(val label: String) : IRStatement("$label:")
+    class Placeholder : IRStatement("PLACEHOLDER - IF YOU SEE ME THERE ARE PROBLEMS") {
+        // override to prevent updating prev reference in next statement
+        override var next: IRStatement? = null
+    }
 }
 
 private fun IRStatement.updateReference(

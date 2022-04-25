@@ -15,12 +15,14 @@ data class IRCompilation(
     data class Stats(
         val totalLines: Int,
         val minLines: Int,
+        val numFunctions: Int,
         val complexity: Double,
     ) {
         override fun toString(): String = """
              IR Compilation Summary:
                 Num lines (with labels): $totalLines
                 Num liens (no labels): $minLines
+                Num Functions: $numFunctions
                 Complexity rating: $complexity
         """.trimIndent()
     }

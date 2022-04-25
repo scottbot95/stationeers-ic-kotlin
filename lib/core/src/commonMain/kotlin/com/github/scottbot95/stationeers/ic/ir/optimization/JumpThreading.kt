@@ -15,7 +15,7 @@ object JumpThreading : IROptimization {
     override fun optimize(compilation: IRCompilation): Boolean {
         var changes = 0
 
-        compilation.allEntrypoints.forEach { statement ->
+        compilation.allEntrypoints.forEach { (_, statement) ->
             changes += statement.optimizeRegisterReuse { this::next }
             changes += statement.optimizeRegisterReuse { this::cond }
             changes += statement.optimizeConstantCondition()

@@ -1,5 +1,5 @@
 {
     "`Compiler`.`compile matching snapshot`": [
-        "start:\nhcf\ntest_loop:\nL1:\ninit R4 null 10\neq R3 R1 R4\nifz R3, JMP L0\ninit R6 null 1\nadd R5 R1 R6\ncopy R1 R5\njmp L1\nL0:\ninit R2  0\nnop\nret R1\ntest_and:\nifz R1, JMP L2\nifz R2, JMP L2\nifz R3, JMP L2\ninit R5  1\nL3:\nnop\ncopy R6 R5\nret R6\nL2:\ninit R5  0\njmp L3"
+        "start:\nhcf\ntest_loop:\ninit R4 null 10\neq R3 R1 R4\nifz R3, JMP L0\ninit R6 null 1\nadd R5 R1 R6\ncopy R1 R5\njmp test_loop\nL0:\ninit R2  0\nnop\nret R1\ntest_and:\nifz R1, JMP L1\nifz R2, JMP L1\nifz R3, JMP L1\ninit R5  1\nL2:\nnop\ncopy R6 R5\nret R6\nL1:\ninit R5  0\njmp L2"
     ]
 }

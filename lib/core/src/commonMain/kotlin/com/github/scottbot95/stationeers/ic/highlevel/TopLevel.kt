@@ -24,14 +24,10 @@ data class ICScriptTopLevel(
     )
 
     fun compile(): IRCompilation {
-        val allStatements: MutableSet<IRStatement> = mutableSetOf()
-
-        val topLevelEntry = IRStatement.Label("start").apply {
-            allStatements += this
-        }
+        val topLevelPlaceholder = IRStatement.Placeholder()
         val topLevelContext = IRCompileContext(
             regCount = 0U,
-            next = topLevelEntry::next
+            next = topLevelPlaceholder::next
         )
         code.compile(topLevelContext)
         // slap a halt at the end of the top level to prevent overrun into the function code
@@ -40,19 +36,17 @@ data class ICScriptTopLevel(
 
         val functions = functions.associate {
             val numParams = it.paramTypes.size
-            val entrypoint = IRStatement.Label(it.name).apply {
-                allStatements += this
-            }
+            val entrypointPlaceholder = IRStatement.Placeholder()
             val context = IRCompileContext(
                 regCount = (topLevelContext.variables.size + numParams).toUInt(),
                 globals = topLevelContext.variables, // top-level vars are effectively globals
-                next = entrypoint::next
+                next = entrypointPlaceholder::next
             )
             it.code.compile(context)
-            it.name to IRFunction(it.name, entrypoint, numParams)
+            it.name to IRFunction(it.name, entrypointPlaceholder.next!!, numParams)
         }
 
-        return IRCompilation(functions, topLevelEntry)
+        return IRCompilation(functions, topLevelPlaceholder.next!!)
     }
 }
 
