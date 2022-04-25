@@ -3,7 +3,7 @@ package com.github.scottbot95.stationeers.ic.ir.optimization
 import com.github.scottbot95.stationeers.ic.ir.IRCompilation
 import com.github.scottbot95.stationeers.ic.ir.IRStatement
 import com.github.scottbot95.stationeers.ic.ir.allStatements
-import com.github.scottbot95.stationeers.ic.ir.replace
+import com.github.scottbot95.stationeers.ic.ir.replaceWith
 import com.github.scottbot95.stationeers.ic.util.toInt
 import mu.KotlinLogging
 
@@ -24,7 +24,7 @@ object TrimNoOps : IROptimization {
 
     private fun reduceNopChain(statement: IRStatement): Boolean {
         if (isNop(statement) && statement.prev.isNotEmpty()) {
-            statement.replace(statement.next)
+            statement.replaceWith(statement.next)
             return true
         }
 

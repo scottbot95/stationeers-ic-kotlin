@@ -1,7 +1,6 @@
 package com.github.scottbot95.stationeers.ic.ir
 
 import com.github.scottbot95.stationeers.ic.ir.IRStatement.ConditionalStatement
-import kotlin.reflect.KMutableProperty0
 
 sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
     constructor(opCode: String, vararg params: IRRegister) : this(opCode, params.toList())
@@ -17,7 +16,7 @@ sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
          */
         var cond: IRStatement? = null
             set(value) {
-                updateReference(value, field, ::cond)
+                updateReference(value, field)
                 field = value
             }
 
@@ -34,11 +33,11 @@ sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
      */
     var next: IRStatement? = null
         set(value) {
-            updateReference(value, field, ::next)
+            updateReference(value, field)
             field = value
         }
 
-    internal val prev: MutableList<KMutableProperty0<IRStatement?>> = mutableListOf()
+    internal val prev: MutableList<IRStatement> = mutableListOf()
 
     override fun toString(): String = params.joinToString(" ", prefix = "$opCode ").trimEnd()
 
@@ -109,18 +108,17 @@ sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
     class Halt : IRStatement("hcf")
 }
 
-private fun updateReference(
+private fun IRStatement.updateReference(
     new: IRStatement?,
     old: IRStatement?,
-    self: KMutableProperty0<IRStatement?>
 ) {
     // This used to point to something, but now it doesn't. Delete the old prev reference
     old?.let {
-        it.prev -= self
+        it.prev -= this
     }
     if (new != null) {
         // Add this to next statements prev references
-        new.prev += self
+        new.prev += this
     }
 }
 
@@ -167,18 +165,23 @@ fun IRStatement.followChain(dedupe: Boolean = true, followCond: Boolean = true):
  *
  * @return True if node was successfully replaced or false otherwise (ie you tried to replace a node with itself
  */
-fun IRStatement.replace(other: IRStatement?): Boolean {
+fun IRStatement.replaceWith(other: IRStatement?): Boolean {
     // Replace with a nop if we try to replace ourselves, or delete a node that points to itself
     if (other == this || (other == null && next == this)) {
         TODO("How did you even get here? $other $next $this")
-        replace(IRStatement.Nop())
-        return false // Don't count this as a change
+//        replace(IRStatement.Nop())
+//        return false // Don't count this as a change
     }
 
     // update next/cond pointers of previous statements
     // make a copy before iterating since this will change while we iterate
     (prev.toList()).forEach {
-        it.set(other)
+        if (it.next == this) {
+            it.next = other
+        } else {
+            // prev statement must either have next pointing to this, or be a Conditional with cond pointing to this
+            (it as ConditionalStatement).cond = other
+        }
     }
     if (prev.isNotEmpty()) throw IllegalStateException("Deleting old references failed!")
 

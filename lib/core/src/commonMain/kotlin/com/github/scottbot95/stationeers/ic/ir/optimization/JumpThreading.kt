@@ -4,7 +4,7 @@ import com.github.scottbot95.stationeers.ic.ir.IRCompilation
 import com.github.scottbot95.stationeers.ic.ir.IRStatement
 import com.github.scottbot95.stationeers.ic.ir.allEntrypoints
 import com.github.scottbot95.stationeers.ic.ir.cond
-import com.github.scottbot95.stationeers.ic.ir.replace
+import com.github.scottbot95.stationeers.ic.ir.replaceWith
 import com.github.scottbot95.stationeers.ic.util.toInt
 import mu.KotlinLogging
 import kotlin.reflect.KMutableProperty0
@@ -79,7 +79,7 @@ object JumpThreading : IROptimization {
      */
     private fun IRStatement.optimizeCopyReturn(): Int =
         if (this is IRStatement.Copy && (next as? IRStatement.Return)?.result == dest) {
-            replace(IRStatement.Return(src)).toInt()
+            replaceWith(IRStatement.Return(src)).toInt()
         } else {
             0
         }
