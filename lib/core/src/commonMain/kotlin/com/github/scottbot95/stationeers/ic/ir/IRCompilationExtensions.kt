@@ -88,10 +88,12 @@ data class IREntrypoint(
     val statement: IRStatement,
 )
 
+const val TOPLEVEL_ENTRYPOINT_NAME = "start"
+
 val IRCompilation.allEntrypoints: Iterable<IREntrypoint>
     get() = Iterable {
         iterator {
-            yield(IREntrypoint("start", topLevel))
+            yield(IREntrypoint(TOPLEVEL_ENTRYPOINT_NAME, topLevel))
             yieldAll(functions.entries.map { IREntrypoint(it.key, it.value.entrypoint) })
         }
     }

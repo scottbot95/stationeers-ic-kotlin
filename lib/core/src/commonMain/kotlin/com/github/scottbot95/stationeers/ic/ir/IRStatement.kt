@@ -5,6 +5,9 @@ import com.github.scottbot95.stationeers.ic.ir.IRStatement.ConditionalStatement
 sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
     constructor(opCode: String, vararg params: IRRegister) : this(opCode, params.toList())
 
+    sealed class WritingStatement(opCode: String, val dest: IRRegister, vararg params: IRRegister) :
+        IRStatement(opCode, dest, *params)
+
     sealed class ConditionalStatement(
         opCode: String,
         val check: IRRegister,
@@ -43,35 +46,35 @@ sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
 
     class Nop : IRStatement("nop")
     class Init(
-        val reg: IRRegister,
+        dest: IRRegister,
         val ident: String?,
         val value: Number, // TODO should IR maintain types? probably....
 
-    ) : IRStatement("init", reg) {
-        override fun toString(): String = "$opCode $reg $ident $value"
+    ) : WritingStatement("init", dest) {
+        override fun toString(): String = "$opCode $dest $ident $value"
     }
 
     class Add(
-        val dest: IRRegister,
+        dest: IRRegister,
         val a: IRRegister,
         val b: IRRegister,
-    ) : IRStatement("add", dest, a, b)
+    ) : WritingStatement("add", dest, a, b)
 
     class Negate(
-        val dest: IRRegister,
+        dest: IRRegister,
         val src: IRRegister,
-    ) : IRStatement("neg", dest, src)
+    ) : WritingStatement("neg", dest, src)
 
     class Copy(
-        val dest: IRRegister,
+        dest: IRRegister,
         val src: IRRegister,
-    ) : IRStatement("copy", dest, src)
+    ) : WritingStatement("copy", dest, src)
 
     class Equals(
-        val dest: IRRegister,
+        dest: IRRegister,
         val a: IRRegister,
         val b: IRRegister,
-    ) : IRStatement("eq", dest, a, b)
+    ) : WritingStatement("eq", dest, a, b)
 
     class IfNotZero(
         check: IRRegister,
@@ -88,10 +91,10 @@ sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
     }
 
     class FunctionCall(
-        val result: IRRegister,
+        dest: IRRegister,
         val func: IRRegister,
         val parameters: List<IRRegister>,
-    ) : IRStatement("fcall", listOf(result, func) + parameters) {
+    ) : WritingStatement("fcall", dest, func, *parameters.toTypedArray()) {
         constructor(
             result: IRRegister,
             func: IRRegister,
@@ -194,4 +197,9 @@ fun IRStatement.replaceWith(other: IRStatement?): Boolean {
     cond = null
 
     return true
+}
+
+fun IRStatement.readParams(): List<IRRegister> = when (this) {
+    is IRStatement.WritingStatement -> params.drop(1)
+    else -> params
 }

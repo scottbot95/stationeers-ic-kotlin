@@ -58,7 +58,7 @@ object JumpThreading : IROptimization {
 
         var changes = 0
 
-        while ((next as? IRStatement.ConditionalStatement)?.check == reg) {
+        while ((next as? IRStatement.ConditionalStatement)?.check == dest) {
             next = if ((next as IRStatement.ConditionalStatement).matches(value)) {
                 next?.cond
             } else {

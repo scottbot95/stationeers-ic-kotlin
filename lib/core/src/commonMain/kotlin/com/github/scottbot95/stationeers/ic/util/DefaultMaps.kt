@@ -8,7 +8,7 @@ interface DefaultingMutableMap<K, V> : DefaultingMap<K, V>, MutableMap<K, V>
 
 class DefaultingMutableMapImpl<K, V>(
     private val delegate: MutableMap<K, V> = mutableMapOf(),
-    private val defaultValue: () -> V
+    private val defaultValue: (K) -> V
 ) : DefaultingMutableMap<K, V>, MutableMap<K, V> by delegate {
-    override fun get(key: K): V = delegate.getOrPut(key, defaultValue)
+    override fun get(key: K): V = delegate.getOrPut(key) { defaultValue(key) }
 }

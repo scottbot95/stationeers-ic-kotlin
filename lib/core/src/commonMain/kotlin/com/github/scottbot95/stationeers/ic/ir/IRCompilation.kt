@@ -27,3 +27,10 @@ data class IRCompilation(
         """.trimIndent()
     }
 }
+
+val IRCompilation.numGlobals: Int
+    get() = topLevel.followChain()
+        .asSequence()
+        .filterIsInstance<IRStatement.WritingStatement>()
+        .distinctBy { it.dest }
+        .count()
