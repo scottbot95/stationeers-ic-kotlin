@@ -110,8 +110,9 @@ sealed class IRStatement(val opCode: String, val params: List<IRRegister>) {
     class Jump(val label: String) : IRStatement("jmp $label")
     class Label(val label: String) : IRStatement("$label:")
     class Placeholder : IRStatement("PLACEHOLDER - IF YOU SEE ME THERE ARE PROBLEMS") {
+        override fun toString(): String = throw UnsupportedOperationException("Cannot serialized Placeholder")
         // override to prevent updating prev reference in next statement
-        override var next: IRStatement? = null
+//        override var next: IRStatement? = null
     }
 }
 
@@ -155,7 +156,7 @@ fun IRStatement.followChain(dedupe: Boolean = true, followCond: Boolean = true):
     iterator {
         suspend fun SequenceScope<IRStatement>.visit(statement: IRStatement) {
             if (dedupe && statement in seen) return
-            yield(statement)
+            if (statement !is IRStatement.Placeholder) yield(statement)
             seen += statement
             statement.next?.let { visit(it) }
             if (followCond) statement.cond?.let { visit(it) }
@@ -175,9 +176,17 @@ fun IRStatement.followChain(dedupe: Boolean = true, followCond: Boolean = true):
 fun IRStatement.replaceWith(other: IRStatement?): Boolean {
     // Replace with a nop if we try to replace ourselves, or delete a node that points to itself
     if (other == this || (other == null && next == this)) {
-        TODO("How did you even get here? $other $next $this")
-//        replace(IRStatement.Nop())
-//        return false // Don't count this as a change
+        replaceWith(IRStatement.Nop())
+        return false // Don't count this as a change
+    }
+
+    if (prev.isEmpty()) {
+        throw IllegalStateException("Cannot replace the root of a statement tree")
+    }
+
+    if (other == null && prev.singleOrNull() is IRStatement.Placeholder) {
+        prev.single().next = IRStatement.Nop()
+        return false
     }
 
     // update next/cond pointers of previous statements

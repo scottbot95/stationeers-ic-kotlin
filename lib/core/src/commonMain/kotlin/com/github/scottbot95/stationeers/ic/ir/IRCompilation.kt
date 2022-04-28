@@ -2,13 +2,13 @@ package com.github.scottbot95.stationeers.ic.ir
 
 data class IRFunction(
     val name: String,
-    val entrypoint: IRStatement,
+    val entrypoint: IRStatement.Placeholder,
     val numParams: Int,
 )
 
 data class IRCompilation(
     val functions: Map<String, IRFunction>,
-    val topLevel: IRStatement,
+    val topLevel: IRStatement.Placeholder,
 ) : Iterable<IRStatement> {
     override operator fun iterator(): Iterator<IRStatement> = compilationIterator()
 

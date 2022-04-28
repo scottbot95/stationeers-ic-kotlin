@@ -93,13 +93,13 @@ const val TOPLEVEL_ENTRYPOINT_NAME = "start"
 val IRCompilation.allEntrypoints: Iterable<IREntrypoint>
     get() = Iterable {
         iterator {
-            yield(IREntrypoint(TOPLEVEL_ENTRYPOINT_NAME, topLevel))
-            yieldAll(functions.entries.map { IREntrypoint(it.key, it.value.entrypoint) })
+            topLevel.next?.let { yield(IREntrypoint(TOPLEVEL_ENTRYPOINT_NAME, it)) }
+            yieldAll(functions.mapNotNull { (name, func) -> func.entrypoint.next?.let { IREntrypoint(name, it) } })
         }
     }
 
-val IRCompilation.allStatements: Sequence<IRStatement>
-    get() = allEntrypoints.asSequence().flatMap { it.statement.followChain() }
+val IRCompilation.allStatements: List<IRStatement>
+    get() = allEntrypoints.flatMap { it.statement.followChain() }
 
 /**
  * Calculate some stats describing this compilation.

@@ -43,10 +43,10 @@ data class ICScriptTopLevel(
                 next = entrypointPlaceholder::next
             )
             it.code.compile(context)
-            it.name to IRFunction(it.name, entrypointPlaceholder.next!!, numParams)
+            it.name to IRFunction(it.name, entrypointPlaceholder, numParams)
         }
 
-        return IRCompilation(functions, topLevelPlaceholder.next!!)
+        return IRCompilation(functions, topLevelPlaceholder)
     }
 }
 

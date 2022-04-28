@@ -2,7 +2,6 @@ package com.github.scottbot95.stationeers.ic.ir.optimization
 
 import com.github.scottbot95.stationeers.ic.ir.IRCompilation
 import com.github.scottbot95.stationeers.ic.ir.IRCompileContext
-import com.github.scottbot95.stationeers.ic.ir.IRRegister
 import com.github.scottbot95.stationeers.ic.ir.IRStatement
 import com.github.scottbot95.stationeers.ic.ir.makeReg
 import com.github.scottbot95.stationeers.ic.ir.plusAssign
@@ -13,15 +12,15 @@ class DeduplicationTest : WordSpec({
     val optimizer = IROptimizer(listOf(Deduplication))
     "Deduplication" should {
         "merge duplicate networks of statements" {
-            val x = IRRegister(0U)
 
-            val entrypoint = IRStatement.Init(x, null, 0)
+            val entrypoint = IRStatement.Placeholder()
             val context = IRCompileContext(
-                regCount = 1U,
                 next = entrypoint::next
             )
+            val x = context.makeReg()
             val y = context.makeReg()
             val z = context.makeReg()
+            context += IRStatement.Init(x, null, 0)
             context += IRStatement.Init(y, null, 1)
             context += IRStatement.Copy(z, x)
             context += IRStatement.Add(x, x, y)
