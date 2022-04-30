@@ -13,11 +13,15 @@ sealed interface AccessSource {
     data class Parameter(val functionName: String, val paramIndex: Int) : AccessSource
 }
 
+inline val AccessSource?.orUndefined get() = this ?: AccessSource.Undefined
+
 typealias AccessInfo = MutableMap<IRRegister, RegisterAccessInfo>
+
+typealias StateType = MutableMap<IRRegister, MutableSet<AccessSource>>
 
 data class RegisterAccessInfo(
     val reads: MutableSet<AccessSource> = mutableSetOf(),
-    var writer: AccessSource? = null,
+    var writers: MutableSet<AccessSource> = mutableSetOf(),
 )
 
 /**
@@ -49,17 +53,17 @@ fun IRCompilation.generateAccessInfo(
 private fun trace(
     data: MutableMap<IRStatement, AccessInfo>,
     statement: IRStatement,
-    state: MutableMap<IRRegister, AccessSource>,
+    state: StateType,
     followCopies: Boolean,
     includeBranchAsWriter: Boolean
 ) {
     val myData = data.getOrPut(statement) { mutableMapOf() }
     var changes = 0
-    changes += state.entries.sumOf { (reg, source) ->
+    changes += state.entries.sumOf { (reg, sources) ->
         val info = myData.getOrPut(reg) { RegisterAccessInfo() }
-        val added = info.writer != source
-        info.writer = source
-        added.toInt()
+        sources.count {
+            info.writers.add(it)
+        }
     }
 
     if (followCopies && statement is IRStatement.Copy) {
@@ -70,16 +74,18 @@ private fun trace(
     } else {
         val self = AccessSource.Statement(statement)
         statement.readParams().forEach { reg ->
-            val writer = (state[reg] as? AccessSource.Statement)?.statement as? IRStatement.WritingStatement
-            val writeDest = writer?.dest
+            state[reg]?.forEach { source ->
+                val writer = (source as? AccessSource.Statement)?.statement as? IRStatement.WritingStatement
+                val writeDest = writer?.dest
 
-            // add this statement as read source to writers access info
-            if ((writeDest == reg)) {
-                changes += data.getOrPut(writer) { mutableMapOf() }
-                    .getOrPut(reg) { RegisterAccessInfo() }
-                    .reads
-                    .add(self)
-                    .toInt()
+                // add this statement as read source to writers access info
+                if ((writeDest == reg)) {
+                    changes += data.getOrPut(writer) { mutableMapOf() }
+                        .getOrPut(reg) { RegisterAccessInfo() }
+                        .reads
+                        .add(self)
+                        .toInt()
+                }
             }
         }
 
@@ -87,12 +93,12 @@ private fun trace(
 
         if (statement is IRStatement.WritingStatement) {
             // At this point, we are the only write source for any registers we write to
-            state[statement.dest] = self
-            myData[statement.dest]!!.writer = self
+            state[statement.dest] = mutableSetOf(self)
+            myData[statement.dest]!!.writers = mutableSetOf(self)
         } else if (includeBranchAsWriter && statement is IRStatement.ConditionalStatement) {
             // Optionally count branches as writes since we can infer value
-            state[statement.check] = self
-            myData[statement.check]!!.writer = self
+            state[statement.check] = mutableSetOf(self)
+            myData[statement.check]!!.writers = mutableSetOf(self)
         }
     }
 
@@ -113,23 +119,23 @@ private fun trace(
 private fun IRCompilation.initState(
     name: String,
     entrypoint: IRStatement
-): MutableMap<IRRegister, AccessSource> {
+): StateType {
     val numGlobals = numGlobals // cache value to avoid extra work
     val numParams = functions[name]?.numParams ?: 0
 
-    val state: MutableMap<IRRegister, AccessSource> = entrypoint.followChain()
+    val state: StateType = entrypoint.followChain()
         .asSequence()
         .flatMap { it.params }
-        .associateWithTo(mutableMapOf()) { AccessSource.Undefined }
+        .associateWithTo(mutableMapOf()) { mutableSetOf() }
 
     // populate state with globals and params
     if (name != TOPLEVEL_ENTRYPOINT_NAME) {
         repeat(numGlobals) {
-            state[IRRegister(it.toUInt())] = AccessSource.Global(it)
+            state.getOrPut(IRRegister(it.toUInt())) { mutableSetOf() }.add(AccessSource.Global(it))
         }
     }
     repeat(numParams) {
-        state[IRRegister((numGlobals + it).toUInt())] = AccessSource.Parameter(name, it)
+        state.getOrPut(IRRegister((numGlobals + it).toUInt())) { mutableSetOf() }.add(AccessSource.Parameter(name, it))
     }
 
     return state

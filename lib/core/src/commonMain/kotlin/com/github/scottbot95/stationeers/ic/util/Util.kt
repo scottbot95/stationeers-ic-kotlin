@@ -37,3 +37,8 @@ fun String.compareWith(other: String, header: String? = null, separator: String 
 }
 
 fun Boolean.toInt(): Int = if (this) 1 else 0
+
+/**
+ * Add two numbers as if they were floats
+ */
+operator fun Number.plus(other: Number): Number = this.toFloat() + other.toFloat()

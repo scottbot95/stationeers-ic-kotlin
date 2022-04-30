@@ -14,7 +14,8 @@ fun interface IROptimization {
         val all: List<IROptimization> = listOf(
             TrimNoOps,
             JumpThreading,
-            Deduplication
+            Deduplication,
+            ConstantSimplification
         )
     }
 }

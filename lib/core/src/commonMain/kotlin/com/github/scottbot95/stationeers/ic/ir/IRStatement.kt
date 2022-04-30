@@ -151,11 +151,15 @@ fun IRStatement.followNext(dedupe: Boolean = true): Iterable<IRStatement> = foll
  *
  * @param dedupe Whether to quit when duplicates are shown. Can produce an infinite sequence if set to `false`
  */
-fun IRStatement.followChain(dedupe: Boolean = true, followCond: Boolean = true): Iterable<IRStatement> = Iterable {
+fun IRStatement.followChain(
+    dedupe: Boolean = true,
+    followCond: Boolean = true,
+    exclude: IRStatement? = null
+): Iterable<IRStatement> = Iterable {
     val seen = mutableSetOf<IRStatement>()
     iterator {
         suspend fun SequenceScope<IRStatement>.visit(statement: IRStatement) {
-            if (dedupe && statement in seen) return
+            if (statement == exclude || dedupe && statement in seen) return
             if (statement !is IRStatement.Placeholder) yield(statement)
             seen += statement
             statement.next?.let { visit(it) }
@@ -173,7 +177,7 @@ fun IRStatement.followChain(dedupe: Boolean = true, followCond: Boolean = true):
  *
  * @return True if node was successfully replaced or false otherwise (ie you tried to replace a node with itself
  */
-fun IRStatement.replaceWith(other: IRStatement?): Boolean {
+infix fun IRStatement.replaceWith(other: IRStatement?): Boolean {
     // Replace with a nop if we try to replace ourselves, or delete a node that points to itself
     if (other == this || (other == null && next == this)) {
         replaceWith(IRStatement.Nop())
@@ -212,3 +216,5 @@ fun IRStatement.readParams(): List<IRRegister> = when (this) {
     is IRStatement.WritingStatement -> params.drop(1)
     else -> params
 }
+
+infix fun IRStatement.reachableFrom(other: IRStatement): Boolean = other.followChain().any { it == other }
